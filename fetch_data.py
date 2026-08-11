@@ -344,7 +344,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
     <div class="chart-box">
       <div class="chart-title">行业表现柱图</div>
       <div class="chart-sub">各行业按权重加权平均涨跌幅</div>
-      <svg id="sectorBar" viewBox="0 0 400 260" style="width:100%;height:auto"></svg>
+      <svg id="sectorBar" viewBox="0 0 400 340" style="width:100%;height:auto"></svg>
     </div>
   </div>
 
@@ -520,24 +520,43 @@ function svgEl(tag,attrs){const el=document.createElementNS("http://www.w3.org/2
 (function(){
   const svg=document.getElementById("sectorBar");
   const data=DATA.sectors;
-  const W=400,H=260,padL=60,padB=30,padT=20,padR=20;
+  const W=400,H=340,padL=70,padB=20,padT=20,padR=50;
   const maxC=Math.max(...data.map(d=>Math.abs(d.change)),.01);
-  const scale=(H-padT-padB)/2/maxC;
-  const zeroY=padT+(H-padT-padB)/2;
+  const plotH=H-padT-padB;
+  const zeroY=padT+plotH/2;
+  const scale=(plotH/2-10)/maxC;
   svg.appendChild(svgEl("line",{x1:padL,y1:zeroY,x2:W-padR,y2:zeroY,stroke:BORDER,"stroke-width":1}));
-  const bh=(H-padT-padB)/data.length-6;
-  data.forEach((d,i)=>{
-    const h=Math.max(Math.abs(d.change)*scale,3);
-    const y=d.change>=0?zeroY-h:zeroY;
+  const barH=18;
+  const gap=8;
+  // 分开上涨和下跌
+  const upData=data.filter(d=>d.change>=0).sort((a,b)=>b.change-a.change);
+  const downData=data.filter(d=>d.change<0).sort((a,b)=>a.change-b.change);
+  // 上涨在上方，从顶往下排
+  upData.forEach((d,i)=>{
+    const h=Math.max(Math.abs(d.change)*scale,4);
+    const y=zeroY-h-(upData.length-1-i)*(barH+gap)-4;
     const x=padL+8;
     const bw=W-padL-padR-16;
-    const bar=svgEl("rect",{x:x,y:y,width:bw,height:h,rx:4,fill:colorForChange(d.change),opacity:.85});
+    const bar=svgEl("rect",{x:x,y:y,width:bw,height:barH,rx:4,fill:colorForChange(d.change),opacity:.85});
     bar.style.cursor="pointer";
     bar.addEventListener("mouseenter",e=>showTip(e,d.name+"<br>平均 "+fmtPct(d.change)));
     bar.addEventListener("mouseleave",hideTip);
     svg.appendChild(bar);
-    svg.appendChild(svgEl("text",{x:padL-6,y:y+h/2+4,"text-anchor":"end",fill:TEXT2,"font-size":10,"font-weight":600})).textContent=d.name;
-    svg.appendChild(svgEl("text",{x:x+bw+4,y:y+h/2+4,fill:colorForChange(d.change),"font-size":10,"font-weight":700})).textContent=fmtPct(d.change);
+    svg.appendChild(svgEl("text",{x:padL-8,y:y+barH/2+4,"text-anchor":"end",fill:TEXT2,"font-size":11,"font-weight":600})).textContent=d.name;
+    svg.appendChild(svgEl("text",{x:x+bw+6,y:y+barH/2+4,fill:colorForChange(d.change),"font-size":11,"font-weight":700})).textContent=fmtPct(d.change);
+  });
+  // 下跌在下方，从零轴往下排
+  downData.forEach((d,i)=>{
+    const y=zeroY+4+i*(barH+gap);
+    const x=padL+8;
+    const bw=W-padL-padR-16;
+    const bar=svgEl("rect",{x:x,y:y,width:bw,height:barH,rx:4,fill:colorForChange(d.change),opacity:.85});
+    bar.style.cursor="pointer";
+    bar.addEventListener("mouseenter",e=>showTip(e,d.name+"<br>平均 "+fmtPct(d.change)));
+    bar.addEventListener("mouseleave",hideTip);
+    svg.appendChild(bar);
+    svg.appendChild(svgEl("text",{x:padL-8,y:y+barH/2+4,"text-anchor":"end",fill:TEXT2,"font-size":11,"font-weight":600})).textContent=d.name;
+    svg.appendChild(svgEl("text",{x:x+bw+6,y:y+barH/2+4,fill:colorForChange(d.change),"font-size":11,"font-weight":700})).textContent=fmtPct(d.change);
   });
 })();
 
