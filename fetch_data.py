@@ -5,6 +5,7 @@
 """
 
 import json
+import math
 import os
 import sys
 from datetime import datetime
@@ -96,6 +97,9 @@ def build_data():
             close = float(latest["Close"])
             prev_close = float(prev["Close"])
             change = round((close - prev_close) / prev_close * 100, 2)
+            if math.isnan(change):
+                print(f"  NaN跳过: {ticker}")
+                continue
             stocks.append({"ticker": ticker, "name": name, "sector": sector, "weight": weight, "change": change})
         except Exception as e:
             print(f"  处理失败 {ticker}: {e}")
@@ -117,6 +121,8 @@ def build_data():
 
     sectors = defaultdict(lambda: {"weight": 0, "total_change": 0, "count": 0})
     for s in stocks:
+        if math.isnan(s["change"]):
+            continue
         sectors[s["sector"]]["weight"] += s["weight"]
         sectors[s["sector"]]["total_change"] += s["change"] * s["weight"]
         sectors[s["sector"]]["count"] += 1
@@ -174,6 +180,8 @@ def build_mock_data():
 
     sectors = defaultdict(lambda: {"weight": 0, "total_change": 0, "count": 0})
     for s in stocks:
+        if math.isnan(s["change"]):
+            continue
         sectors[s["sector"]]["weight"] += s["weight"]
         sectors[s["sector"]]["total_change"] += s["change"] * s["weight"]
         sectors[s["sector"]]["count"] += 1
@@ -518,37 +526,61 @@ function svgEl(tag,attrs){const el=document.createElementNS("http://www.w3.org/2
 
 // 行业柱图 - 发散条形图（零轴在中间）
 (function(){
-  const svg=document.getElementById("sectorBar");
-  const data=DATA.sectors;
-  // 按涨跌排序：涨的在上面，跌的在下面
-  data.sort((a,b)=>b.change-a.change);
-  const W=400,H=320,padL=70,padR=60,padT=16,padB=16;
-  const zeroX=padL+100; // 零轴位置
-  const maxC=Math.max(...data.map(d=>Math.abs(d.change)),.01);
-  const scale=(W-padL-padR-100)/maxC; // 可用半宽
-  const rowH=(H-padT-padB)/data.length;
-  const barH=Math.min(rowH-10,22);
+  const svg = document.getElementById("sectorBar");
+  // 复制数组 + 过滤掉 change 为 NaN / undefined / null 的脏数据
+  const data = DATA.sectors
+    .filter(d => typeof d.change === 'number' && !isNaN(d.change))
+    .map(d => ({...d}));
+
+  if(data.length === 0){
+    svg.appendChild(svgEl("text", {x:200, y:160, "text-anchor":"middle", fill:TEXT4, "font-size":14}))
+       .textContent = "行业数据暂缺";
+    return;
+  }
+
+  data.sort((a,b) => b.change - a.change);
+  const W = 400, H = 320, padL = 70, padR = 60, padT = 16, padB = 16;
+  const zeroX = padL + 100;
+  const maxC = Math.max(...data.map(d => Math.abs(d.change)), 0.01);
+  const scale = (W - padL - padR - 100) / maxC;
+  const rowH = (H - padT - padB) / data.length;
+  const barH = Math.min(rowH - 10, 22);
 
   // 零轴线
-  svg.appendChild(svgEl("line",{x1:zeroX,y1:padT,x2:zeroX,y2:H-padB,stroke:BORDER,"stroke-width":1,"stroke-dasharray":"3,3",opacity:.5}));
+  svg.appendChild(svgEl("line", {
+    x1: zeroX, y1: padT, x2: zeroX, y2: H - padB,
+    stroke: BORDER, "stroke-width": 1, "stroke-dasharray": "3,3", opacity: .5
+  }));
 
-  data.forEach((d,i)=>{
-    const y=padT+i*rowH+(rowH-barH)/2;
-    const w=Math.max(Math.abs(d.change)*scale,2);
-    const isUp=d.change>=0;
-    // 上涨：从zeroX向右；下跌：从zeroX-w向右画w长度（即向左延伸）
-    const x=isUp?zeroX:zeroX-w;
-    const bar=svgEl("rect",{x:x,y:y,width:w,height:barH,rx:3,fill:colorForChange(d.change),opacity:.9});
-    bar.style.cursor="pointer";
-    bar.addEventListener("mouseenter",e=>showTip(e,d.name+"<br>平均 "+fmtPct(d.change)));
-    bar.addEventListener("mouseleave",hideTip);
+  data.forEach((d, i) => {
+    const y = padT + i * rowH + (rowH - barH) / 2;
+    const w = Math.max(Math.abs(d.change) * scale, 3); // 最小 3px，避免太细看不见
+    const isUp = d.change >= 0;
+    const x = isUp ? zeroX : zeroX - w;
+    const c = colorForChange(d.change);
+
+    const bar = svgEl("rect", {
+      x: x, y: y, width: w, height: barH, rx: 3,
+      fill: c, opacity: .9
+    });
+    bar.style.cursor = "pointer";
+    bar.addEventListener("mouseenter", e => showTip(e, d.name + "<br>平均 " + fmtPct(d.change)));
+    bar.addEventListener("mouseleave", hideTip);
     svg.appendChild(bar);
-    // 行业名（左侧）
-    svg.appendChild(svgEl("text",{x:zeroX-10,y:y+barH/2+4,"text-anchor":"end",fill:TEXT2,"font-size":11,"font-weight":600})).textContent=d.name;
-    // 数值（bar末端）
-    const tx=isUp?zeroX+w+6:zeroX-w-6;
-    const ta=isUp?"start":"end";
-    svg.appendChild(svgEl("text",{x:tx,y:y+barH/2+4,"text-anchor":ta,fill:colorForChange(d.change),"font-size":11,"font-weight":700})).textContent=fmtPct(d.change);
+
+    // 行业名（零轴左侧）
+    svg.appendChild(svgEl("text", {
+      x: zeroX - 10, y: y + barH/2 + 4,
+      "text-anchor": "end", fill: TEXT2, "font-size": 11, "font-weight": 600
+    })).textContent = d.name;
+
+    // 数值（bar 末端外侧）
+    const tx = isUp ? zeroX + w + 6 : zeroX - w - 6;
+    const ta = isUp ? "start" : "end";
+    svg.appendChild(svgEl("text", {
+      x: tx, y: y + barH/2 + 4,
+      "text-anchor": ta, fill: c, "font-size": 11, "font-weight": 700
+    })).textContent = fmtPct(d.change);
   });
 })();
 
