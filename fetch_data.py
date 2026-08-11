@@ -344,7 +344,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
     <div class="chart-box">
       <div class="chart-title">行业表现柱图</div>
       <div class="chart-sub">各行业按权重加权平均涨跌幅</div>
-      <svg id="sectorBar" viewBox="0 0 400 340" style="width:100%;height:auto"></svg>
+      <svg id="sectorBar" viewBox="0 0 400 320" style="width:100%;height:auto"></svg>
     </div>
   </div>
 
@@ -516,47 +516,39 @@ function svgEl(tag,attrs){const el=document.createElementNS("http://www.w3.org/2
   svg.appendChild(svgEl("line",{x1:zeroX,y1:padT,x2:zeroX,y2:H-padB,stroke:TEXT,"stroke-width":1,"stroke-dasharray":"4,4",opacity:.3}));
 })();
 
-// 行业柱图
+// 行业柱图 - 发散条形图（零轴在中间）
 (function(){
   const svg=document.getElementById("sectorBar");
   const data=DATA.sectors;
-  const W=400,H=340,padL=70,padB=20,padT=20,padR=50;
+  // 按涨跌排序：涨的在上面，跌的在下面
+  data.sort((a,b)=>b.change-a.change);
+  const W=400,H=320,padL=70,padR=60,padT=16,padB=16;
+  const zeroX=padL+100; // 零轴位置
   const maxC=Math.max(...data.map(d=>Math.abs(d.change)),.01);
-  const plotH=H-padT-padB;
-  const zeroY=padT+plotH/2;
-  const scale=(plotH/2-10)/maxC;
-  svg.appendChild(svgEl("line",{x1:padL,y1:zeroY,x2:W-padR,y2:zeroY,stroke:BORDER,"stroke-width":1}));
-  const barH=18;
-  const gap=8;
-  // 分开上涨和下跌
-  const upData=data.filter(d=>d.change>=0).sort((a,b)=>b.change-a.change);
-  const downData=data.filter(d=>d.change<0).sort((a,b)=>a.change-b.change);
-  // 上涨在上方，从顶往下排
-  upData.forEach((d,i)=>{
-    const h=Math.max(Math.abs(d.change)*scale,4);
-    const y=zeroY-h-(upData.length-1-i)*(barH+gap)-4;
-    const x=padL+8;
-    const bw=W-padL-padR-16;
-    const bar=svgEl("rect",{x:x,y:y,width:bw,height:barH,rx:4,fill:colorForChange(d.change),opacity:.85});
+  const scale=(W-padL-padR-100)/maxC; // 可用半宽
+  const rowH=(H-padT-padB)/data.length;
+  const barH=Math.min(rowH-10,22);
+
+  // 零轴线
+  svg.appendChild(svgEl("line",{x1:zeroX,y1:padT,x2:zeroX,y2:H-padB,stroke:BORDER,"stroke-width":1,"stroke-dasharray":"3,3",opacity:.5}));
+
+  data.forEach((d,i)=>{
+    const y=padT+i*rowH+(rowH-barH)/2;
+    const w=Math.max(Math.abs(d.change)*scale,2);
+    const isUp=d.change>=0;
+    // 上涨：从zeroX向右；下跌：从zeroX-w向右画w长度（即向左延伸）
+    const x=isUp?zeroX:zeroX-w;
+    const bar=svgEl("rect",{x:x,y:y,width:w,height:barH,rx:3,fill:colorForChange(d.change),opacity:.9});
     bar.style.cursor="pointer";
     bar.addEventListener("mouseenter",e=>showTip(e,d.name+"<br>平均 "+fmtPct(d.change)));
     bar.addEventListener("mouseleave",hideTip);
     svg.appendChild(bar);
-    svg.appendChild(svgEl("text",{x:padL-8,y:y+barH/2+4,"text-anchor":"end",fill:TEXT2,"font-size":11,"font-weight":600})).textContent=d.name;
-    svg.appendChild(svgEl("text",{x:x+bw+6,y:y+barH/2+4,fill:colorForChange(d.change),"font-size":11,"font-weight":700})).textContent=fmtPct(d.change);
-  });
-  // 下跌在下方，从零轴往下排
-  downData.forEach((d,i)=>{
-    const y=zeroY+4+i*(barH+gap);
-    const x=padL+8;
-    const bw=W-padL-padR-16;
-    const bar=svgEl("rect",{x:x,y:y,width:bw,height:barH,rx:4,fill:colorForChange(d.change),opacity:.85});
-    bar.style.cursor="pointer";
-    bar.addEventListener("mouseenter",e=>showTip(e,d.name+"<br>平均 "+fmtPct(d.change)));
-    bar.addEventListener("mouseleave",hideTip);
-    svg.appendChild(bar);
-    svg.appendChild(svgEl("text",{x:padL-8,y:y+barH/2+4,"text-anchor":"end",fill:TEXT2,"font-size":11,"font-weight":600})).textContent=d.name;
-    svg.appendChild(svgEl("text",{x:x+bw+6,y:y+barH/2+4,fill:colorForChange(d.change),"font-size":11,"font-weight":700})).textContent=fmtPct(d.change);
+    // 行业名（左侧）
+    svg.appendChild(svgEl("text",{x:zeroX-10,y:y+barH/2+4,"text-anchor":"end",fill:TEXT2,"font-size":11,"font-weight":600})).textContent=d.name;
+    // 数值（bar末端）
+    const tx=isUp?zeroX+w+6:zeroX-w-6;
+    const ta=isUp?"start":"end";
+    svg.appendChild(svgEl("text",{x:tx,y:y+barH/2+4,"text-anchor":ta,fill:colorForChange(d.change),"font-size":11,"font-weight":700})).textContent=fmtPct(d.change);
   });
 })();
 
