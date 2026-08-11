@@ -163,35 +163,37 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>纳指100 - 每日收盘</title>
 <style>
-:root{--bg:#fafafa;--card:#fff;--text:#1f1f1f;--text2:#5a5a5a;--text3:#888;--text4:#aaa;--border:#e5e5e5;--rise:#16a34a;--fall:#dc2626}
-@media(prefers-color-scheme:dark){:root{--bg:#0f0f0f;--card:#1a1a1a;--text:#e8e8e8;--text2:#a0a0a0;--text3:#777;--text4:#555;--border:#2a2a2a;--rise:#22c55e;--fall:#ef4444}}
+:root{--bg:#131722;--card:#1e222d;--text:#d1d4dc;--text2:#868993;--text3:#5d606b;--text4:#434651;--border:#2a2e39;--rise:#089981;--fall:#f23645;--grid:#2a2e39}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);padding:16px;line-height:1.5}
-.container{max-width:1100px;margin:0 auto}
-.header{display:flex;align-items:baseline;gap:12px;margin-bottom:20px;flex-wrap:wrap}
-.header h1{font-size:22px;font-weight:600}
-.header .date{font-size:13px;color:var(--text3)}
-.header .badge{font-size:12px;padding:2px 10px;border-radius:6px;background:rgba(22,163,74,.12);color:var(--rise)}
-.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
-.kpi{background:var(--card);padding:16px;border:1px solid var(--border);border-radius:12px}
-.kpi-label{font-size:12px;color:var(--text3);margin-bottom:4px}
-.kpi-value{font-size:30px;font-weight:600;font-variant-numeric:tabular-nums}
-.kpi-sub{font-size:13px;margin-top:4px;font-variant-numeric:tabular-nums}
-.kpi-sub.up{color:var(--rise)}.kpi-sub.down{color:var(--rise)}.kpi-sub.down{color:var(--fall)}
-.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
-.chart-box{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px}
-.chart-title{font-size:14px;font-weight:500;margin-bottom:6px;color:var(--text2)}
-.chart-sub{font-size:11px;color:var(--text4);margin-bottom:10px}
-.full-row{margin-bottom:20px}
-.tooltip{position:absolute;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:12px;pointer-events:none;opacity:0;transition:opacity .15s;z-index:10;box-shadow:0 4px 12px rgba(0,0,0,.15);white-space:nowrap}
-.legend{display:flex;flex-wrap:wrap;gap:8px 14px;margin-top:10px;font-size:11px}
-.legend-item{display:flex;align-items:center;gap:4px}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);padding:20px;line-height:1.5}
+.container{max-width:1200px;margin:0 auto}
+.header{display:flex;align-items:center;gap:14px;margin-bottom:24px;flex-wrap:wrap;border-bottom:1px solid var(--border);padding-bottom:16px}
+.header h1{font-size:24px;font-weight:700;letter-spacing:-0.3px}
+.header .date{font-size:13px;color:var(--text2);font-variant-numeric:tabular-nums}
+.header .badge{font-size:11px;padding:3px 10px;border-radius:4px;background:rgba(8,153,129,0.15);color:var(--rise);font-weight:600}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.kpi{background:var(--card);padding:18px;border:1px solid var(--border);border-radius:8px;position:relative;overflow:hidden}
+.kpi::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:var(--border)}
+.kpi.up::before{background:var(--rise)}
+.kpi.down::before{background:var(--fall)}
+.kpi-label{font-size:11px;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px}
+.kpi-value{font-size:32px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1}
+.kpi-sub{font-size:13px;margin-top:6px;font-variant-numeric:tabular-nums;font-weight:600}
+.kpi-sub.up{color:var(--rise)}.kpi-sub.down{color:var(--fall)}
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.chart-box{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:18px}
+.chart-title{font-size:13px;font-weight:600;margin-bottom:4px;color:var(--text);text-transform:uppercase;letter-spacing:0.3px}
+.chart-sub{font-size:11px;color:var(--text3);margin-bottom:12px}
+.full-row{margin-bottom:24px}
+.tooltip{position:absolute;background:#2a2e39;border:1px solid var(--border);border-radius:6px;padding:8px 12px;font-size:12px;pointer-events:none;opacity:0;transition:opacity .12s;z-index:10;box-shadow:0 8px 24px rgba(0,0,0,0.4);color:var(--text);white-space:nowrap;font-weight:500}
+.legend{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:12px;font-size:11px}
+.legend-item{display:flex;align-items:center;gap:5px;color:var(--text2)}
 .legend-dot{width:8px;height:8px;border-radius:2px}
-.stock-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(85px,1fr));gap:4px;margin-top:10px}
-.stock-cell{padding:5px 6px;border-radius:6px;font-size:11px;text-align:center;cursor:pointer;transition:transform .1s,box-shadow .1s;background:var(--card)}
-.stock-cell:hover{transform:scale(1.06);box-shadow:0 2px 8px rgba(0,0,0,.08)}
-.footer{text-align:center;font-size:11px;color:var(--text4);margin-top:24px;padding-bottom:20px}
-@media(max-width:720px){.charts-row{grid-template-columns:1fr}.kpi-row{grid-template-columns:repeat(2,1fr)}.kpi-value{font-size:24px}}
+.stock-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:5px;margin-top:12px}
+.stock-cell{padding:6px 8px;border-radius:4px;font-size:11px;text-align:center;cursor:pointer;transition:all .1s;background:var(--bg);border:1px solid var(--border);font-weight:500}
+.stock-cell:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,0.3);border-color:var(--text4)}
+.footer{text-align:center;font-size:11px;color:var(--text3);margin-top:28px;padding-bottom:24px;border-top:1px solid var(--border);padding-top:20px}
+@media(max-width:720px){.charts-row{grid-template-columns:1fr}.kpi-row{grid-template-columns:repeat(2,1fr)}.kpi-value{font-size:26px}}
 </style>
 </head>
 <body>
@@ -218,12 +220,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC
 </div>
 <script>
 const DATA = __DATA_JSON__;
-const RISE=getComputedStyle(document.documentElement).getPropertyValue("--rise").trim()||"#16a34a";
-const FALL=getComputedStyle(document.documentElement).getPropertyValue("--fall").trim()||"#dc2626";
-const TEXT=getComputedStyle(document.documentElement).getPropertyValue("--text").trim()||"#1f1f1f";
-const TEXT2=getComputedStyle(document.documentElement).getPropertyValue("--text2").trim()||"#5a5a5a";
-const TEXT4=getComputedStyle(document.documentElement).getPropertyValue("--text4").trim()||"#aaaaaa";
-const BORDER=getComputedStyle(document.documentElement).getPropertyValue("--border").trim()||"#e5e5e5";
+const RISE="#089981";
+const FALL="#f23645";
+const TEXT="#d1d4dc";
+const TEXT2="#868993";
+const TEXT4="#434651";
+const BORDER="#2a2e39";
 function colorForChange(c){return c>=0?RISE:FALL}
 function fmtPct(c){return(c>=0?"+":"")+c.toFixed(2)+"%"}
 function svgEl(tag,attrs){const el=document.createElementNS("http://www.w3.org/2000/svg",tag);for(let k in attrs)el.setAttribute(k,attrs[k]);return el}
