@@ -419,7 +419,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
     <div class="stock-grid" id="stockGrid"></div>
   </div>
 
-  <div class="footer">数据来自 Yahoo Finance · 每日自动更新 · 仅供参考不构成投资建议</div>
+  <div class="footer">
+  <div>数据来自 Yahoo Finance · 每日自动更新 · 仅供参考不构成投资建议</div>
+  <div style="margin-top:8px;display:flex;align-items:center;justify-content:center;gap:6px;font-size:11px;color:var(--text-tertiary);opacity:.75">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--glow-color)">
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+    </svg>
+    <span>AI ANALYZED BY QWEN</span>
+  </div>
+</div>
 </div>
 
 <div class="tooltip" id="tooltip" style="position:absolute;background:#2a2e39;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:12px;color:#e2e8f0;pointer-events:none;opacity:0;transition:opacity .15s;z-index:10;box-shadow:0 4px 12px rgba(0,0,0,0.15);white-space:nowrap"></div>
@@ -889,37 +897,47 @@ def generate_html(data, is_history=False, history_dates=None):
 
 
 def call_siliconflow(prompt, api_key):
-    """调用 SiliconFlow API (Qwen3-8B)，失败返回 None。"""
+    """调用 SiliconFlow API (Qwen3-8B)，失败返回 None。超时15秒。"""
     if not api_key:
         return None
     try:
         import urllib.request
         import urllib.error
+        import socket
         import time
-        time.sleep(0.3)
-        req = urllib.request.Request(
-            "https://api.siliconflow.cn/v1/chat/completions",
-            data=json.dumps({
-                "model": "Qwen/Qwen3-8B",
-                "messages": [{"role": "user", "content": prompt}],
-                "temperature": 0.6,
-                "max_tokens": 250
-            }).encode("utf-8"),
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {api_key}"
-            }
-        )
-        with urllib.request.urlopen(req, timeout=60) as resp:
-            result = json.loads(resp.read().decode("utf-8"))
-            text = result["choices"][0]["message"]["content"].strip()
-            print(f"    [SiliconFlow raw]: {text[:80]}...")
-            if len(text) < 20:
-                print("    [SiliconFlow 响应过短，使用本地生成]")
-                return None
-            return text
+        time.sleep(0.5)
+
+        # 设置全局 socket 超时，防止卡住
+        old_timeout = socket.getdefaulttimeout()
+        socket.setdefaulttimeout(15)
+
+        try:
+            req = urllib.request.Request(
+                "https://api.siliconflow.cn/v1/chat/completions",
+                data=json.dumps({
+                    "model": "Qwen/Qwen3-8B",
+                    "messages": [{"role": "user", "content": prompt}],
+                    "temperature": 0.6,
+                    "max_tokens": 250
+                }).encode("utf-8"),
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {api_key}"
+                }
+            )
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                result = json.loads(resp.read().decode("utf-8"))
+                text = result["choices"][0]["message"]["content"].strip()
+                print(f"    [SiliconFlow]: {text[:60]}...")
+                if len(text) < 15:
+                    print("    [响应过短，fallback]")
+                    return None
+                return text
+        finally:
+            socket.setdefaulttimeout(old_timeout)
+
     except Exception as e:
-        print(f"  SiliconFlow API 失败: {e}")
+        print(f"  SiliconFlow 失败: {e}")
         return None
 
 
