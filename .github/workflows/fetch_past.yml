@@ -16,8 +16,18 @@ jobs:
           python-version: "3.11"
           cache: "pip"
       - run: pip install -r requirements.txt
+      
+      # 先把 gh-pages 上的现有文件拉回来（防止覆盖）
+      - name: Restore existing files
+        run: |
+          git fetch origin gh-pages
+          git checkout origin/gh-pages -- docs/ || true
+          mkdir -p docs/history
+        continue-on-error: true
+      
       - name: Fetch past 4 days history
         run: python fetch_past_dates.py
+      
       - uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
