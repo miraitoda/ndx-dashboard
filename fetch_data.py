@@ -421,7 +421,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 
   <div class="footer">
   <div>数据来自 Yahoo Finance · 每日自动更新 · 仅供参考不构成投资建议</div>
-  <div style="margin-top:8px;font-size:11px;color:var(--text-tertiary);opacity:.75">AI ANALYZED BY QWEN</div>
+  <div style="margin-top:8px;font-size:11px;color:var(--text-tertiary);opacity:.75">AI ANALYZED BY GEMINI</div>
 </div>
 </div>
 
@@ -891,60 +891,42 @@ def generate_html(data, is_history=False, history_dates=None):
 
 
 
-def call_siliconflow(prompt, api_key):
-    """调用 SiliconFlow API (Qwen3-8B)，失败返回 None。超时15秒，自动重试3次。"""
+def call_gemini(prompt, api_key):
+    """调用 Gemini API (gemini-3.6-flash)，失败返回 None。超时15秒。"""
     if not api_key:
         return None
+    try:
+        import urllib.request
+        import urllib.error
+        import time
+        time.sleep(1)
 
-    import urllib.request
-    import urllib.error
-    import socket
-    import time
+        req = urllib.request.Request(
+            f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key={api_key}",
+            data=json.dumps({
+                "contents": [{"role": "user", "parts": [{"text": prompt}]}],
+                "generationConfig": {"maxOutputTokens": 400, "temperature": 0.5}
+            }).encode("utf-8"),
+            headers={"Content-Type": "application/json"}
+        )
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            result = json.loads(resp.read().decode("utf-8"))
 
-    for attempt in range(3):
-        try:
-            time.sleep(0.5)
-            old_timeout = socket.getdefaulttimeout()
-            socket.setdefaulttimeout(15)
+            raw_text = result.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "").strip()
+            print(f"    [Gemini raw]: {raw_text[:80]}")
 
-            try:
-                req = urllib.request.Request(
-                    "https://api.siliconflow.cn/v1/chat/completions",
-                    data=json.dumps({
-                        "model": "Qwen/Qwen3-8B",
-                        "messages": [{"role": "user", "content": prompt}],
-                        "temperature": 0.6,
-                        "max_tokens": 250
-                    }).encode("utf-8"),
-                    headers={
-                        "Content-Type": "application/json",
-                        "Authorization": f"Bearer {api_key}"
-                    }
-                )
-                with urllib.request.urlopen(req, timeout=15) as resp:
-                    result = json.loads(resp.read().decode("utf-8"))
-                    text = result["choices"][0]["message"]["content"].strip()
-                    print(f"    [SiliconFlow]: {text[:60]}...")
-                    if len(text) < 15:
-                        print("    [响应过短，fallback]")
-                        return None
-                    return text
-            finally:
-                socket.setdefaulttimeout(old_timeout)
-
-        except Exception as e:
-            print(f"  SiliconFlow 第{attempt+1}次失败: {e}")
-            if attempt < 2:
-                print(f"  等待2秒后重试...")
-                time.sleep(2)
-            else:
-                print(f"  3次均失败，使用本地生成")
+            if len(raw_text) < 20 or "prompt" in raw_text.lower() or "note:" in raw_text.lower() or "length:" in raw_text.lower():
+                print("    [Gemini 无效响应，使用本地生成]")
                 return None
+            return raw_text
+    except Exception as e:
+        print(f"  Gemini API 失败: {e}")
+        return None
 
 
 def generate_summary(data, summary_type="overview"):
     """生成行情总结，支持多种类型：overview/stocks/sectors/distribution/industry"""
-    api_key = os.environ.get("SILICONFLOW_API_KEY")
+    api_key = os.environ.get("GEMINI_API_KEY")
     idx = data["index"]
     sectors = data["sectors"]
     stocks = data["stocks"]
@@ -1034,7 +1016,7 @@ Top5涨：{top5_str}。Bottom5跌：{bottom5_str}。指数整体{idx['change']:+
         return None
 
     # 优先调用 Gemini
-    summary = call_siliconflow(prompt, api_key)
+    summary = call_gemini(prompt, api_key)
     if summary:
         print(f"  Gemini [{summary_type}]: {summary[:50]}...")
         return summary
