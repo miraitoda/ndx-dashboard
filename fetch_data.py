@@ -425,7 +425,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--glow-color)">
       <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
     </svg>
-    <span>AI ANALYZED BY KIMI</span>
+    <span>AI ANALYZED BY QWEN</span>
   </div>
 </div>
 </div>
@@ -909,7 +909,7 @@ def call_kimi(prompt, api_key):
         req = urllib.request.Request(
             "https://api.moonshot.cn/v1/chat/completions",
             data=json.dumps({
-                "model": "moonshot-v1-8k",
+                "model": "kimi-k2.6",
                 "messages": [{"role": "user", "content": prompt}],
                 "temperature": 0.6,
                 "max_tokens": 250
