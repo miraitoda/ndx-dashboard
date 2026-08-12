@@ -888,19 +888,19 @@ def generate_html(data, is_history=False, history_dates=None):
 
 
 
-def call_groq(prompt, api_key):
-    """调用 Groq API (Llama 3.3 70B)，失败返回 None。"""
+def call_siliconflow(prompt, api_key):
+    """调用 SiliconFlow API (Qwen3-8B)，失败返回 None。"""
     if not api_key:
         return None
     try:
         import urllib.request
         import urllib.error
         import time
-        time.sleep(0.5)
+        time.sleep(0.3)
         req = urllib.request.Request(
-            "https://api.groq.com/openai/v1/chat/completions",
+            "https://api.siliconflow.cn/v1/chat/completions",
             data=json.dumps({
-                "model": "llama-3.3-70b-versatile",
+                "model": "Qwen/Qwen3-8B",
                 "messages": [{"role": "user", "content": prompt}],
                 "temperature": 0.6,
                 "max_tokens": 250
@@ -913,19 +913,19 @@ def call_groq(prompt, api_key):
         with urllib.request.urlopen(req, timeout=60) as resp:
             result = json.loads(resp.read().decode("utf-8"))
             text = result["choices"][0]["message"]["content"].strip()
-            print(f"    [Groq raw]: {text[:80]}...")
+            print(f"    [SiliconFlow raw]: {text[:80]}...")
             if len(text) < 20:
-                print("    [Groq 响应过短，使用本地生成]")
+                print("    [SiliconFlow 响应过短，使用本地生成]")
                 return None
             return text
     except Exception as e:
-        print(f"  Groq API 失败: {e}")
+        print(f"  SiliconFlow API 失败: {e}")
         return None
 
 
 def generate_summary(data, summary_type="overview"):
     """生成行情总结，支持多种类型：overview/stocks/sectors/distribution/industry"""
-    api_key = os.environ.get("GROQ_API_KEY")
+    api_key = os.environ.get("SILICONFLOW_API_KEY")
     idx = data["index"]
     sectors = data["sectors"]
     stocks = data["stocks"]
@@ -1015,7 +1015,7 @@ Top5涨：{top5_str}。Bottom5跌：{bottom5_str}。指数整体{idx['change']:+
         return None
 
     # 优先调用 Gemini
-    summary = call_groq(prompt, api_key)
+    summary = call_siliconflow(prompt, api_key)
     if summary:
         print(f"  Gemini [{summary_type}]: {summary[:50]}...")
         return summary
