@@ -888,56 +888,44 @@ def generate_html(data, is_history=False, history_dates=None):
 
 
 
-def call_gemini(prompt, api_key):
-    """调用 Gemini API，失败返回 None。"""
+def call_groq(prompt, api_key):
+    """调用 Groq API (Llama 3.3 70B)，失败返回 None。"""
     if not api_key:
         return None
     try:
         import urllib.request
         import urllib.error
-        import re
         import time
-
-        # 免费 tier 有速率限制，每次调用间隔 1 秒
-        time.sleep(1)
-
+        time.sleep(0.5)
         req = urllib.request.Request(
-            f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key={api_key}",
+            "https://api.groq.com/openai/v1/chat/completions",
             data=json.dumps({
-                "contents": [{"role": "user", "parts": [{"text": prompt}]}],
-                "generationConfig": {"maxOutputTokens": 400, "temperature": 0.5}
+                "model": "llama-3.3-70b-versatile",
+                "messages": [{"role": "user", "content": prompt}],
+                "temperature": 0.6,
+                "max_tokens": 250
             }).encode("utf-8"),
-            headers={"Content-Type": "application/json"}
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {api_key}"
+            }
         )
         with urllib.request.urlopen(req, timeout=60) as resp:
             result = json.loads(resp.read().decode("utf-8"))
-
-            raw_text = result.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "").strip()
-            print(f"    [Gemini raw]: {raw_text[:100]}")
-
-            # 验证：内容太短、包含指令关键词、或包含英文说明，都视为无效
-            invalid_keywords = ["要求", "数据：", "Note:", "prompt", "Length:", "字数", "不要", "markdown", "Here is", "Summary:", "Based on"]
-            if any(kw in raw_text for kw in invalid_keywords) or len(raw_text) < 25:
-                print(f"    [Gemini 无效响应，使用本地生成]")
+            text = result["choices"][0]["message"]["content"].strip()
+            print(f"    [Groq raw]: {text[:80]}...")
+            if len(text) < 20:
+                print("    [Groq 响应过短，使用本地生成]")
                 return None
-
-            # 清理格式
-            text = re.sub(r'\*\*', '', raw_text)
-            text = re.sub(r'\* ', '', text)
-            text = re.sub(r'- ', '', text)
-            text = re.sub(r'#+ ', '', text)
-            text = re.sub(r'`', '', text)
-            text = re.sub(r'\n+', ' ', text)
-            text = re.sub(r'\s+', ' ', text)
-            return text.strip()
+            return text
     except Exception as e:
-        print(f"  Gemini API 失败: {e}")
+        print(f"  Groq API 失败: {e}")
         return None
 
 
 def generate_summary(data, summary_type="overview"):
     """生成行情总结，支持多种类型：overview/stocks/sectors/distribution/industry"""
-    api_key = os.environ.get("GEMINI_API_KEY")
+    api_key = os.environ.get("GROQ_API_KEY")
     idx = data["index"]
     sectors = data["sectors"]
     stocks = data["stocks"]
@@ -1027,7 +1015,7 @@ Top5涨：{top5_str}。Bottom5跌：{bottom5_str}。指数整体{idx['change']:+
         return None
 
     # 优先调用 Gemini
-    summary = call_gemini(prompt, api_key)
+    summary = call_groq(prompt, api_key)
     if summary:
         print(f"  Gemini [{summary_type}]: {summary[:50]}...")
         return summary
