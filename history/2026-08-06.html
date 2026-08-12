@@ -86,13 +86,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 /* 滚动行情条 */
 .ticker-bar{width:100%;height:38px;background:var(--surface);border-bottom:1px solid var(--glow-border);overflow:hidden;display:flex;align-items:center;position:relative;box-shadow:0 0 24px var(--glow-color),0 2px 8px rgba(0,0,0,0.15)}
 .ticker-bar-top{position:sticky;top:60px;z-index:90}
-.ticker-bar-bottom{margin-top:32px;border-bottom:none;border-top:1px solid var(--glow-border)}
+.ticker-bar-bottom{position:fixed;bottom:0;left:0;z-index:90;width:100vw;border-bottom:none;border-top:1px solid var(--glow-border)}
 .ticker-track{display:flex;white-space:nowrap;animation:ticker-scroll 80s linear infinite;will-change:transform}
+.ticker-track-reverse{animation-direction:reverse}
 .ticker-item{display:inline-flex;align-items:center;padding:0 16px;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:.3px;flex-shrink:0}
 .ticker-item .ticker-name{color:var(--text-secondary);margin-right:6px}
 .ticker-item .ticker-change{font-weight:700}
 .ticker-item .ticker-sep{color:var(--border-strong);margin-left:16px}
 @keyframes ticker-scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+body{padding-bottom:38px}
 
 .footer{text-align:center;font-size:12px;color:var(--text-tertiary);margin-top:40px;padding:24px;border-top:1px solid var(--border);font-weight:500}
 
@@ -195,10 +198,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
     <div class="stock-grid" id="stockGrid"></div>
   </div>
 
-  <div class="ticker-bar ticker-bar-bottom" id="tickerBottom"></div>
-
   <div class="footer">数据来自 Yahoo Finance · 每日自动更新 · 仅供参考不构成投资建议</div>
 </div>
+
+<div class="ticker-bar ticker-bar-bottom" id="tickerBottom"></div>
 
 <div class="tooltip" id="tooltip" style="position:absolute;background:#2a2e39;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:12px;color:#e2e8f0;pointer-events:none;opacity:0;transition:opacity .15s;z-index:10;box-shadow:0 4px 12px rgba(0,0,0,0.15);white-space:nowrap"></div>
 
@@ -565,12 +568,16 @@ function getMarketStatus() {
 
 // 滚动行情条
 (function(){
-  const stocks = DATA.stocks.slice().sort((a,b) => Math.abs(b.change) - Math.abs(a.change));
-  function buildTicker(id){
+  // 顶部：按涨跌幅度排序
+  const topStocks = DATA.stocks.slice().sort((a,b) => Math.abs(b.change) - Math.abs(a.change));
+  // 底部：随机打乱，和顶部不同
+  const bottomStocks = DATA.stocks.slice().sort(() => Math.random() - 0.5);
+  
+  function buildTicker(id, stocks, reverse){
     const bar = document.getElementById(id);
     if(!bar) return;
     const track = document.createElement('div');
-    track.className = 'ticker-track';
+    track.className = 'ticker-track' + (reverse ? ' ticker-track-reverse' : '');
     let html = '';
     stocks.forEach(s => {
       const c = colorForChange(s.change);
@@ -579,8 +586,8 @@ function getMarketStatus() {
     track.innerHTML = html + html;
     bar.appendChild(track);
   }
-  buildTicker('tickerTop');
-  buildTicker('tickerBottom');
+  buildTicker('tickerTop', topStocks, false);
+  buildTicker('tickerBottom', bottomStocks, true);
 })();
 
 // 主题切换
