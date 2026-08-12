@@ -333,9 +333,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
         <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path>
       </svg>
     </button>
-    <button class="theme-toggle" onclick="toggleTheme()">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-      <span id="theme-label">深色模式</span>
+    <button class="icon-btn" onclick="toggleTheme()" title="切换主题">
+      <svg id="theme-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+      </svg>
     </button>
   </div>
 </div>
@@ -723,7 +724,9 @@ function getMarketStatus() {
   data.forEach((v,i)=>{
     const c=svgEl("circle",{cx:x(i),cy:y(v),r:3,fill:"var(--bg)",stroke:GLOW,"stroke-width":1.5});
     c.style.cursor="pointer";
-    c.addEventListener("mouseenter",e=>showTip(e,(i+1)+"天前<br>收盘 "+Math.round(v).toLocaleString()));
+    const daysAgo = data.length - i;
+    const dayLabel = daysAgo === 1 ? "今日" : daysAgo + "天前";
+    c.addEventListener("mouseenter",e=>showTip(e,dayLabel+"<br>收盘 "+Math.round(v).toLocaleString()));
     c.addEventListener("mouseleave",hideTip);
     svg.appendChild(c);
   });
@@ -752,15 +755,15 @@ function getMarketStatus() {
 // 主题切换
 function toggleTheme(){
   const root=document.documentElement;
-  const label=document.getElementById("theme-label");
-  if(root.classList.contains("light")){root.classList.remove("light");label.textContent="深色模式"}
-  else{root.classList.add("light");label.textContent="日间模式"}
+  const icon=document.getElementById("theme-icon");
+  if(root.classList.contains("light")){root.classList.remove("light");icon.innerHTML='<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>'}
+  else{root.classList.add("light");icon.innerHTML='<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>'}
 }
 
 // 跟随系统主题
 if(window.matchMedia&&window.matchMedia("(prefers-color-scheme: light)").matches){
   document.documentElement.classList.add("light");
-  document.getElementById("theme-label").textContent="日间模式";
+  document.getElementById("theme-icon").innerHTML='<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
 }
 
 const tip=document.getElementById("tooltip");
