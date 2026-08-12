@@ -362,7 +362,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
   <div class="ai-summary" id="aiSummaryBox" style="display:none">
     <div class="ai-label">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-      <span>AI 行情总结</span>
+      <span>行情总结</span>
     </div>
     <p id="aiSummaryText"></p>
   </div>
@@ -419,10 +419,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
     <div class="stock-grid" id="stockGrid"></div>
   </div>
 
-  <div class="footer">
-  <div>数据来自 Yahoo Finance · 每日自动更新 · 仅供参考不构成投资建议</div>
-  <div style="margin-top:8px;font-size:11px;color:var(--text-tertiary);opacity:.75">AI ANALYZED BY GEMINI</div>
-</div>
+  <div class="footer">数据来自 Yahoo Finance · 每日自动更新 · 仅供参考不构成投资建议</div>
 </div>
 
 <div class="tooltip" id="tooltip" style="position:absolute;background:#2a2e39;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:12px;color:#e2e8f0;pointer-events:none;opacity:0;transition:opacity .15s;z-index:10;box-shadow:0 4px 12px rgba(0,0,0,0.15);white-space:nowrap"></div>
@@ -891,46 +888,79 @@ def generate_html(data, is_history=False, history_dates=None):
 
 
 
-def call_gemini(prompt, api_key):
-    """调用 Gemini API (gemini-3.6-flash)，失败返回 None。超时15秒。"""
-    if not api_key:
-        return None
-    try:
-        import urllib.request
-        import urllib.error
-        import time
-        time.sleep(1)
 
-        req = urllib.request.Request(
-            f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key={api_key}",
-            data=json.dumps({
-                "contents": [{"role": "user", "parts": [{"text": prompt}]}],
-                "generationConfig": {"maxOutputTokens": 400, "temperature": 0.5}
-            }).encode("utf-8"),
-            headers={"Content-Type": "application/json"}
-        )
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            result = json.loads(resp.read().decode("utf-8"))
+import random
 
-            raw_text = result.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "").strip()
-            print(f"    [Gemini raw]: {raw_text[:80]}")
+# 随机话术库
+OVERVIEW_OPENINGS = [
+    "纳指100今日{trend}{pct}，{up_str}，整体走势{mood}。",
+    "今日纳指100{trend}{pct}，{up_str}，市场{mood}。",
+    "纳指100收盘{trend}{pct}，{up_str}，全天{mood}运行。",
+    "今日美股科技股{trend}{pct}，{up_str}，整体{mood}。",
+]
 
-            if len(raw_text) < 20 or "prompt" in raw_text.lower() or "note:" in raw_text.lower() or "length:" in raw_text.lower():
-                print("    [Gemini 无效响应，使用本地生成]")
-                return None
-            return raw_text
-    except Exception as e:
-        print(f"  Gemini API 失败: {e}")
-        return None
+OVERVIEW_SECTORS = [
+    "行业层面，{sector_text}。",
+    "板块方面，{sector_text}。",
+    "从行业看，{sector_text}。",
+    "分行业看，{sector_text}。",
+]
+
+OVERVIEW_STOCKS = [
+    "个股方面，{leaders}表现亮眼；{laggards}承压。",
+    "权重股中，{leaders}强势，{laggards}走弱。",
+    "龙头表现分化，{leaders}领涨，{laggards}领跌。",
+    "成分股中，{leaders}表现突出，{laggards}跌幅居前。",
+]
+
+OVERVIEW_OUTLOOKS = [
+    "市场情绪积极，短期有望延续强势。",
+    "避险情绪升温，短期或继续震荡整理。",
+    "板块分化明显，建议关注结构性机会。",
+    "资金轮动加速，短期或维持震荡格局。",
+    "市场信心尚可，关注后续量能配合。",
+    "多空分歧加大，建议控制仓位观望。",
+]
+
+STOCKS_TEMPLATES = [
+    "权重股分化明显，{leaders}强势领涨，{laggards}大幅回调。指数整体{trend_text}。",
+    "龙头表现割裂，{leaders}逆势走强，{laggards}承压下行。指数{trend_text}。",
+    "成分股涨跌互现，{leaders}表现亮眼，{laggards}拖累指数。整体{trend_text}。",
+]
+
+SECTORS_TEMPLATES = [
+    "行业轮动加速，{lead}获资金青睐，{lag}资金流出明显。板块分化加剧，结构性特征突出。",
+    "板块分化显著，{lead}逆势走强，{lag}持续承压。资金呈现明显的避险偏好。",
+    "从行业看，{lead}领涨，{lag}领跌。资金在板块间快速切换，轮动格局明显。",
+]
+
+DIST_TEMPLATES = [
+    "市场情绪偏暖，普涨格局下{up}只个股上涨，仅{down}只下跌，赚钱效应较好。",
+    "市场情绪偏冷，普跌格局下{down}只个股下跌，仅{up}只上涨，亏钱效应扩散。",
+    "市场情绪分化，{up}涨{down}跌，暴涨{extreme_up}只、暴跌{extreme_down}只，结构性行情特征明显。",
+    "涨跌家数接近，{up}涨{down}跌，市场处于均衡状态，等待方向选择。",
+]
+
+INDUSTRY_TEMPLATES = [
+    "{lead}板块表现最强，{lag}板块承压。行业间分化显著，建议关注强势板块机会。",
+    "{lead}逆势领涨，{lag}持续走弱。板块间资金博弈激烈，结构性机会与风险并存。",
+    "行业表现分化，{lead}一枝独秀，{lag}跌幅居前。建议聚焦强势板块，回避弱势领域。",
+]
+
+TREND_TEMPLATES = [
+    "近30日纳指100强势上行{c30:+.2f}%，趋势明确。近5日{recent5:+.2f}%，短期 momentum 良好，关注能否延续。",
+    "近30日纳指100下行{c30:+.2f}%，趋势偏弱。近5日{recent5:+.2f}%，短期或存在超跌反弹机会。",
+    "近30日纳指100区间震荡({c30:+.2f}%)，但近5日反弹{recent5:+.2f}%，短期有企稳迹象。",
+    "近30日纳指100区间震荡({c30:+.2f}%)，近5日回调{recent5:+.2f}%，短期承压关注支撑。",
+    "近30日纳指100横盘整理({c30:+.2f}%)，近5日波动有限{recent5:+.2f}%，等待方向选择。",
+]
 
 
 def generate_summary(data, summary_type="overview"):
-    """生成行情总结，支持多种类型：overview/stocks/sectors/distribution/industry"""
-    api_key = os.environ.get("GEMINI_API_KEY")
+    """生成行情总结，纯本地生成，随机话术组合，效果自然。"""
     idx = data["index"]
     sectors = data["sectors"]
     stocks = data["stocks"]
-    bins = data.get("bins", {})
 
     if not stocks or not sectors:
         return None
@@ -940,163 +970,106 @@ def generate_summary(data, summary_type="overview"):
     top3_down = sorted_stocks[-3:][::-1]
     sorted_sectors = sorted(sectors, key=lambda x: x["change"], reverse=True)
 
-    # 根据类型构造 prompt
+    up_str = str(idx['up']) + "涨" + str(idx['down']) + "跌"
+    trend = "收涨" if idx['change'] >= 0 else "收跌"
+    pct = ("+" if idx['change'] >= 0 else "") + f"{idx['change']:.2f}%"
+
+    # 情绪词随机
+    if idx['change'] >= 1.5: mood = random.choice(["强势", "强劲", " bullish"])
+    elif idx['change'] >= 0.5: mood = random.choice(["偏强", "积极", "向好"])
+    elif idx['change'] >= -0.5: mood = random.choice(["震荡", "胶着", "盘整"])
+    elif idx['change'] >= -1.5: mood = random.choice(["偏弱", "疲软", "承压"])
+    else: mood = random.choice(["承压", "低迷", "走弱"])
+
+    lead = sorted_sectors[0]
+    lag = sorted_sectors[-1]
+
     if summary_type == "overview":
-        prompt = f"""作为资深美股分析师，基于以下数据用一段80-120字中文总结纳斯达克100当日行情，风格像彭博快评，纯文本无markdown。
+        sector_text = lead['name'] + "领涨(" + f"{lead['change']:+.2f}%" + ")"
+        if lead['name'] != lag['name']:
+            sector_text += "，" + lag['name'] + "领跌(" + f"{lag['change']:+.2f}%" + ")"
 
-收盘{idx.get('price', 'N/A')}，涨跌{idx['change']}%，{idx['up']}涨{idx['down']}跌。领涨行业{sorted_sectors[0]['name']}({sorted_sectors[0]['change']:+.2f}%)，领跌{sorted_sectors[-1]['name']}({sorted_sectors[-1]['change']:+.2f}%)。龙头{top3_up[0]['ticker']}({top3_up[0]['change']:+.2f}%)，{top3_down[0]['ticker']}({top3_down[0]['change']:+.2f}%)。
+        leaders = top3_up[0]['ticker'] + "(" + f"{top3_up[0]['change']:+.2f}%" + ")"
+        laggards = top3_down[0]['ticker'] + "(" + f"{top3_down[0]['change']:+.2f}%" + ")"
 
-直接输出总结。"""
-        fallback = _fallback_overview(idx, sorted_sectors, top3_up, top3_down)
+        lines = [
+            random.choice(OVERVIEW_OPENINGS).format(trend=trend, pct=pct, up_str=up_str, mood=mood),
+            random.choice(OVERVIEW_SECTORS).format(sector_text=sector_text),
+            random.choice(OVERVIEW_STOCKS).format(leaders=leaders, laggards=laggards),
+        ]
+
+        if idx['change'] >= 1 and idx['up'] >= 70:
+            lines.append("市场情绪积极，短期有望延续强势。")
+        elif idx['change'] <= -1 and idx['down'] >= 70:
+            lines.append("避险情绪升温，短期或继续震荡整理。")
+        else:
+            lines.append(random.choice(OVERVIEW_OUTLOOKS))
+
+        summary = "".join(lines)
 
     elif summary_type == "stocks":
-        top5 = sorted_stocks[:5]
-        bottom5 = sorted_stocks[-5:][::-1]
-        top5_str = ", ".join([s['ticker'] + "(" + f"{s['change']:+.2f}%" + ")" for s in top5])
-        bottom5_str = ", ".join([s['ticker'] + "(" + f"{s['change']:+.2f}%" + ")" for s in bottom5])
-        prompt = f"""作为资深美股分析师，基于以下数据用一段60-100字中文点评纳指100权重股表现，纯文本无markdown。
-
-Top5涨：{top5_str}。Bottom5跌：{bottom5_str}。指数整体{idx['change']:+.2f}%。
-
-聚焦龙头分化与集中度，分析权重股对指数的拉动或拖累，指出异常异动个股。直接输出。"""
-        fallback = _fallback_stocks(idx, top3_up, top3_down)
+        leaders = top3_up[0]['ticker'] + "(" + f"{top3_up[0]['change']:+.2f}%" + ")"
+        if len(top3_up) > 1:
+            leaders += "、" + top3_up[1]['ticker'] + "(" + f"{top3_up[1]['change']:+.2f}%" + ")"
+        laggards = top3_down[0]['ticker'] + "(" + f"{top3_down[0]['change']:+.2f}%" + ")"
+        if len(top3_down) > 1:
+            laggards += "、" + top3_down[1]['ticker'] + "(" + f"{top3_down[1]['change']:+.2f}%" + ")"
+        trend_text = "受权重股支撑" if idx['change'] >= 0 else "受权重股拖累"
+        summary = random.choice(STOCKS_TEMPLATES).format(leaders=leaders, laggards=laggards, trend_text=trend_text)
 
     elif summary_type == "sectors":
-        up_sectors = [s for s in sorted_sectors if s['change'] > 0]
-        down_sectors = [s for s in sorted_sectors if s['change'] < 0]
-        up_names = ", ".join([s['name'] + "(" + f"{s['change']:+.2f}%" + ")" for s in up_sectors[:3]])
-        down_names = ", ".join([s['name'] + "(" + f"{s['change']:+.2f}%" + ")" for s in down_sectors[:3]])
-        prompt = f"""作为资深美股分析师，基于以下数据用一段60-100字中文分析纳指100行业轮动，纯文本无markdown。
-
-上涨行业{len(up_sectors)}个：{up_names}。下跌行业{len(down_sectors)}个：{down_names}。领涨{sorted_sectors[0]['name']}({sorted_sectors[0]['change']:+.2f}%)，领跌{sorted_sectors[-1]['name']}({sorted_sectors[-1]['change']:+.2f}%)。
-
-分析资金从哪些板块流出、流入哪些板块。直接输出。"""
-        fallback = _fallback_sectors(sorted_sectors)
+        summary = random.choice(SECTORS_TEMPLATES).format(
+            lead=lead['name'] + "(" + f"{lead['change']:+.2f}%" + ")",
+            lag=lag['name'] + "(" + f"{lag['change']:+.2f}%" + ")"
+        )
 
     elif summary_type == "distribution":
-        labels = bins.get("labels", [])
+        bins = data.get("bins", {})
         counts = bins.get("counts", [])
-        dist_str = ", ".join([f"{l}:{c}只" for l, c in zip(labels, counts) if c > 0])
         extreme_up = sum(counts[6:]) if len(counts) > 6 else 0
         extreme_down = sum(counts[:2]) if len(counts) > 2 else 0
-        prompt = f"""作为资深美股分析师，基于以下数据用一段60-100字中文点评纳指100涨跌分布，纯文本无markdown。
 
-{dist_str}。暴涨(>3%){extreme_up}只，暴跌(<-3%){extreme_down}只，整体{idx['up']}涨{idx['down']}跌。
-
-判断市场是普涨、普跌还是分化，指出极端情绪信号。直接输出。"""
-        fallback = _fallback_distribution(idx, bins)
+        if idx['up'] >= 70:
+            summary = DIST_TEMPLATES[0].format(up=idx['up'], down=idx['down'])
+        elif idx['down'] >= 70:
+            summary = DIST_TEMPLATES[1].format(up=idx['up'], down=idx['down'])
+        else:
+            summary = random.choice(DIST_TEMPLATES[2:]).format(
+                up=idx['up'], down=idx['down'], extreme_up=extreme_up, extreme_down=extreme_down
+            )
 
     elif summary_type == "industry":
-        tech_change = next((s['change'] for s in sectors if s['name']=='科技'), 0)
-        prompt = f"""作为资深美股分析师，基于以下数据用一段60-100字中文点评纳指100行业表现分化，纯文本无markdown。
-
-领涨{sorted_sectors[0]['name']}({sorted_sectors[0]['change']:+.2f}%)，领跌{sorted_sectors[-1]['name']}({sorted_sectors[-1]['change']:+.2f}%)，科技板块{tech_change:+.2f}%。
-
-指出哪些行业有结构性机会、哪些需回避。直接输出。"""
-        fallback = _fallback_industry(sorted_sectors)
+        summary = random.choice(INDUSTRY_TEMPLATES).format(
+            lead=lead['name'] + "(" + f"{lead['change']:+.2f}%" + ")",
+            lag=lag['name'] + "(" + f"{lag['change']:+.2f}%" + ")"
+        )
 
     elif summary_type == "trend":
         hist = data.get("history", [])
         if len(hist) < 5:
             return "历史数据不足，无法分析趋势。"
         c30 = round((hist[-1] - hist[0]) / hist[0] * 100, 2)
-        max30 = max(hist)
-        min30 = min(hist)
-        max_idx = hist.index(max30)
-        min_idx = hist.index(min30)
         recent5 = round((hist[-1] - hist[-5]) / hist[-5] * 100, 2)
-        prompt = f"""作为资深美股分析师，基于以下数据用一段60-100字中文点评纳指100近30日走势，纯文本无markdown。
 
-30日涨幅{c30:+.2f}%，区间高点{max30:,.0f}({max_idx+1}天前)，区间低点{min30:,.0f}({min_idx+1}天前)，近5日{recent5:+.2f}%。
-
-判断是上升趋势、下降趋势还是区间震荡，指出支撑压力或关键变盘信号。直接输出。"""
-        fallback = _fallback_trend(hist, c30, recent5)
+        if c30 >= 5:
+            summary = TREND_TEMPLATES[0].format(c30=c30, recent5=recent5)
+        elif c30 <= -5:
+            summary = TREND_TEMPLATES[1].format(c30=c30, recent5=recent5)
+        else:
+            if recent5 >= 2:
+                summary = TREND_TEMPLATES[2].format(c30=c30, recent5=recent5)
+            elif recent5 <= -2:
+                summary = TREND_TEMPLATES[3].format(c30=c30, recent5=recent5)
+            else:
+                summary = TREND_TEMPLATES[4].format(c30=c30, recent5=recent5)
 
     else:
         return None
 
-    # 优先调用 Gemini
-    summary = call_gemini(prompt, api_key)
-    if summary:
-        print(f"  Gemini [{summary_type}]: {summary[:50]}...")
-        return summary
-
-    print(f"  本地 [{summary_type}]: {fallback[:50]}...")
-    return fallback
+    print(f"  [本地 {summary_type}]: {summary[:60]}...")
+    return summary
 
 
-def _fallback_overview(idx, sorted_sectors, top3_up, top3_down):
-    up_str = str(idx['up']) + "涨" + str(idx['down']) + "跌"
-    trend = "收涨" if idx['change'] >= 0 else "收跌"
-    pct = ("+" if idx['change'] >= 0 else "") + f"{idx['change']:.2f}%"
-    if idx['change'] >= 1.5: mood = "强势"
-    elif idx['change'] >= 0.5: mood = "偏强"
-    elif idx['change'] >= -0.5: mood = "震荡"
-    elif idx['change'] >= -1.5: mood = "偏弱"
-    else: mood = "承压"
-    lead = sorted_sectors[0]
-    lag = sorted_sectors[-1]
-    sector_text = lead['name'] + "领涨(" + f"{lead['change']:+.2f}%" + ")"
-    if lead['name'] != lag['name']:
-        sector_text += "，" + lag['name'] + "领跌(" + f"{lag['change']:+.2f}%" + ")"
-    leaders = top3_up[0]['ticker'] + "(" + f"{top3_up[0]['change']:+.2f}%" + ")"
-    if len(top3_up) > 1:
-        leaders += "、" + top3_up[1]['ticker'] + "(" + f"{top3_up[1]['change']:+.2f}%" + ")"
-    lines = ["纳指100今日" + trend + pct + "，" + up_str + "，整体走势" + mood + "。",
-             "行业层面，" + sector_text + "。",
-             "个股方面，" + leaders + "表现亮眼；" + top3_down[0]['ticker'] + "(" + f"{top3_down[0]['change']:+.2f}%" + ")承压。",]
-    if idx['change'] >= 1 and idx['up'] >= 70: lines.append("市场情绪积极，短期有望延续强势。")
-    elif idx['change'] <= -1 and idx['down'] >= 70: lines.append("避险情绪升温，短期或继续震荡整理。")
-    else: lines.append("板块分化明显，建议关注结构性机会。")
-    return "".join(lines)
-
-
-def _fallback_stocks(idx, top3_up, top3_down):
-    leaders = top3_up[0]['ticker'] + "(" + f"{top3_up[0]['change']:+.2f}%" + ")"
-    if len(top3_up) > 1:
-        leaders += "、" + top3_up[1]['ticker'] + "(" + f"{top3_up[1]['change']:+.2f}%" + ")"
-    laggards = top3_down[0]['ticker'] + "(" + f"{top3_down[0]['change']:+.2f}%" + ")"
-    if len(top3_down) > 1:
-        laggards += "、" + top3_down[1]['ticker'] + "(" + f"{top3_down[1]['change']:+.2f}%" + ")"
-    return f"权重股分化明显，{leaders}强势领涨，{laggards}大幅回调。指数整体{'受权重股支撑' if idx['change'] >= 0 else '受权重股拖累'}。"
-
-
-def _fallback_sectors(sorted_sectors):
-    lead = sorted_sectors[0]
-    lag = sorted_sectors[-1]
-    return f"行业轮动加速，{lead['name']}({lead['change']:+.2f}%)获资金青睐，{lag['name']}({lag['change']:+.2f}%)资金流出明显。板块分化加剧，结构性特征突出。"
-
-
-def _fallback_distribution(idx, bins):
-    counts = bins.get("counts", [])
-    extreme_up = sum(counts[6:]) if len(counts) > 6 else 0
-    extreme_down = sum(counts[:2]) if len(counts) > 2 else 0
-    if idx['up'] >= 70:
-        return f"市场情绪偏暖，普涨格局下{idx['up']}只个股上涨，仅{idx['down']}只下跌，赚钱效应较好。"
-    elif idx['down'] >= 70:
-        return f"市场情绪偏冷，普跌格局下{idx['down']}只个股下跌，仅{idx['up']}只上涨，亏钱效应扩散。"
-    else:
-        return f"市场情绪分化，{idx['up']}涨{idx['down']}跌，暴涨{extreme_up}只、暴跌{extreme_down}只，结构性行情特征明显。"
-
-
-def _fallback_industry(sorted_sectors):
-    lead = sorted_sectors[0]
-    lag = sorted_sectors[-1]
-    return f"{lead['name']}板块表现最强({lead['change']:+.2f}%)，{lag['name']}板块承压({lag['change']:+.2f}%)。行业间分化显著，建议关注强势板块机会。"
-
-
-def _fallback_trend(hist, c30, recent5):
-    if c30 >= 5:
-        return f"近30日纳指100强势上行{c30:+.2f}%，趋势明确。近5日{recent5:+.2f}%，短期 momentum 良好，关注能否延续。"
-    elif c30 <= -5:
-        return f"近30日纳指100下行{c30:+.2f}%，趋势偏弱。近5日{recent5:+.2f}%，短期或存在超跌反弹机会。"
-    else:
-        if recent5 >= 2:
-            return f"近30日纳指100区间震荡({c30:+.2f}%)，但近5日反弹{recent5:+.2f}%，短期有企稳迹象。"
-        elif recent5 <= -2:
-            return f"近30日纳指100区间震荡({c30:+.2f}%)，近5日回调{recent5:+.2f}%，短期承压关注支撑。"
-        else:
-            return f"近30日纳指100横盘整理({c30:+.2f}%)，近5日波动有限{recent5:+.2f}%，等待方向选择。"
 def fmt_pct(c):
     return f"{'+' if c >= 0 else ''}{c:.2f}%"
 
