@@ -897,48 +897,54 @@ def generate_html(data, is_history=False, history_dates=None):
 
 
 def call_siliconflow(prompt, api_key):
-    """调用 SiliconFlow API (Qwen3-8B)，失败返回 None。超时15秒。"""
+    """调用 SiliconFlow API (Qwen3-8B)，失败返回 None。超时15秒，自动重试3次。"""
     if not api_key:
         return None
-    try:
-        import urllib.request
-        import urllib.error
-        import socket
-        import time
-        time.sleep(0.5)
 
-        # 设置全局 socket 超时，防止卡住
-        old_timeout = socket.getdefaulttimeout()
-        socket.setdefaulttimeout(15)
+    import urllib.request
+    import urllib.error
+    import socket
+    import time
 
+    for attempt in range(3):
         try:
-            req = urllib.request.Request(
-                "https://api.siliconflow.cn/v1/chat/completions",
-                data=json.dumps({
-                    "model": "Qwen/Qwen3-8B",
-                    "messages": [{"role": "user", "content": prompt}],
-                    "temperature": 0.6,
-                    "max_tokens": 250
-                }).encode("utf-8"),
-                headers={
-                    "Content-Type": "application/json",
-                    "Authorization": f"Bearer {api_key}"
-                }
-            )
-            with urllib.request.urlopen(req, timeout=15) as resp:
-                result = json.loads(resp.read().decode("utf-8"))
-                text = result["choices"][0]["message"]["content"].strip()
-                print(f"    [SiliconFlow]: {text[:60]}...")
-                if len(text) < 15:
-                    print("    [响应过短，fallback]")
-                    return None
-                return text
-        finally:
-            socket.setdefaulttimeout(old_timeout)
+            time.sleep(0.5)
+            old_timeout = socket.getdefaulttimeout()
+            socket.setdefaulttimeout(15)
 
-    except Exception as e:
-        print(f"  SiliconFlow 失败: {e}")
-        return None
+            try:
+                req = urllib.request.Request(
+                    "https://api.siliconflow.cn/v1/chat/completions",
+                    data=json.dumps({
+                        "model": "Qwen/Qwen3-8B",
+                        "messages": [{"role": "user", "content": prompt}],
+                        "temperature": 0.6,
+                        "max_tokens": 250
+                    }).encode("utf-8"),
+                    headers={
+                        "Content-Type": "application/json",
+                        "Authorization": f"Bearer {api_key}"
+                    }
+                )
+                with urllib.request.urlopen(req, timeout=15) as resp:
+                    result = json.loads(resp.read().decode("utf-8"))
+                    text = result["choices"][0]["message"]["content"].strip()
+                    print(f"    [SiliconFlow]: {text[:60]}...")
+                    if len(text) < 15:
+                        print("    [响应过短，fallback]")
+                        return None
+                    return text
+            finally:
+                socket.setdefaulttimeout(old_timeout)
+
+        except Exception as e:
+            print(f"  SiliconFlow 第{attempt+1}次失败: {e}")
+            if attempt < 2:
+                print(f"  等待2秒后重试...")
+                time.sleep(2)
+            else:
+                print(f"  3次均失败，使用本地生成")
+                return None
 
 
 def generate_summary(data, summary_type="overview"):
