@@ -18,6 +18,15 @@ jobs:
           python-version: "3.11"
           cache: "pip"
       - run: pip install -r requirements.txt
+      
+      # 关键：先把 gh-pages 上的历史文件拉回来
+      - name: Restore history files
+        run: |
+          git fetch origin gh-pages
+          git checkout origin/gh-pages -- docs/history/ || true
+          mkdir -p docs/history
+        continue-on-error: true
+      
       - name: Generate Dashboard
         run: python fetch_data.py
       - uses: peaceiris/actions-gh-pages@v4
@@ -26,4 +35,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./docs
           publish_branch: gh-pages
-          force_orphan: true
+          keep_files: true
