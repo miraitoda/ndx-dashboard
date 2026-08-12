@@ -269,7 +269,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 
 .container{max-width:1200px;margin:0 auto;padding:24px}
 
-.toolbar{display:flex;justify-content:space-between;align-items:center;padding:12px 24px;border-bottom:1px solid var(--glow-border);background:linear-gradient(180deg,var(--surface) 0%,var(--surface-glass) 100%);position:sticky;top:0;z-index:100;backdrop-filter:blur(20px);box-shadow:0 0 40px var(--glow-color),0 4px 20px rgba(0,0,0,0.2)}
+.sticky-header{position:-webkit-sticky;position:sticky;top:0;z-index:100;width:100%}
+.toolbar{display:flex;justify-content:space-between;align-items:center;padding:12px 24px;border-bottom:1px solid var(--glow-border);background:linear-gradient(180deg,var(--surface) 0%,var(--surface-glass) 100%);backdrop-filter:blur(20px);box-shadow:0 0 40px var(--glow-color),0 4px 20px rgba(0,0,0,0.2);width:100%;box-sizing:border-box}
 .toolbar-left,.toolbar-right{display:flex;align-items:center;gap:10px}
 .nav-btns{display:flex;gap:8px}
 .nav-btn{padding:6px 14px;border-radius:8px;border:1px solid var(--border-strong);background:var(--surface-glass);color:var(--text-secondary);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;font-family:inherit}
@@ -327,7 +328,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 
 /* 滚动行情条 */
 .ticker-bar{width:100%;height:38px;background:var(--surface);border-bottom:1px solid var(--glow-border);overflow:hidden;display:flex;align-items:center;position:relative;box-shadow:0 0 24px var(--glow-color),0 2px 8px rgba(0,0,0,0.15)}
-.ticker-bar-top{position:sticky;top:60px;z-index:90}
+.ticker-bar-top{position:relative;width:100%;z-index:90}
 .ticker-bar-bottom{position:fixed;bottom:0;left:0;z-index:90;width:100vw;border-bottom:none;border-top:1px solid var(--glow-border)}
 .ticker-track{display:flex;white-space:nowrap;animation:ticker-scroll 80s linear infinite;will-change:transform}
 .ticker-track-reverse{animation-direction:reverse}
@@ -344,6 +345,7 @@ body{padding-bottom:38px}
 @media(max-width:720px){.charts-row{grid-template-columns:1fr}.kpi-row{grid-template-columns:repeat(2,1fr)}.kpi-value{font-size:32px}.hero h1{font-size:36px}.container{padding:16px}}
 </style></head><body>
 
+<div class="sticky-header">
 <div class="toolbar">
   <div class="toolbar-left">
     <div class="logo">NDX <span>DASHBOARD</span></div>
@@ -366,10 +368,10 @@ body{padding-bottom:38px}
         <circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
       </svg>
     </button>
-  </div>
+ </div>
 </div>
-
 <div class="ticker-bar ticker-bar-top" id="tickerTop"></div>
+</div>
 
 <div class="container">
   <div class="hero">
