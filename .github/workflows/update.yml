@@ -19,16 +19,22 @@ jobs:
           cache: "pip"
       - run: pip install -r requirements.txt
       
-      # 关键：先把 gh-pages 上的历史文件拉回来
+      # 关键：把 gh-pages 上的历史文件完整复制回来
       - name: Restore history files
         run: |
-          git fetch origin gh-pages
-          git checkout origin/gh-pages -- docs/history/ || true
-          mkdir -p docs/history
+          git clone --branch gh-pages --single-branch https://github.com/${{ github.repository }}.git /tmp/gh-pages || true
+          if [ -d /tmp/gh-pages/history ]; then
+            mkdir -p docs/history
+            cp -r /tmp/gh-pages/history/* docs/history/ || true
+            echo "已恢复 $(ls docs/history/ | wc -l) 个历史文件"
+          else
+            echo "gh-pages 上没有 history 目录"
+          fi
         continue-on-error: true
       
       - name: Generate Dashboard
         run: python fetch_data.py
+      
       - uses: peaceiris/actions-gh-pages@v4
         if: github.ref == 'refs/heads/main'
         with:
