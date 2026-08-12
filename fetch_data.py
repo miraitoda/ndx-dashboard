@@ -8,7 +8,7 @@ import json
 import math
 import os
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 from collections import defaultdict
 
 import yfinance as yf
@@ -53,8 +53,12 @@ def fetch_stock_data(tickers, max_batch=25):
 def fetch_index_history(ticker="^NDX", days=30):
     try:
         t = yf.Ticker(ticker)
-        hist = t.history(period=f"{days + 5}d", interval="1d")
+        end = datetime.now()
+        start = end - timedelta(days=days + 15)
+        hist = t.history(start=start.strftime("%Y-%m-%d"), end=end.strftime("%Y-%m-%d"))
         closes = hist["Close"].dropna().tolist()
+        if len(closes) < days:
+            print(f"  警告: 仅获取到 {len(closes)} 天历史数据，目标 {days} 天")
         return [round(float(c), 2) for c in closes[-days:]]
     except Exception as e:
         print(f"  指数历史失败: {e}")
@@ -331,6 +335,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
     <div class="logo">NDX <span>DASHBOARD</span></div>
     <div class="nav-btns">
       <button class="nav-btn" id="btnPrev" disabled>← 前一日</button>
+      <button class="nav-btn" id="btnToday" style="display:none">今天</button>
       <button class="nav-btn" id="btnNext" disabled>后一日 →</button>
     </div>
   </div>
@@ -487,6 +492,7 @@ function getMarketStatus() {
 (function() {
     const btnPrev = document.getElementById("btnPrev");
     const btnNext = document.getElementById("btnNext");
+    const btnToday = document.getElementById("btnToday");
     if (!btnPrev || !btnNext) return;
 
     const path = window.location.pathname;
@@ -496,6 +502,10 @@ function getMarketStatus() {
     if (isHistory) {
         const m = path.match(/history\\/(\\d{4}-\\d{2}-\\d{2})/);
         currentDate = m ? m[1] : DATA.date;
+        if (btnToday) {
+            btnToday.style.display = "inline-block";
+            btnToday.onclick = () => location.href = "../index.html";
+        }
     } else {
         currentDate = DATA.date;
     }
