@@ -889,32 +889,46 @@ def generate_html(data, is_history=False, history_dates=None):
 
 
 def call_gemini(prompt, api_key):
-    """调用 Gemini API，失败返回 None。自动清理 markdown 标记和多余换行。"""
+    """调用 Gemini API，失败返回 None。"""
     if not api_key:
         return None
     try:
         import urllib.request
         import urllib.error
         import re
+        import time
+
+        # 免费 tier 有速率限制，每次调用间隔 1 秒
+        time.sleep(1)
+
         req = urllib.request.Request(
-            f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key={api_key}",
+            f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}",
             data=json.dumps({
-                "contents": [{"parts": [{"text": prompt}]}],
-                "generationConfig": {"maxOutputTokens": 200, "temperature": 0.7}
+                "contents": [{"role": "user", "parts": [{"text": prompt}]}],
+                "generationConfig": {"maxOutputTokens": 400, "temperature": 0.5}
             }).encode("utf-8"),
             headers={"Content-Type": "application/json"}
         )
         with urllib.request.urlopen(req, timeout=60) as resp:
             result = json.loads(resp.read().decode("utf-8"))
-            text = result["candidates"][0]["content"]["parts"][0]["text"].strip()
-            # 清理 markdown 标记和多余格式
-            text = re.sub(r'\*\*', '', text)           # 去除 ** 粗体
-            text = re.sub(r'\* ', '', text)           # 去除 * 列表标记
-            text = re.sub(r'- ', '', text)            # 去除 - 列表标记
-            text = re.sub(r'#+ ', '', text)           # 去除 # 标题标记
-            text = re.sub(r'`', '', text)             # 去除 ` 代码标记
-            text = re.sub(r'\n+', ' ', text)          # 合并换行为空格
-            text = re.sub(r'\s+', ' ', text)          # 合并多余空格
+
+            raw_text = result.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "").strip()
+            print(f"    [Gemini raw]: {raw_text[:100]}")
+
+            # 验证：内容太短、包含指令关键词、或包含英文说明，都视为无效
+            invalid_keywords = ["要求", "数据：", "Note:", "prompt", "Length:", "字数", "不要", "markdown", "Here is", "Summary:", "Based on"]
+            if any(kw in raw_text for kw in invalid_keywords) or len(raw_text) < 25:
+                print(f"    [Gemini 无效响应，使用本地生成]")
+                return None
+
+            # 清理格式
+            text = re.sub(r'\*\*', '', raw_text)
+            text = re.sub(r'\* ', '', text)
+            text = re.sub(r'- ', '', text)
+            text = re.sub(r'#+ ', '', text)
+            text = re.sub(r'`', '', text)
+            text = re.sub(r'\n+', ' ', text)
+            text = re.sub(r'\s+', ' ', text)
             return text.strip()
     except Exception as e:
         print(f"  Gemini API 失败: {e}")
@@ -939,9 +953,11 @@ def generate_summary(data, summary_type="overview"):
 
     # 根据类型构造 prompt
     if summary_type == "overview":
-        prompt = f"""你是资深美股分析师，请用 3-4 句话总结当日纳斯达克100整体行情，风格专业简洁，像彭博终端快评。
-数据：收盘 {idx.get('price', 'N/A')}，涨跌 {idx['change']}%，{idx['up']}涨{idx['down']}跌，领涨行业{sorted_sectors[0]['name']}({sorted_sectors[0]['change']:+.2f}%)，领跌行业{sorted_sectors[-1]['name']}({sorted_sectors[-1]['change']:+.2f}%)，龙头{top3_up[0]['ticker']}({top3_up[0]['change']:+.2f}%)、{top3_down[0]['ticker']}({top3_down[0]['change']:+.2f}%)。
-要求：80-120字，纯文本不要markdown，第一句点明大盘情绪，第二句行业分化，第三句龙头表现，第四句展望。不要"根据数据"等机械表达。"""
+        prompt = f"""作为资深美股分析师，基于以下数据用一段80-120字中文总结纳斯达克100当日行情，风格像彭博快评，纯文本无markdown。
+
+收盘{idx.get('price', 'N/A')}，涨跌{idx['change']}%，{idx['up']}涨{idx['down']}跌。领涨行业{sorted_sectors[0]['name']}({sorted_sectors[0]['change']:+.2f}%)，领跌{sorted_sectors[-1]['name']}({sorted_sectors[-1]['change']:+.2f}%)。龙头{top3_up[0]['ticker']}({top3_up[0]['change']:+.2f}%)，{top3_down[0]['ticker']}({top3_down[0]['change']:+.2f}%)。
+
+直接输出总结。"""
         fallback = _fallback_overview(idx, sorted_sectors, top3_up, top3_down)
 
     elif summary_type == "stocks":
@@ -949,9 +965,11 @@ def generate_summary(data, summary_type="overview"):
         bottom5 = sorted_stocks[-5:][::-1]
         top5_str = ", ".join([s['ticker'] + "(" + f"{s['change']:+.2f}%" + ")" for s in top5])
         bottom5_str = ", ".join([s['ticker'] + "(" + f"{s['change']:+.2f}%" + ")" for s in bottom5])
-        prompt = f"""你是资深美股分析师，请用 2-3 句话点评当日纳指100权重股表现，聚焦龙头分化与集中度。
-数据：Top5涨{top5_str}，Bottom5跌{bottom5_str}，指数整体{idx['change']:+.2f}%。
-要求：60-100字，纯文本不要markdown，分析权重股对指数的拉动/拖累，指出是否有异常异动个股。不要机械表达。"""
+        prompt = f"""作为资深美股分析师，基于以下数据用一段60-100字中文点评纳指100权重股表现，纯文本无markdown。
+
+Top5涨：{top5_str}。Bottom5跌：{bottom5_str}。指数整体{idx['change']:+.2f}%。
+
+聚焦龙头分化与集中度，分析权重股对指数的拉动或拖累，指出异常异动个股。直接输出。"""
         fallback = _fallback_stocks(idx, top3_up, top3_down)
 
     elif summary_type == "sectors":
@@ -959,9 +977,11 @@ def generate_summary(data, summary_type="overview"):
         down_sectors = [s for s in sorted_sectors if s['change'] < 0]
         up_names = ", ".join([s['name'] + "(" + f"{s['change']:+.2f}%" + ")" for s in up_sectors[:3]])
         down_names = ", ".join([s['name'] + "(" + f"{s['change']:+.2f}%" + ")" for s in down_sectors[:3]])
-        prompt = f"""你是资深美股分析师，请用 2-3 句话分析当日纳指100行业轮动，聚焦资金偏好与板块分化。
-数据：上涨行业{len(up_sectors)}个({up_names})，下跌行业{len(down_sectors)}个({down_names})，领涨{sorted_sectors[0]['name']}({sorted_sectors[0]['change']:+.2f}%)，领跌{sorted_sectors[-1]['name']}({sorted_sectors[-1]['change']:+.2f}%)。
-要求：60-100字，纯文本不要markdown，分析资金从哪些板块流出、流入哪些板块。不要机械表达。"""
+        prompt = f"""作为资深美股分析师，基于以下数据用一段60-100字中文分析纳指100行业轮动，纯文本无markdown。
+
+上涨行业{len(up_sectors)}个：{up_names}。下跌行业{len(down_sectors)}个：{down_names}。领涨{sorted_sectors[0]['name']}({sorted_sectors[0]['change']:+.2f}%)，领跌{sorted_sectors[-1]['name']}({sorted_sectors[-1]['change']:+.2f}%)。
+
+分析资金从哪些板块流出、流入哪些板块。直接输出。"""
         fallback = _fallback_sectors(sorted_sectors)
 
     elif summary_type == "distribution":
@@ -970,15 +990,20 @@ def generate_summary(data, summary_type="overview"):
         dist_str = ", ".join([f"{l}:{c}只" for l, c in zip(labels, counts) if c > 0])
         extreme_up = sum(counts[6:]) if len(counts) > 6 else 0
         extreme_down = sum(counts[:2]) if len(counts) > 2 else 0
-        prompt = f"""你是资深美股分析师，请用 2-3 句话点评当日纳指100涨跌分布，聚焦市场情绪温度。
-数据：{dist_str}，暴涨(>3%){extreme_up}只，暴跌(<-3%){extreme_down}只，整体{idx['up']}涨{idx['down']}跌。
-要求：60-100字，纯文本不要markdown，判断市场是普涨/普跌还是分化，指出极端情绪信号。不要机械表达。"""
+        prompt = f"""作为资深美股分析师，基于以下数据用一段60-100字中文点评纳指100涨跌分布，纯文本无markdown。
+
+{dist_str}。暴涨(>3%){extreme_up}只，暴跌(<-3%){extreme_down}只，整体{idx['up']}涨{idx['down']}跌。
+
+判断市场是普涨、普跌还是分化，指出极端情绪信号。直接输出。"""
         fallback = _fallback_distribution(idx, bins)
 
     elif summary_type == "industry":
-        prompt = f"""你是资深美股分析师，请用 2-3 句话点评当日纳指100行业表现分化，聚焦结构性机会与风险。
-数据：领涨{sorted_sectors[0]['name']}({sorted_sectors[0]['change']:+.2f}%)，领跌{sorted_sectors[-1]['name']}({sorted_sectors[-1]['change']:+.2f}%)，科技板块{next((s['change'] for s in sectors if s['name']=='科技'), 0):+.2f}%。
-要求：60-100字，纯文本不要markdown，指出哪些行业有结构性机会、哪些需回避。不要机械表达。"""
+        tech_change = next((s['change'] for s in sectors if s['name']=='科技'), 0)
+        prompt = f"""作为资深美股分析师，基于以下数据用一段60-100字中文点评纳指100行业表现分化，纯文本无markdown。
+
+领涨{sorted_sectors[0]['name']}({sorted_sectors[0]['change']:+.2f}%)，领跌{sorted_sectors[-1]['name']}({sorted_sectors[-1]['change']:+.2f}%)，科技板块{tech_change:+.2f}%。
+
+指出哪些行业有结构性机会、哪些需回避。直接输出。"""
         fallback = _fallback_industry(sorted_sectors)
 
     elif summary_type == "trend":
@@ -991,9 +1016,11 @@ def generate_summary(data, summary_type="overview"):
         max_idx = hist.index(max30)
         min_idx = hist.index(min30)
         recent5 = round((hist[-1] - hist[-5]) / hist[-5] * 100, 2)
-        prompt = f"""你是资深美股分析师，请用 2-3 句话点评纳指100近30日走势，聚焦趋势方向与关键点位。
-数据：30日涨幅{c30:+.2f}%，区间高点{max30:,.0f}({max_idx+1}天前)，区间低点{min30:,.0f}({min_idx+1}天前)，近5日{recent5:+.2f}%。
-要求：60-100字，纯文本不要markdown，判断是上升趋势/下降趋势/区间震荡，指出支撑/压力或关键变盘信号。不要机械表达。"""
+        prompt = f"""作为资深美股分析师，基于以下数据用一段60-100字中文点评纳指100近30日走势，纯文本无markdown。
+
+30日涨幅{c30:+.2f}%，区间高点{max30:,.0f}({max_idx+1}天前)，区间低点{min30:,.0f}({min_idx+1}天前)，近5日{recent5:+.2f}%。
+
+判断是上升趋势、下降趋势还是区间震荡，指出支撑压力或关键变盘信号。直接输出。"""
         fallback = _fallback_trend(hist, c30, recent5)
 
     else:
