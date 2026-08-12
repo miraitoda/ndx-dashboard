@@ -2,17 +2,6 @@
 # -*- coding: utf-8 -*-
 """
 临时脚本：补录前4个交易日历史数据（GitHub Actions 专用版）
-============================================================
-用法：
-  1. 把本文件放到项目根目录（和 fetch_data.py 同级）
-  2. 提交到 main 分支
-  3. 在 GitHub Actions 里运行（或本地运行）
-  4. 跑完后删除本文件
-
-说明：
-- 一次性下载 10 天的数据（覆盖 4 个目标日期及其前一日）
-- 每批 10 只股票，批次间 sleep 2 秒，降低触发 Yahoo Finance 限流风险
-- 如果抓取失败，脚本会提示错误，可稍后重试
 """
 
 import os
@@ -25,17 +14,14 @@ from collections import defaultdict
 
 import yfinance as yf
 
-# 从项目导入（确保在同一目录）
 from ndx_components import STOCKS
 from fetch_data import generate_html, generate_summary, ensure_dir
 
-# 前4个交易日（2026-08-12 往前推，跳过周末）
 TARGET_DATES = ['2026-08-11', '2026-08-10', '2026-08-07', '2026-08-06']
 OUTPUT_DIR = "docs"
 
 
 def fetch_history_data(start_date, end_date):
-    """抓取一段历史数据，返回 {ticker: DataFrame}"""
     tickers = [s[0] for s in STOCKS]
     print(f"\n下载 {start_date} ~ {end_date} 的个股数据...")
 
@@ -74,7 +60,6 @@ def fetch_history_data(start_date, end_date):
 
 
 def fetch_index_history_range(start_date, end_date):
-    """抓取指数历史数据"""
     print(f"\n下载 {start_date} ~ {end_date} 的 ^NDX 数据...")
     try:
         t = yf.Ticker("^NDX")
@@ -87,14 +72,12 @@ def fetch_index_history_range(start_date, end_date):
 
 
 def build_data_for_date(date_str, raw_data, ndx_hist):
-    """从已下载的数据中提取特定日期的数据"""
     date = datetime.strptime(date_str, "%Y-%m-%d").date()
 
     if not raw_data:
         print(f"  无原始数据")
         return None
 
-    # 获取所有日期（取第一只有效股票）
     sample_df = None
     for ticker in [s[0] for s in STOCKS]:
         if ticker in raw_data:
@@ -105,7 +88,6 @@ def build_data_for_date(date_str, raw_data, ndx_hist):
         print(f"  样本数据为空")
         return None
 
-    # 处理时区：yfinance 返回的索引可能是 tz-aware
     all_dates = sorted(set(
         d.tz_localize(None).date() if hasattr(d, 'tz_localize') else d.date()
         for d in sample_df.index
@@ -129,7 +111,6 @@ def build_data_for_date(date_str, raw_data, ndx_hist):
             continue
         df = raw_data[ticker]
 
-        # 处理时区
         df_dates = [d.tz_localize(None).date() if hasattr(d, 'tz_localize') else d.date() for d in df.index]
         df_indexed = df.copy()
         df_indexed['__date__'] = df_dates
@@ -157,7 +138,6 @@ def build_data_for_date(date_str, raw_data, ndx_hist):
         print(f"  警告: 仅 {len(stocks)} 只有效数据，跳过")
         return None
 
-    # 指数数据
     if ndx_hist is not None and not ndx_hist.empty:
         ndx_dates = [
             d.tz_localize(None).date() if hasattr(d, 'tz_localize') else d.date()
@@ -188,7 +168,6 @@ def build_data_for_date(date_str, raw_data, ndx_hist):
     flat = sum(1 for s in stocks if s["change"] == 0)
     index_info.update({"up": up, "down": down, "flat": flat, "total": len(stocks)})
 
-    # 行业统计
     sectors = defaultdict(lambda: {"weight": 0, "total_change": 0, "count": 0})
     for s in stocks:
         sectors[s["sector"]]["weight"] += s["weight"]
@@ -204,7 +183,6 @@ def build_data_for_date(date_str, raw_data, ndx_hist):
         })
     sector_list.sort(key=lambda x: -x["weight"])
 
-    # 分布
     bins = [(-999, -3), (-3, -2), (-2, -1), (-1, 0), (0, 1), (1, 2), (2, 3), (3, 999)]
     labels = ["<-3%", "-3~-2%", "-2~-1%", "-1~0%", "0~1%", "1~2%", "2~3%", ">3%"]
     counts = [0] * len(bins)
@@ -215,7 +193,6 @@ def build_data_for_date(date_str, raw_data, ndx_hist):
                 counts[i] += 1
                 break
 
-    # 30日历史（从已下载的指数数据中提取）
     history = []
     if ndx_hist is not None and not ndx_hist.empty:
         ndx_dates = [
@@ -230,7 +207,6 @@ def build_data_for_date(date_str, raw_data, ndx_hist):
         except ValueError:
             pass
 
-    # pie
     sorted_w = sorted(stocks, key=lambda x: -x["weight"])
     top15 = sorted_w[:15]
     others = sorted_w[15:]
@@ -244,7 +220,6 @@ def build_data_for_date(date_str, raw_data, ndx_hist):
         "history": history, "date": date_str,
     }
 
-    # AI 总结
     print("  生成 AI 总结...")
     result["ai_summary"] = generate_summary(result, "overview")
     result["ai_stocks"] = generate_summary(result, "stocks")
@@ -257,7 +232,6 @@ def build_data_for_date(date_str, raw_data, ndx_hist):
 
 
 def save_history(data, all_dates):
-    """保存历史快照"""
     history_dir = os.path.join(OUTPUT_DIR, "history")
     os.makedirs(history_dir, exist_ok=True)
     date_str = data["date"]
@@ -281,27 +255,24 @@ def main():
 
     ensure_dir()
 
-    # 计算下载范围：从最早日期的前7天到最晚日期的后1天
     dates = [datetime.strptime(d, "%Y-%m-%d") for d in TARGET_DATES]
     start = (min(dates) - timedelta(days=7)).strftime("%Y-%m-%d")
     end = (max(dates) + timedelta(days=1)).strftime("%Y-%m-%d")
 
-    # 下载数据
     raw_data = fetch_history_data(start, end)
     if not raw_data:
         print("\n数据下载失败，请检查网络或稍后重试")
-        print("提示：如果频繁触发限流，可增大批次间隔时间（修改 time.sleep(2) 为更大值）")
         return 1
 
     ndx_hist = fetch_index_history_range(start, end)
 
-    # 为每个目标日期生成快照
     all_dates = []
     for date_str in TARGET_DATES:
         print(f"\n处理 {date_str}...")
         data = build_data_for_date(date_str, raw_data, ndx_hist)
         if data:
             all_dates.append(date_str)
+            save_history(data, all_dates)   # ✅ 就是这行漏了！
 
     if not all_dates:
         print("\n没有成功生成任何快照")
@@ -310,7 +281,6 @@ def main():
     all_dates.sort()
     print(f"\n更新导航链接: {all_dates}")
 
-    # 重新生成所有历史页面（更新导航）
     history_dir = os.path.join(OUTPUT_DIR, "history")
     for date_str in all_dates:
         json_file = os.path.join(history_dir, f"{date_str}.json")
