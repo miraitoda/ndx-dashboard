@@ -475,7 +475,7 @@ function getMarketStatus() {
     let currentDate;
 
     if (isHistory) {
-        const m = path.match(/history\/(\d{4}-\d{2}-\d{2})/);
+        const m = path.match(/history\\/(\\d{4}-\\d{2}-\\d{2})/);
         currentDate = m ? m[1] : DATA.date;
     } else {
         currentDate = DATA.date;
@@ -923,29 +923,24 @@ def main():
     print("纳指100 Dashboard 数据更新")
     print("=" * 50)
     ensure_dir()
-    print("
-[1/4] 抓取数据...")
+    print("\n[1/4] 抓取数据...")
     data = build_data()
 
     # 检查数据质量：成分股少于80只视为非交易日/数据异常，不更新历史快照
     is_trading_day = data["index"]["total"] >= 80
 
-    print("
-[2/4] 生成临时 HTML...")
+    print("\n[2/4] 生成临时 HTML...")
     temp_html = generate_html(data, is_history=False, history_dates=get_existing_history_dates())
 
     history_dates = get_existing_history_dates()
     if is_trading_day:
-        print("
-[3/4] 管理历史快照...")
+        print("\n[3/4] 管理历史快照...")
         history_dates = manage_history(data, temp_html)
         print(f"  保留日期: {history_dates}")
     else:
-        print("
-[3/4] 数据不完整，跳过历史快照更新")
+        print("\n[3/4] 数据不完整，跳过历史快照更新")
 
-    print("
-[4/4] 生成最终页面...")
+    print("\n[4/4] 生成最终页面...")
 
     # 生成 index.html（最新）
     html = generate_html(data, is_history=False, history_dates=history_dates)
@@ -967,8 +962,7 @@ def main():
                 f.write(old_html)
         print(f"  更新 {len(history_dates)} 个历史页面导航")
 
-    print(f"
-完成！日期: {data['date']} | 成分股: {data['index']['total']} 只 | 涨跌: {data['index']['change']}%")
+    print(f"\n完成！日期: {data['date']} | 成分股: {data['index']['total']} 只 | 涨跌: {data['index']['change']}%")
     return 0
 if __name__ == "__main__":
     sys.exit(main())
