@@ -155,11 +155,13 @@ def build_data():
     oc = sum(s["weight"] * s["change"] for s in others) / ow if ow > 0 else 0
     pie = top15 + [{"ticker": "其他", "name": f"其他{len(others)}只", "sector": "", "weight": round(ow, 2), "change": round(oc, 2)}]
 
-    return {
+    result = {
         "index": index_info, "stocks": stocks, "pie_stocks": pie,
         "sectors": sector_list, "bins": {"labels": labels, "counts": counts},
         "history": history, "date": datetime.now().strftime("%Y-%m-%d"),
     }
+    result["ai_summary"] = generate_summary(result)
+    return result
 
 
 def build_mock_data():
@@ -252,14 +254,21 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
 
-/* 顶部工具栏 */
-.toolbar{display:flex;justify-content:space-between;align-items:center;padding:16px 24px;border-bottom:1px solid var(--glow-border);background:linear-gradient(180deg,var(--surface) 0%,var(--surface-glass) 100%);position:sticky;top:0;z-index:100;backdrop-filter:blur(20px);box-shadow:0 0 40px var(--glow-color),0 4px 20px rgba(0,0,0,0.2)}
-.toolbar .logo{font-size:18px;font-weight:800;color:var(--text);letter-spacing:-0.5px}
-.toolbar .logo span{color:var(--glow-color)}
-.theme-toggle{display:flex;align-items:center;gap:8px;padding:6px 14px;border-radius:20px;border:1px solid var(--border-strong);background:var(--surface-glass);color:var(--text-secondary);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;font-family:inherit}
-.theme-toggle:hover{border-color:var(--text-tertiary);color:var(--text)}
+
 
 .container{max-width:1200px;margin:0 auto;padding:24px}
+
+.toolbar{display:flex;justify-content:space-between;align-items:center;padding:12px 24px;border-bottom:1px solid var(--glow-border);background:linear-gradient(180deg,var(--surface) 0%,var(--surface-glass) 100%);position:sticky;top:0;z-index:100;backdrop-filter:blur(20px);box-shadow:0 0 40px var(--glow-color),0 4px 20px rgba(0,0,0,0.2)}
+.toolbar-left,.toolbar-right{display:flex;align-items:center;gap:16px}
+.nav-btns{display:flex;gap:8px}
+.nav-btn{padding:6px 14px;border-radius:8px;border:1px solid var(--border-strong);background:var(--surface-glass);color:var(--text-secondary);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;font-family:inherit}
+.nav-btn:hover:not(:disabled){border-color:var(--text-tertiary);color:var(--text);background:var(--surface)}
+.nav-btn:disabled{opacity:0.35;cursor:not-allowed}
+
+.ai-summary{background:var(--surface-raised);border:1px solid var(--glow-border);border-radius:20px;padding:22px 28px;margin-bottom:32px;position:relative;overflow:hidden;box-shadow:var(--shadow)}
+.ai-summary::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--glow-color),transparent);opacity:.6}
+.ai-label{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--glow-color);font-weight:700;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px}
+.ai-summary p{margin:0;font-size:15px;line-height:1.7;color:var(--text-secondary);font-weight:500}
 
 /* Hero */
 .hero{position:relative;padding:40px 0 32px;margin-bottom:32px;text-align:center;overflow:hidden}
@@ -305,11 +314,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 </style></head><body>
 
 <div class="toolbar">
-  <div class="logo">NDX <span>DASHBOARD</span></div>
-  <button class="theme-toggle" onclick="toggleTheme()">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-    <span id="theme-label">深色模式</span>
-  </button>
+  <div class="toolbar-left">
+    <div class="logo">NDX <span>DASHBOARD</span></div>
+    <div class="nav-btns">
+      <button class="nav-btn" id="btnPrev" disabled>← 前一日</button>
+      <button class="nav-btn" id="btnNext" disabled>后一日 →</button>
+    </div>
+  </div>
+  <div class="toolbar-right">
+    <button class="theme-toggle" onclick="location.reload()" title="刷新页面">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="23 4 23 10 17 10"></polyline>
+        <polyline points="1 20 1 14 7 14"></polyline>
+        <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"></path>
+      </svg>
+    </button>
+    <button class="theme-toggle" onclick="toggleTheme()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+      <span id="theme-label">深色模式</span>
+    </button>
+  </div>
 </div>
 
 <div class="container">
@@ -319,6 +343,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
       <span id="dateStr"></span>
       <span class="badge" id="statusBadge">已收盘</span>
     </div>
+  </div>
+
+  <div class="ai-summary" id="aiSummaryBox" style="display:none">
+    <div class="ai-label">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      <span>AI 行情总结</span>
+    </div>
+    <p id="aiSummaryText"></p>
   </div>
 
   <div class="kpi-row">
@@ -405,6 +437,74 @@ function colorForChange(c){return c>=0?RISE:FALL}
 function fmtPct(c){return(c>=0?"+":"")+c.toFixed(2)+"%"}
 function svgEl(tag,attrs){const el=document.createElementNS("http://www.w3.org/2000/svg",tag);for(let k in attrs)el.setAttribute(k,attrs[k]);return el}
 
+const HISTORY_DATES = __HISTORY_DATES__;
+const IS_HISTORY = __IS_HISTORY__;
+
+// 美股开盘状态判断（基于客户端实时时间）
+function getMarketStatus() {
+    const now = new Date();
+    const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+    const beijing = new Date(utc + 8 * 3600000);
+    const day = beijing.getDay();
+    if (day === 0 || day === 6) return "已收盘";
+
+    const year = beijing.getFullYear();
+    // 夏令时：3月第二个周日 - 11月第一个周日
+    const dstStart = new Date(year, 2, 14 - new Date(year, 2, 1).getDay());
+    const dstEnd = new Date(year, 10, 7 - new Date(year, 10, 1).getDay());
+    const isDST = beijing >= dstStart && beijing < dstEnd;
+
+    const hour = beijing.getHours();
+    const minute = beijing.getMinutes();
+    const timeVal = hour + minute / 60;
+    const openTime = isDST ? 21.5 : 22.5;   // 21:30 / 22:30
+    const closeTime = isDST ? 28 : 29;       // 次日04:00 / 05:00
+
+    if (timeVal >= openTime && timeVal < closeTime) return "开盘中";
+    return "已收盘";
+}
+
+// 前后日导航
+(function() {
+    const btnPrev = document.getElementById("btnPrev");
+    const btnNext = document.getElementById("btnNext");
+    if (!btnPrev || !btnNext) return;
+
+    const path = window.location.pathname;
+    const isHistory = path.includes("/history/");
+    let currentDate;
+
+    if (isHistory) {
+        const m = path.match(/history\/(\d{4}-\d{2}-\d{2})/);
+        currentDate = m ? m[1] : DATA.date;
+    } else {
+        currentDate = DATA.date;
+    }
+
+    const idx = HISTORY_DATES.indexOf(currentDate);
+    if (idx === -1) return;
+
+    if (idx > 0) {
+        const prevDate = HISTORY_DATES[idx - 1];
+        btnPrev.disabled = false;
+        btnPrev.onclick = () => {
+            location.href = isHistory ? "./" + prevDate + ".html" : "./history/" + prevDate + ".html";
+        };
+    }
+
+    if (idx < HISTORY_DATES.length - 1) {
+        const nextDate = HISTORY_DATES[idx + 1];
+        btnNext.disabled = false;
+        if (nextDate === DATA.date && isHistory) {
+            btnNext.onclick = () => location.href = "../index.html";
+        } else {
+            btnNext.onclick = () => {
+                location.href = isHistory ? "./" + nextDate + ".html" : "./history/" + nextDate + ".html";
+            };
+        }
+    }
+})();
+
 // 填充 KPI
 (function(){
   const idx=DATA.index;
@@ -427,6 +527,14 @@ function svgEl(tag,attrs){const el=document.createElementNS("http://www.w3.org/2
     document.getElementById("trendRange").textContent="数据暂缺";
   }
   if(idx.total<80){document.getElementById("dataStatus").textContent="部分缺失";document.getElementById("dataStatus").style.color=FALL}
+})();
+
+// AI 行情总结
+(function(){
+  if(DATA.ai_summary){
+    document.getElementById("aiSummaryText").textContent = DATA.ai_summary;
+    document.getElementById("aiSummaryBox").style.display = "block";
+  }
 })();
 
 // 个股饼图
@@ -524,10 +632,9 @@ function svgEl(tag,attrs){const el=document.createElementNS("http://www.w3.org/2
   svg.appendChild(svgEl("line",{x1:zeroX,y1:padT,x2:zeroX,y2:H-padB,stroke:TEXT,"stroke-width":1,"stroke-dasharray":"4,4",opacity:.3}));
 })();
 
-// 行业柱图 - 发散条形图（零轴在中间）
+// 行业柱图 - 零轴居中，上涨文字在左bar在右，下跌文字在右bar在左
 (function(){
   const svg = document.getElementById("sectorBar");
-  // 复制数组 + 过滤掉 change 为 NaN / undefined / null 的脏数据
   const data = DATA.sectors
     .filter(d => typeof d.change === 'number' && !isNaN(d.change))
     .map(d => ({...d}));
@@ -539,10 +646,10 @@ function svgEl(tag,attrs){const el=document.createElementNS("http://www.w3.org/2
   }
 
   data.sort((a,b) => b.change - a.change);
-  const W = 400, H = 320, padL = 70, padR = 60, padT = 16, padB = 16;
-  const zeroX = padL + 100;
+  const W = 400, H = 320, padT = 16, padB = 16, textGap = 60;
+  const zeroX = W / 2;
   const maxC = Math.max(...data.map(d => Math.abs(d.change)), 0.01);
-  const scale = (W - padL - padR - 100) / maxC;
+  const scale = (W / 2 - textGap - 10) / maxC;
   const rowH = (H - padT - padB) / data.length;
   const barH = Math.min(rowH - 10, 22);
 
@@ -554,10 +661,10 @@ function svgEl(tag,attrs){const el=document.createElementNS("http://www.w3.org/2
 
   data.forEach((d, i) => {
     const y = padT + i * rowH + (rowH - barH) / 2;
-    const w = Math.max(Math.abs(d.change) * scale, 3); // 最小 3px，避免太细看不见
+    const w = Math.max(Math.abs(d.change) * scale, 3);
     const isUp = d.change >= 0;
-    const x = isUp ? zeroX : zeroX - w;
     const c = colorForChange(d.change);
+    const x = isUp ? zeroX : zeroX - w;
 
     const bar = svgEl("rect", {
       x: x, y: y, width: w, height: barH, rx: 3,
@@ -568,19 +675,27 @@ function svgEl(tag,attrs){const el=document.createElementNS("http://www.w3.org/2
     bar.addEventListener("mouseleave", hideTip);
     svg.appendChild(bar);
 
-    // 行业名（零轴左侧）
-    svg.appendChild(svgEl("text", {
-      x: zeroX - 10, y: y + barH/2 + 4,
-      "text-anchor": "end", fill: TEXT2, "font-size": 11, "font-weight": 600
-    })).textContent = d.name;
-
-    // 数值（bar 末端外侧）
-    const tx = isUp ? zeroX + w + 6 : zeroX - w - 6;
-    const ta = isUp ? "start" : "end";
-    svg.appendChild(svgEl("text", {
-      x: tx, y: y + barH/2 + 4,
-      "text-anchor": ta, fill: c, "font-size": 11, "font-weight": 700
-    })).textContent = fmtPct(d.change);
+    if(isUp){
+      // 上涨：行业名在左(zero轴左侧)，数值在bar右侧
+      svg.appendChild(svgEl("text", {
+        x: zeroX - 8, y: y + barH/2 + 4,
+        "text-anchor": "end", fill: TEXT2, "font-size": 11, "font-weight": 600
+      })).textContent = d.name;
+      svg.appendChild(svgEl("text", {
+        x: zeroX + w + 6, y: y + barH/2 + 4,
+        "text-anchor": "start", fill: c, "font-size": 11, "font-weight": 700
+      })).textContent = fmtPct(d.change);
+    } else {
+      // 下跌：数值在bar左侧，行业名在右(zero轴右侧)
+      svg.appendChild(svgEl("text", {
+        x: zeroX - w - 6, y: y + barH/2 + 4,
+        "text-anchor": "end", fill: c, "font-size": 11, "font-weight": 700
+      })).textContent = fmtPct(d.change);
+      svg.appendChild(svgEl("text", {
+        x: zeroX + 8, y: y + barH/2 + 4,
+        "text-anchor": "start", fill: TEXT2, "font-size": 11, "font-weight": 600
+      })).textContent = d.name;
+    }
   });
 })();
 
@@ -646,12 +761,16 @@ if(window.matchMedia&&window.matchMedia("(prefers-color-scheme: light)").matches
 
 const tip=document.getElementById("tooltip");
 function showTip(e,html){
-  tip.innerHTML=html;tip.style.opacity="1";
-  const rect=e.target.getBoundingClientRect();
-  const host=document.querySelector(".container").getBoundingClientRect();
-  let left=rect.left-host.left+rect.width/2-tip.offsetWidth/2;
-  let top=rect.top-host.top-tip.offsetHeight-8;
-  if(left<0)left=0;if(top<0)top=rect.bottom-host.top+8;
+  tip.innerHTML=html;
+  tip.style.opacity="1";
+  // 先让浏览器渲染以获取正确尺寸
+  const tw=tip.offsetWidth, th=tip.offsetHeight;
+  let left=e.pageX-tw/2;
+  let top=e.pageY-th-14;
+  // 边界保护
+  if(left<8)left=8;
+  if(left+tw>document.documentElement.scrollWidth-8)left=document.documentElement.scrollWidth-tw-8;
+  if(top<window.scrollY+8)top=e.pageY+14;
   tip.style.left=left+"px";tip.style.top=top+"px";
 }
 function hideTip(){tip.style.opacity="0"}
@@ -659,30 +778,197 @@ function hideTip(){tip.style.opacity="0"}
 </body></html>"""
 
 
-def generate_html(data):
-    jd = json.dumps(data, ensure_ascii=False)
-    return HTML_TEMPLATE.replace("__DATA_JSON__", jd)
+def get_existing_history_dates():
+    """获取已存在的历史日期列表"""
+    history_dir = os.path.join(OUTPUT_DIR, "history")
+    if not os.path.exists(history_dir):
+        return []
+    dates = []
+    for f in os.listdir(history_dir):
+        if f.endswith(".json") and len(f) == 15:
+            try:
+                datetime.strptime(f[:10], "%Y-%m-%d")
+                dates.append(f[:10])
+            except:
+                pass
+    return sorted(dates)
 
+
+def manage_history(data, html_content):
+    """管理历史快照，滚动保留5个交易日。非交易日不生成新快照。"""
+    history_dir = os.path.join(OUTPUT_DIR, "history")
+    os.makedirs(history_dir, exist_ok=True)
+
+    date_str = data["date"]
+
+    # 保存 JSON 原始数据
+    json_file = os.path.join(history_dir, f"{date_str}.json")
+    with open(json_file, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False)
+
+    # 保存 HTML 快照
+    history_file = os.path.join(history_dir, f"{date_str}.html")
+    with open(history_file, "w", encoding="utf-8") as f:
+        f.write(html_content)
+    print(f"  历史快照: {history_file}")
+
+    # 扫描所有 JSON 文件，按日期排序
+    files = []
+    for f in os.listdir(history_dir):
+        if f.endswith(".json") and len(f) == 15:
+            try:
+                d = datetime.strptime(f[:10], "%Y-%m-%d")
+                files.append((d, f[:10]))
+            except:
+                pass
+
+    files.sort(key=lambda x: x[0])
+
+    # 保留最近5个，删除旧的
+    removed = []
+    while len(files) > 5:
+        old_date = files[0][1]
+        for ext in [".json", ".html"]:
+            old_file = os.path.join(history_dir, old_date + ext)
+            try:
+                if os.path.exists(old_file):
+                    os.remove(old_file)
+                    removed.append(old_file)
+            except Exception as e:
+                print(f"  删除失败 {old_file}: {e}")
+        files.pop(0)
+
+    for r in removed:
+        print(f"  删除旧快照: {os.path.basename(r)}")
+
+    return [f[1] for f in files]
+
+
+def generate_html(data, is_history=False, history_dates=None):
+    jd = json.dumps(data, ensure_ascii=False)
+    all_dates = sorted(set((history_dates or []) + [data["date"]]))
+    hd = json.dumps(all_dates, ensure_ascii=False)
+    html = HTML_TEMPLATE.replace("__DATA_JSON__", jd).replace("__HISTORY_DATES__", hd).replace("__IS_HISTORY__", "true" if is_history else "false")
+    return html
+
+
+
+def generate_summary(data):
+    """本地生成行情总结，完全免费"""
+    idx = data["index"]
+    sectors = data["sectors"]
+    stocks = data["stocks"]
+
+    if not stocks or not sectors:
+        return None
+
+    sorted_stocks = sorted(stocks, key=lambda x: x["change"], reverse=True)
+    top3_up = sorted_stocks[:3]
+    top3_down = sorted_stocks[-3:][::-1]
+    sorted_sectors = sorted(sectors, key=lambda x: x["change"], reverse=True)
+
+    up_str = f"{idx['up']}涨{idx['down']}跌"
+    trend = "收涨" if idx['change'] >= 0 else "收跌"
+    pct = f"{'+' if idx['change'] >= 0 else ''}{idx['change']:.2f}%"
+
+    # 情绪词
+    if idx['change'] >= 1.5:
+        mood = "强势"
+    elif idx['change'] >= 0.5:
+        mood = "偏强"
+    elif idx['change'] >= -0.5:
+        mood = "震荡"
+    elif idx['change'] >= -1.5:
+        mood = "偏弱"
+    else:
+        mood = "承压"
+
+    # 行业描述
+    lead_sector = sorted_sectors[0]
+    lag_sector = sorted_sectors[-1]
+    sector_text = f"{lead_sector['name']}领涨({lead_sector['change']:+.2f}%)"
+    if lead_sector['name'] != lag_sector['name']:
+        sector_text += f"，{lag_sector['name']}领跌({lag_sector['change']:+.2f}%)"
+
+    # 龙头描述
+    leaders = f"{top3_up[0]['ticker']}({top3_up[0]['change']:+.2f}%)"
+    if len(top3_up) > 1:
+        leaders += f"、{top3_up[1]['ticker']}({top3_up[1]['change']:+.2f}%)"
+
+    # 组装
+    lines = [
+        f"纳指100今日{trend}{pct}，{up_str}，整体走势{mood}。",
+        f"行业层面，{sector_text}。",
+        f"个股方面，{leaders}表现亮眼；{top3_down[0]['ticker']}({top3_down[0]['change']:+.2f}%)承压。",
+    ]
+
+    # 展望
+    if idx['change'] >= 1 and idx['up'] >= 70:
+        lines.append("市场情绪积极，短期有望延续强势。")
+    elif idx['change'] <= -1 and idx['down'] >= 70:
+        lines.append("避险情绪升温，短期或继续震荡整理。")
+    else:
+        lines.append("板块分化明显，建议关注结构性机会。")
+
+    summary = "".join(lines)
+    print(f"  行情总结: {summary[:60]}...")
+    return summary
+
+
+def fmt_pct(c):
+    return f"{'+' if c >= 0 else ''}{c:.2f}%"
 
 def main():
     print("=" * 50)
     print("纳指100 Dashboard 数据更新")
     print("=" * 50)
     ensure_dir()
-    print("\n[1/3] 抓取数据...")
+    print("
+[1/4] 抓取数据...")
     data = build_data()
-    print("\n[2/3] 生成 HTML...")
-    html = generate_html(data)
-    print("\n[3/3] 写入文件...")
+
+    # 检查数据质量：成分股少于80只视为非交易日/数据异常，不更新历史快照
+    is_trading_day = data["index"]["total"] >= 80
+
+    print("
+[2/4] 生成临时 HTML...")
+    temp_html = generate_html(data, is_history=False, history_dates=get_existing_history_dates())
+
+    history_dates = get_existing_history_dates()
+    if is_trading_day:
+        print("
+[3/4] 管理历史快照...")
+        history_dates = manage_history(data, temp_html)
+        print(f"  保留日期: {history_dates}")
+    else:
+        print("
+[3/4] 数据不完整，跳过历史快照更新")
+
+    print("
+[4/4] 生成最终页面...")
+
+    # 生成 index.html（最新）
+    html = generate_html(data, is_history=False, history_dates=history_dates)
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         f.write(html)
-    print(f"\n完成！输出: {OUTPUT_FILE}")
-    print(f"日期: {data['date']}")
-    print(f"成分股: {data['index']['total']} 只")
-    print(f"指数涨跌: {data['index']['change']}%")
-    print(f"上涨/下跌: {data['index']['up']} / {data['index']['down']}")
+    print(f"  输出: {OUTPUT_FILE}")
+
+    # 重新生成所有历史页面（更新导航链接）
+    if history_dates:
+        history_dir = os.path.join(OUTPUT_DIR, "history")
+        for date_str in history_dates:
+            json_file = os.path.join(history_dir, f"{date_str}.json")
+            if not os.path.exists(json_file):
+                continue
+            with open(json_file, "r", encoding="utf-8") as f:
+                old_data = json.load(f)
+            old_html = generate_html(old_data, is_history=True, history_dates=history_dates)
+            with open(os.path.join(history_dir, f"{date_str}.html"), "w", encoding="utf-8") as f:
+                f.write(old_html)
+        print(f"  更新 {len(history_dates)} 个历史页面导航")
+
+    print(f"
+完成！日期: {data['date']} | 成分股: {data['index']['total']} 只 | 涨跌: {data['index']['change']}%")
     return 0
-
-
 if __name__ == "__main__":
     sys.exit(main())
