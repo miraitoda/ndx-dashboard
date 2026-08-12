@@ -556,6 +556,7 @@ function getMarketStatus() {
 (function(){
   const idx=DATA.index;
   document.getElementById("dateStr").textContent=DATA.date;
+  document.getElementById("statusBadge").textContent=getMarketStatus();
   document.getElementById("idxPrice").textContent=idx.price?idx.price.toLocaleString():"估算中";
   const chgEl=document.getElementById("idxChange");
   chgEl.textContent=fmtPct(idx.change)+(idx.price?" ("+(idx.price-idx.prev_close).toFixed(2)+")":"");
