@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>纳指100 - 每日收盘</title>
+<style>
+:root{
+  --bg:#0b0e14;--surface:#151921;--surface-raised:#1e222d;--surface-glass:rgba(30,34,45,0.6);
+  --text:#e2e8f0;--text-secondary:#94a3b8;--text-tertiary:#64748b;
+  --border:rgba(148,163,184,0.08);--border-strong:rgba(148,163,184,0.15);
+  --rise:#089981;--fall:#f23645;
+  --accent-glow:rgba(59,130,246,0.08);
+  --shadow:0 4px 24px rgba(0,0,0,0.4);--shadow-lg:0 8px 40px rgba(0,0,0,0.5);
+  --glow-color:#f23645;--glow-border:rgba(242,54,69,0.25);
+  --badge-bg:rgba(242,54,69,0.1);--badge-color:#f23645;--badge-border:rgba(242,54,69,0.2);
+}
+.light{
+  --bg:#f1f5f9;--surface:#ffffff;--surface-raised:#ffffff;--surface-glass:rgba(255,255,255,0.7);
+  --text:#0f172a;--text-secondary:#475569;--text-tertiary:#94a3b8;
+  --border:rgba(148,163,184,0.15);--border-strong:rgba(148,163,184,0.25);
+  --accent-glow:rgba(59,130,246,0.04);
+  --shadow:0 4px 24px rgba(0,0,0,0.06);--shadow-lg:0 8px 40px rgba(0,0,0,0.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
+
+
+
+.container{max-width:1200px;margin:0 auto;padding:24px}
+
+.toolbar{display:flex;justify-content:space-between;align-items:center;padding:12px 24px;border-bottom:1px solid var(--glow-border);background:linear-gradient(180deg,var(--surface) 0%,var(--surface-glass) 100%);position:sticky;top:0;z-index:100;backdrop-filter:blur(20px);box-shadow:0 0 40px var(--glow-color),0 4px 20px rgba(0,0,0,0.2)}
+.toolbar-left,.toolbar-right{display:flex;align-items:center;gap:10px}
+.nav-btns{display:flex;gap:8px}
+.nav-btn{padding:6px 14px;border-radius:8px;border:1px solid var(--border-strong);background:var(--surface-glass);color:var(--text-secondary);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;font-family:inherit}
+.nav-btn:hover:not(:disabled){border-color:var(--text-tertiary);color:var(--text);background:var(--surface)}
+.nav-btn:disabled{opacity:0.35;cursor:not-allowed}
+.icon-btn{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;border:1px solid var(--border-strong);background:var(--surface-glass);color:var(--text-secondary);cursor:pointer;transition:all 0.2s}
+.icon-btn:hover{border-color:var(--text-tertiary);color:var(--text);background:var(--surface);transform:rotate(180deg)}
+.icon-btn svg{transition:transform 0.4s ease}
+.icon-btn:hover svg{transform:rotate(-180deg)}
+
+.ai-summary{background:var(--surface-raised);border:1px solid var(--glow-border);border-radius:20px;padding:22px 28px;margin-bottom:32px;position:relative;overflow:hidden;box-shadow:var(--shadow)}
+.ai-summary::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--glow-color),transparent);opacity:.6}
+.ai-label{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--glow-color);font-weight:700;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px}
+.ai-summary p{margin:0;font-size:15px;line-height:1.7;color:var(--text-secondary);font-weight:500;word-break:break-word}
+.chart-summary{margin-top:14px;padding:12px 16px;border-radius:10px;background:var(--surface);border-left:3px solid var(--glow-color);font-size:13px;line-height:1.6;color:var(--text-secondary);font-weight:500;white-space:normal;word-break:break-word}
+.light .chart-summary{background:#f8fafc}
+
+/* Hero */
+.hero{position:relative;padding:40px 0 32px;margin-bottom:32px;text-align:center;overflow:hidden}
+.hero::before{content:"";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:300px;background:radial-gradient(ellipse,var(--accent-glow) 0%,transparent 70%);pointer-events:none}
+.hero h1{font-size:48px;font-weight:900;letter-spacing:-2px;background:linear-gradient(135deg,var(--text) 0%,var(--text-secondary) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:12px;position:relative}
+.hero .meta{display:inline-flex;align-items:center;gap:16px;font-size:14px;color:var(--text-tertiary);font-weight:500}
+.hero .badge{font-size:11px;padding:4px 14px;border-radius:20px;background:var(--badge-bg);color:var(--badge-color);border:1px solid var(--badge-border);font-weight:700;letter-spacing:0.5px}
+
+/* KPI */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px}
+.kpi{background:var(--surface-raised);border:1px solid var(--border);border-radius:20px;padding:28px 24px;position:relative;overflow:hidden;transition:transform 0.2s,box-shadow 0.2s;box-shadow:var(--shadow)}
+.kpi:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
+.kpi::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--glow-color),transparent);opacity:0.6}
+.kpi::after{content:"";position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle at 50% 0%,rgba(255,255,255,0.03) 0%,transparent 50%);pointer-events:none}
+.kpi-label{font-size:11px;color:var(--text-tertiary);margin-bottom:12px;text-transform:uppercase;letter-spacing:2px;font-weight:700}
+.kpi-value{font-size:42px;font-weight:900;font-variant-numeric:tabular-nums;line-height:1;letter-spacing:-1.5px;color:var(--text)}
+.kpi-sub{font-size:16px;margin-top:12px;font-weight:700;font-variant-numeric:tabular-nums}
+.kpi-sub.up{color:var(--rise)}.kpi-sub.down{color:var(--fall)}
+
+/* 图表 */
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:32px}
+.chart-box{background:var(--surface-raised);border:1px solid var(--border);border-radius:24px;padding:28px;position:relative;overflow:hidden;box-shadow:var(--shadow);transition:transform 0.2s}
+.chart-box:hover{transform:translateY(-2px)}
+.chart-box::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--glow-color),transparent);opacity:0.5}
+.chart-box::after{content:"";position:absolute;top:-30%;right:-20%;width:300px;height:300px;background:radial-gradient(circle,var(--accent-glow) 0%,transparent 60%);pointer-events:none}
+.chart-title{font-size:18px;font-weight:800;margin-bottom:6px;color:var(--text);letter-spacing:-0.3px}
+.chart-sub{font-size:12px;color:var(--text-tertiary);margin-bottom:16px;font-weight:500}
+
+.full-row{margin-bottom:32px}
+
+.legend{display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:14px;font-size:12px}
+.legend-item{display:flex;align-items:center;gap:6px;color:var(--text-secondary);font-weight:600}
+.legend-dot{width:10px;height:10px;border-radius:3px}
+
+.stock-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(95px,1fr));gap:6px;margin-top:14px}
+.stock-cell{padding:8px 10px;border-radius:10px;font-size:12px;text-align:center;cursor:pointer;transition:all 0.15s;background:var(--surface);border:1px solid var(--border);font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
+.light .stock-cell{box-shadow:0 2px 8px rgba(0,0,0,0.03)}
+.stock-cell:hover{transform:translateY(-3px) scale(1.02);box-shadow:0 8px 24px rgba(0,0,0,0.2);border-color:var(--border-strong)}
+
+.footer{text-align:center;font-size:12px;color:var(--text-tertiary);margin-top:40px;padding:24px;border-top:1px solid var(--border);font-weight:500}
+
+@media(max-width:720px){.charts-row{grid-template-columns:1fr}.kpi-row{grid-template-columns:repeat(2,1fr)}.kpi-value{font-size:32px}.hero h1{font-size:36px}.container{padding:16px}}
+</style></head><body>
+
+<div class="toolbar">
+  <div class="toolbar-left">
+    <div class="logo">NDX <span>DASHBOARD</span></div>
+    <div class="nav-btns">
+      <button class="nav-btn" id="btnPrev" disabled>← 前一日</button>
+      <button class="nav-btn" id="btnNext" disabled>后一日 →</button>
+    </div>
+  </div>
+  <div class="toolbar-right">
+    <button class="icon-btn" onclick="location.reload()" title="刷新页面">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="1 4 1 10 7 10"></polyline>
+        <polyline points="23 20 23 14 17 14"></polyline>
+        <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path>
+      </svg>
+    </button>
+    <button class="icon-btn" onclick="toggleTheme()" title="切换主题">
+      <svg id="theme-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<div class="container">
+  <div class="hero">
+    <h1>纳斯达克100</h1>
+    <div class="meta">
+      <span id="dateStr"></span>
+      <span class="badge" id="statusBadge">已收盘</span>
+    </div>
+  </div>
+
+  <div class="ai-summary" id="aiSummaryBox" style="display:none">
+    <div class="ai-label">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      <span>行情总结</span>
+    </div>
+    <p id="aiSummaryText"></p>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi" id="kpiPrice"><div class="kpi-label">指数点位</div><div class="kpi-value" id="idxPrice">--</div><div class="kpi-sub" id="idxChange">--</div></div>
+    <div class="kpi" id="kpiUpDown"><div class="kpi-label">涨跌家数</div><div class="kpi-value" style="font-size:28px" id="upDown">--</div><div class="kpi-sub" style="color:var(--text-tertiary)">涨 / 跌</div></div>
+    <div class="kpi" id="kpiTrend"><div class="kpi-label">30日走势</div><div class="kpi-value" id="trend30d">--</div><div class="kpi-sub" style="color:var(--text-tertiary)" id="trendRange">--</div></div>
+    <div class="kpi"><div class="kpi-label">数据状态</div><div class="kpi-value" style="font-size:28px" id="dataStatus">正常</div><div class="kpi-sub" style="color:var(--text-tertiary)">成分股 <span id="stockCount">--</span> 只</div></div>
+  </div>
+
+  <div class="charts-row">
+    <div class="chart-box">
+      <div class="chart-title">个股权重饼图（Top 15 + 其他）</div>
+      <div class="chart-sub">绿色=上涨，红色=下跌，面积=权重</div>
+      <svg id="stockPie" viewBox="0 0 320 280" style="width:100%;height:auto"></svg>
+      <div class="legend" id="stockLegend"></div>
+      <div class="chart-summary" id="aiStocksBox" style="display:none"><p></p></div>
+    </div>
+    <div class="chart-box">
+      <div class="chart-title">行业权重饼图</div>
+      <div class="chart-sub">绿色=上涨，红色=下跌，面积=权重</div>
+      <svg id="sectorPie" viewBox="0 0 320 280" style="width:100%;height:auto"></svg>
+      <div class="legend" id="sectorLegend"></div>
+      <div class="chart-summary" id="aiSectorsBox" style="display:none"><p></p></div>
+    </div>
+  </div>
+
+  <div class="charts-row">
+    <div class="chart-box">
+      <div class="chart-title">涨跌分布柱图</div>
+      <div class="chart-sub">100支成分股按涨跌幅区间分布</div>
+      <svg id="distChart" viewBox="0 0 400 220" style="width:100%;height:auto"></svg>
+      <div class="chart-summary" id="aiDistBox" style="display:none"><p></p></div>
+    </div>
+    <div class="chart-box">
+      <div class="chart-title">行业表现柱图</div>
+      <div class="chart-sub">各行业按权重加权平均涨跌幅</div>
+      <svg id="sectorBar" viewBox="0 0 400 320" style="width:100%;height:auto"></svg>
+      <div class="chart-summary" id="aiIndustryBox" style="display:none"><p></p></div>
+    </div>
+  </div>
+
+  <div class="full-row chart-box">
+    <div class="chart-title">纳指100 · 近30日走势</div>
+    <div class="chart-sub">每日收盘价连线</div>
+    <svg id="trendLine" viewBox="0 0 800 240" style="width:100%;height:auto"></svg>
+    <div class="chart-summary" id="aiTrendBox" style="display:none"><p></p></div>
+  </div>
+
+  <div class="chart-box">
+    <div class="chart-title">100支成分股涨跌一览</div>
+    <div class="chart-sub">鼠标悬停查看详情</div>
+    <div class="stock-grid" id="stockGrid"></div>
+  </div>
+
+  <div class="footer">数据来自 Yahoo Finance · 每日自动更新 · 仅供参考不构成投资建议</div>
+</div>
+
+<div class="tooltip" id="tooltip" style="position:absolute;background:#2a2e39;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:12px;color:#e2e8f0;pointer-events:none;opacity:0;transition:opacity .15s;z-index:10;box-shadow:0 4px 12px rgba(0,0,0,0.15);white-space:nowrap"></div>
+
+<script>
+const DATA = {"index": {"price": 29525.48, "prev_close": 29621.8, "change": -0.33, "up": 43, "down": 31, "flat": 1, "total": 75}, "stocks": [{"ticker": "AAPL", "name": "苹果", "sector": "科技", "weight": 11.04, "change": -1.09}, {"ticker": "NVDA", "name": "英伟达", "sector": "科技", "weight": 8.7, "change": -0.02}, {"ticker": "MSFT", "name": "微软", "sector": "科技", "weight": 7.3, "change": -0.44}, {"ticker": "AVGO", "name": "博通", "sector": "科技", "weight": 2.7, "change": -1.5}, {"ticker": "ADBE", "name": "Adobe", "sector": "科技", "weight": 1.2, "change": -3.39}, {"ticker": "CSCO", "name": "思科", "sector": "科技", "weight": 1.0, "change": -1.75}, {"ticker": "INTU", "name": "Intuit", "sector": "科技", "weight": 0.9, "change": 0.6}, {"ticker": "QCOM", "name": "高通", "sector": "科技", "weight": 0.85, "change": 0.31}, {"ticker": "AMAT", "name": "应用材料", "sector": "科技", "weight": 0.8, "change": 0.67}, {"ticker": "TXN", "name": "德州仪器", "sector": "科技", "weight": 0.75, "change": 0.29}, {"ticker": "AMD", "name": "AMD", "sector": "科技", "weight": 1.6, "change": 1.01}, {"ticker": "ADI", "name": "ADI", "sector": "科技", "weight": 0.46, "change": 0.36}, {"ticker": "MU", "name": "美光", "sector": "科技", "weight": 0.45, "change": 0.87}, {"ticker": "LRCX", "name": "Lam Research", "sector": "科技", "weight": 0.42, "change": 1.64}, {"ticker": "KLAC", "name": "KLA", "sector": "科技", "weight": 0.4, "change": 4.01}, {"ticker": "SNPS", "name": "Synopsys", "sector": "科技", "weight": 0.35, "change": -0.19}, {"ticker": "CDNS", "name": "Cadence", "sector": "科技", "weight": 0.34, "change": -1.32}, {"ticker": "FTNT", "name": "Fortinet", "sector": "科技", "weight": 0.29, "change": -1.41}, {"ticker": "MRVL", "name": "Marvell", "sector": "科技", "weight": 0.27, "change": 1.8}, {"ticker": "NXPI", "name": "NXP", "sector": "科技", "weight": 0.24, "change": 1.26}, {"ticker": "ADP", "name": "ADP", "sector": "科技", "weight": 0.17, "change": -0.95}, {"ticker": "PAYX", "name": "Paychex", "sector": "科技", "weight": 0.15, "change": 0.1}, {"ticker": "INTC", "name": "英特尔", "sector": "科技", "weight": 0.19, "change": 0.19}, {"ticker": "MCHP", "name": "Microchip", "sector": "科技", "weight": 0.07, "change": -0.45}, {"ticker": "MSTR", "name": "MicroStrategy", "sector": "科技", "weight": 0.06, "change": -1.27}, {"ticker": "STX", "name": "希捷", "sector": "科技", "weight": 0.04, "change": 2.44}, {"ticker": "WDC", "name": "西数", "sector": "科技", "weight": 0.04, "change": -0.09}, {"ticker": "ASML", "name": "ASML", "sector": "科技", "weight": 0.03, "change": 3.8}, {"ticker": "MPWR", "name": "MPS", "sector": "科技", "weight": 0.03, "change": 1.52}, {"ticker": "TER", "name": "泰瑞达", "sector": "科技", "weight": 0.02, "change": 3.96}, {"ticker": "GOOGL", "name": "谷歌A", "sector": "通信服务", "weight": 2.5, "change": -3.84}, {"ticker": "NFLX", "name": "奈飞", "sector": "通信服务", "weight": 1.8, "change": -1.97}, {"ticker": "TMUS", "name": "T-Mobile", "sector": "通信服务", "weight": 1.1, "change": 0.21}, {"ticker": "CMCSA", "name": "康卡斯特", "sector": "通信服务", "weight": 0.7, "change": 1.79}, {"ticker": "WBD", "name": "华纳兄弟", "sector": "通信服务", "weight": 0.07, "change": 0.74}, {"ticker": "TTWO", "name": "Take-Two", "sector": "通信服务", "weight": 0.07, "change": -1.21}, {"ticker": "AMZN", "name": "亚马逊", "sector": "可选消费", "weight": 6.7, "change": -2.09}, {"ticker": "TSLA", "name": "特斯拉", "sector": "可选消费", "weight": 3.6, "change": 0.58}, {"ticker": "BKNG", "name": "Booking", "sector": "可选消费", "weight": 0.52, "change": -0.0}, {"ticker": "SBUX", "name": "星巴克", "sector": "可选消费", "weight": 0.5, "change": 1.92}, {"ticker": "MELI", "name": "MercadoLibre", "sector": "可选消费", "weight": 0.37, "change": 6.34}, {"ticker": "MAR", "name": "万豪", "sector": "可选消费", "weight": 0.31, "change": 0.3}, {"ticker": "ORLY", "name": "O'Reilly", "sector": "可选消费", "weight": 0.26, "change": 0.37}, {"ticker": "ROST", "name": "Ross", "sector": "可选消费", "weight": 0.14, "change": -1.19}, {"ticker": "WMT", "name": "沃尔玛", "sector": "必需消费", "weight": 3.0, "change": 0.53}, {"ticker": "COST", "name": "开市客", "sector": "必需消费", "weight": 2.2, "change": -0.88}, {"ticker": "PEP", "name": "百事", "sector": "必需消费", "weight": 1.4, "change": 0.49}, {"ticker": "MDLZ", "name": "亿滋", "sector": "必需消费", "weight": 0.36, "change": 0.41}, {"ticker": "KDP", "name": "Keurig", "sector": "必需消费", "weight": 0.18, "change": -0.41}, {"ticker": "CCEP", "name": "可口可乐欧洲", "sector": "必需消费", "weight": 0.03, "change": 0.45}, {"ticker": "AMGN", "name": "安进", "sector": "医疗保健", "weight": 0.65, "change": -0.7}, {"ticker": "ISRG", "name": "直觉外科", "sector": "医疗保健", "weight": 0.58, "change": 2.0}, {"ticker": "GILD", "name": "吉利德", "sector": "医疗保健", "weight": 0.48, "change": 2.04}, {"ticker": "VRTX", "name": "Vertex", "sector": "医疗保健", "weight": 0.43, "change": 1.1}, {"ticker": "REGN", "name": "再生元", "sector": "医疗保健", "weight": 0.38, "change": -1.37}, {"ticker": "DXCM", "name": "Dexcom", "sector": "医疗保健", "weight": 0.22, "change": 2.14}, {"ticker": "IDXX", "name": "IDEXX", "sector": "医疗保健", "weight": 0.08, "change": -1.53}, {"ticker": "ALNY", "name": "Alnylam", "sector": "医疗保健", "weight": 0.05, "change": 1.94}, {"ticker": "LIN", "name": "林德", "sector": "工业", "weight": 1.3, "change": -0.39}, {"ticker": "HON", "name": "霍尼韦尔", "sector": "工业", "weight": 0.6, "change": -5.27}, {"ticker": "CSX", "name": "CSX", "sector": "工业", "weight": 0.3, "change": -0.36}, {"ticker": "CTAS", "name": "Cintas", "sector": "工业", "weight": 0.25, "change": 1.27}, {"ticker": "CPRT", "name": "Copart", "sector": "工业", "weight": 0.23, "change": -0.64}, {"ticker": "ODFL", "name": "Old Dominion", "sector": "工业", "weight": 0.13, "change": -1.46}, {"ticker": "FAST", "name": "Fastenal", "sector": "工业", "weight": 0.1, "change": 0.44}, {"ticker": "ROP", "name": "Roper", "sector": "工业", "weight": 0.05, "change": -1.09}, {"ticker": "VRSK", "name": "Verisk", "sector": "工业", "weight": 0.04, "change": -0.12}, {"ticker": "TRI", "name": "汤森路透", "sector": "工业", "weight": 0.02, "change": 0.46}, {"ticker": "PCAR", "name": "Paccar", "sector": "工业", "weight": 0.02, "change": 0.98}, {"ticker": "AXON", "name": "Axon", "sector": "工业", "weight": 0.03, "change": 6.7}, {"ticker": "EXC", "name": "Exelon", "sector": "公用事业", "weight": 0.1, "change": 0.83}, {"ticker": "XEL", "name": "Xcel", "sector": "公用事业", "weight": 0.09, "change": 1.03}, {"ticker": "AEP", "name": "AEP", "sector": "公用事业", "weight": 0.09, "change": 0.6}, {"ticker": "BKR", "name": "Baker Hughes", "sector": "能源", "weight": 0.02, "change": 1.15}, {"ticker": "CSGP", "name": "CoStar", "sector": "房地产", "weight": 0.04, "change": -1.14}], "pie_stocks": [{"ticker": "AAPL", "name": "苹果", "sector": "科技", "weight": 11.04, "change": -1.09}, {"ticker": "NVDA", "name": "英伟达", "sector": "科技", "weight": 8.7, "change": -0.02}, {"ticker": "MSFT", "name": "微软", "sector": "科技", "weight": 7.3, "change": -0.44}, {"ticker": "AMZN", "name": "亚马逊", "sector": "可选消费", "weight": 6.7, "change": -2.09}, {"ticker": "TSLA", "name": "特斯拉", "sector": "可选消费", "weight": 3.6, "change": 0.58}, {"ticker": "WMT", "name": "沃尔玛", "sector": "必需消费", "weight": 3.0, "change": 0.53}, {"ticker": "AVGO", "name": "博通", "sector": "科技", "weight": 2.7, "change": -1.5}, {"ticker": "GOOGL", "name": "谷歌A", "sector": "通信服务", "weight": 2.5, "change": -3.84}, {"ticker": "COST", "name": "开市客", "sector": "必需消费", "weight": 2.2, "change": -0.88}, {"ticker": "NFLX", "name": "奈飞", "sector": "通信服务", "weight": 1.8, "change": -1.97}, {"ticker": "AMD", "name": "AMD", "sector": "科技", "weight": 1.6, "change": 1.01}, {"ticker": "PEP", "name": "百事", "sector": "必需消费", "weight": 1.4, "change": 0.49}, {"ticker": "LIN", "name": "林德", "sector": "工业", "weight": 1.3, "change": -0.39}, {"ticker": "ADBE", "name": "Adobe", "sector": "科技", "weight": 1.2, "change": -3.39}, {"ticker": "TMUS", "name": "T-Mobile", "sector": "通信服务", "weight": 1.1, "change": 0.21}, {"ticker": "其他", "name": "其他60只", "sector": "", "weight": 16.81, "change": 0.39}], "sectors": [{"name": "科技", "weight": 40.86, "change": -0.47, "count": 30}, {"name": "可选消费", "weight": 12.4, "change": -0.69, "count": 8}, {"name": "必需消费", "weight": 7.17, "change": 0.06, "count": 6}, {"name": "通信服务", "weight": 6.24, "change": -1.87, "count": 6}, {"name": "工业", "weight": 3.07, "change": -1.17, "count": 12}, {"name": "医疗保健", "weight": 2.87, "change": 0.73, "count": 8}, {"name": "公用事业", "weight": 0.28, "change": 0.82, "count": 3}, {"name": "房地产", "weight": 0.04, "change": -1.14, "count": 1}, {"name": "能源", "weight": 0.02, "change": 1.15, "count": 1}], "bins": {"labels": ["<-3%", "-3~-2%", "-2~-1%", "-1~0%", "0~1%", "1~2%", "2~3%", ">3%"], "counts": [3, 1, 14, 13, 23, 12, 4, 5]}, "history": [30276.35, 29809.13, 29329.21, 29697.87, 29173.02, 29252.56, 29727.1, 29825.11, 29264.1, 29586.29, 29502.6, 29025.77, 28592.66, 28604.23, 29155.18, 28998.1, 28454.81, 28128.34, 28039.21, 27763.13, 27192.31, 28106.35, 28274.2, 28776.8, 29733.16, 29487.79, 29373.33, 29722.3, 29621.8, 29525.48], "date": "2026-08-12", "ai_summary": "今日纳指100收跌-0.33%，43涨31跌，市场胶着。板块方面，能源领涨(+1.15%)，通信服务领跌(-1.87%)。个股方面，Axon（AXON）(+6.70%)表现亮眼；霍尼韦尔（HON）(-5.27%)承压。多空分歧加大，建议控制仓位观望。", "ai_stocks": "成分股涨跌互现，Axon（AXON）(+6.70%)、MercadoLibre（MELI）(+6.34%)表现亮眼，霍尼韦尔（HON）(-5.27%)、谷歌A（GOOGL）(-3.84%)拖累指数。整体受权重股拖累。", "ai_sectors": "行业轮动加速，能源(+1.15%)获资金青睐，通信服务(-1.87%)资金流出明显。板块分化加剧，结构性特征突出。", "ai_distribution": "涨跌家数接近，43涨31跌，市场处于均衡状态，等待方向选择。", "ai_industry": "行业表现分化，能源(+1.15%)一枝独秀，通信服务(-1.87%)跌幅居前。建议聚焦强势板块，回避弱势领域。", "ai_trend": "近30日纳指100横盘整理(-2.48%)，近5日波动有限+0.13%，等待方向选择。"};
+
+const RISE = "#089981";
+const FALL = "#f23645";
+const TEXT = "#d1d4dc";
+const TEXT2 = "#868993";
+const TEXT4 = "#434651";
+const BORDER = "#2a2e39";
+
+// 根据当日涨跌设置全局光晕颜色
+const GLOW = DATA.index.change >= 0 ? RISE : FALL;
+document.documentElement.style.setProperty("--glow-color", GLOW);
+document.documentElement.style.setProperty("--glow-border", GLOW + "40");
+document.documentElement.style.setProperty("--badge-bg", GLOW + "1A");
+document.documentElement.style.setProperty("--badge-color", GLOW);
+document.documentElement.style.setProperty("--badge-border", GLOW + "33");
+
+// KPI 卡片涨跌色
+const kpiPrice = document.getElementById("kpiPrice");
+const kpiUpDown = document.getElementById("kpiUpDown");
+const kpiTrend = document.getElementById("kpiTrend");
+if(DATA.index.change >= 0){
+  kpiPrice.classList.add("up"); kpiUpDown.classList.add("up"); kpiTrend.classList.add("up");
+} else {
+  kpiPrice.classList.add("down"); kpiUpDown.classList.add("down"); kpiTrend.classList.add("down");
+}
+
+function colorForChange(c){return c>=0?RISE:FALL}
+function fmtPct(c){return(c>=0?"+":"")+c.toFixed(2)+"%"}
+function svgEl(tag,attrs){const el=document.createElementNS("http://www.w3.org/2000/svg",tag);for(let k in attrs)el.setAttribute(k,attrs[k]);return el}
+
+const HISTORY_DATES = ["2026-08-12"];
+const IS_HISTORY = false;
+
+// 美股开盘状态判断（基于客户端实时时间）
+function getMarketStatus() {
+    const now = new Date();
+    const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+    const beijing = new Date(utc + 8 * 3600000);
+    const day = beijing.getDay();
+    if (day === 0 || day === 6) return "已收盘";
+
+    const year = beijing.getFullYear();
+    // 夏令时：3月第二个周日 - 11月第一个周日
+    const dstStart = new Date(year, 2, 14 - new Date(year, 2, 1).getDay());
+    const dstEnd = new Date(year, 10, 7 - new Date(year, 10, 1).getDay());
+    const isDST = beijing >= dstStart && beijing < dstEnd;
+
+    const hour = beijing.getHours();
+    const minute = beijing.getMinutes();
+    const timeVal = hour + minute / 60;
+    const openTime = isDST ? 21.5 : 22.5;   // 21:30 / 22:30
+    const closeTime = isDST ? 28 : 29;       // 次日04:00 / 05:00
+
+    if (timeVal >= openTime && timeVal < closeTime) return "开盘中";
+    return "已收盘";
+}
+
+// 前后日导航
+(function() {
+    const btnPrev = document.getElementById("btnPrev");
+    const btnNext = document.getElementById("btnNext");
+    if (!btnPrev || !btnNext) return;
+
+    const path = window.location.pathname;
+    const isHistory = path.includes("/history/");
+    let currentDate;
+
+    if (isHistory) {
+        const m = path.match(/history\/(\d{4}-\d{2}-\d{2})/);
+        currentDate = m ? m[1] : DATA.date;
+    } else {
+        currentDate = DATA.date;
+    }
+
+    const idx = HISTORY_DATES.indexOf(currentDate);
+    if (idx === -1) return;
+
+    if (idx > 0) {
+        const prevDate = HISTORY_DATES[idx - 1];
+        btnPrev.disabled = false;
+        btnPrev.onclick = () => {
+            location.href = isHistory ? "./" + prevDate + ".html" : "./history/" + prevDate + ".html";
+        };
+    }
+
+    if (idx < HISTORY_DATES.length - 1) {
+        const nextDate = HISTORY_DATES[idx + 1];
+        btnNext.disabled = false;
+        if (nextDate === DATA.date && isHistory) {
+            btnNext.onclick = () => location.href = "../index.html";
+        } else {
+            btnNext.onclick = () => {
+                location.href = isHistory ? "./" + nextDate + ".html" : "./history/" + nextDate + ".html";
+            };
+        }
+    }
+})();
+
+// 填充 KPI
+(function(){
+  const idx=DATA.index;
+  document.getElementById("dateStr").textContent=DATA.date;
+  document.getElementById("idxPrice").textContent=idx.price?idx.price.toLocaleString():"估算中";
+  const chgEl=document.getElementById("idxChange");
+  chgEl.textContent=fmtPct(idx.change)+(idx.price?" ("+(idx.price-idx.prev_close).toFixed(2)+")":"");
+  chgEl.className="kpi-sub "+(idx.change>=0?"up":"down");
+  document.getElementById("upDown").innerHTML=idx.up+' <span style="color:var(--text-tertiary)">/</span> '+idx.down;
+  document.getElementById("stockCount").textContent=idx.total;
+  const hist=DATA.history;
+  if(hist.length>=2){
+    const c30=((hist[hist.length-1]-hist[0])/hist[0]*100).toFixed(2);
+    const t30=document.getElementById("trend30d");
+    t30.textContent=(c30>=0?"+":"")+c30+"%";
+    t30.style.color=c30>=0?RISE:FALL;
+    document.getElementById("trendRange").textContent=Math.round(hist[0]).toLocaleString()+" -> "+Math.round(hist[hist.length-1]).toLocaleString();
+  } else {
+    document.getElementById("trend30d").textContent="--";
+    document.getElementById("trendRange").textContent="数据暂缺";
+  }
+  if(idx.total<80){document.getElementById("dataStatus").textContent="部分缺失";document.getElementById("dataStatus").style.color=FALL}
+})();
+
+// AI 行情总结 - 5个独立总结
+(function(){
+  const summaries = [
+    {key: "ai_summary", box: "aiSummaryBox", text: "aiSummaryText"},
+    {key: "ai_stocks", box: "aiStocksBox", text: null},
+    {key: "ai_sectors", box: "aiSectorsBox", text: null},
+    {key: "ai_distribution", box: "aiDistBox", text: null},
+    {key: "ai_industry", box: "aiIndustryBox", text: null},
+    {key: "ai_trend", box: "aiTrendBox", text: null}
+  ];
+  summaries.forEach(s => {
+    if(DATA[s.key]){
+      const box = document.getElementById(s.box);
+      if(box){
+        const el = s.text ? document.getElementById(s.text) : box.querySelector("p");
+        if(el) el.textContent = DATA[s.key];
+        box.style.display = "block";
+      }
+    }
+  });
+})();
+
+// 个股饼图
+(function(){
+  const svg=document.getElementById("stockPie");
+  const data=DATA.pie_stocks;
+  const total=data.reduce((a,b)=>a+b.weight,0);
+  const cx=140,cy=130,r=90,ir=45;
+  let ang=-Math.PI/2;
+  data.forEach(d=>{
+    const a=(d.weight/total)*Math.PI*2;
+    const x1=cx+r*Math.cos(ang),y1=cy+r*Math.sin(ang);
+    const x2=cx+r*Math.cos(ang+a),y2=cy+r*Math.sin(ang+a);
+    const ix1=cx+ir*Math.cos(ang),iy1=cy+ir*Math.sin(ang);
+    const ix2=cx+ir*Math.cos(ang+a),iy2=cy+ir*Math.sin(ang+a);
+    const large=a>Math.PI?1:0;
+    const path="M "+ix1+" "+iy1+" L "+x1+" "+y1+" A "+r+" "+r+" 0 "+large+" 1 "+x2+" "+y2+" L "+ix2+" "+iy2+" A "+ir+" "+ir+" 0 "+large+" 0 "+ix1+" "+iy1;
+    const fill=colorForChange(d.change);
+    const slice=svgEl("path",{d:path,fill:fill,opacity:.85,stroke:"var(--bg)","stroke-width":1.5});
+    slice.style.cursor="pointer";
+    slice.addEventListener("mouseenter",e=>showTip(e,d.ticker+" "+d.name+"<br>权重 "+d.weight+"% - "+fmtPct(d.change)));
+    slice.addEventListener("mouseleave",hideTip);
+    svg.appendChild(slice);
+    ang+=a;
+  });
+  svg.appendChild(svgEl("text",{x:cx,y:cy-6,"text-anchor":"middle",fill:TEXT,"font-size":14,"font-weight":800})).textContent="NDX";
+  svg.appendChild(svgEl("text",{x:cx,y:cy+14,"text-anchor":"middle",fill:GLOW,"font-size":13,"font-weight":700})).textContent=fmtPct(DATA.index.change);
+  // 外圈光晕
+  svg.appendChild(svgEl("circle",{cx:cx,cy:cy,r:95,fill:"none",stroke:GLOW,"stroke-width":18,opacity:.08}));
+  const leg=document.getElementById("stockLegend");
+  data.slice(0,8).forEach(d=>{
+    const item=document.createElement("div");item.className="legend-item";
+    item.innerHTML='<span class="legend-dot" style="background:'+colorForChange(d.change)+'"></span><span>'+d.ticker+" "+fmtPct(d.change)+"</span>";
+    leg.appendChild(item);
+  });
+})();
+
+// 行业饼图
+(function(){
+  const svg=document.getElementById("sectorPie");
+  const data=DATA.sectors;
+  const total=data.reduce((a,b)=>a+b.weight,0);
+  const cx=140,cy=130,r=90,ir=45;
+  let ang=-Math.PI/2;
+  data.forEach(d=>{
+    const a=(d.weight/total)*Math.PI*2;
+    const x1=cx+r*Math.cos(ang),y1=cy+r*Math.sin(ang);
+    const x2=cx+r*Math.cos(ang+a),y2=cy+r*Math.sin(ang+a);
+    const ix1=cx+ir*Math.cos(ang),iy1=cy+ir*Math.sin(ang);
+    const ix2=cx+ir*Math.cos(ang+a),iy2=cy+ir*Math.sin(ang+a);
+    const large=a>Math.PI?1:0;
+    const path="M "+ix1+" "+iy1+" L "+x1+" "+y1+" A "+r+" "+r+" 0 "+large+" 1 "+x2+" "+y2+" L "+ix2+" "+iy2+" A "+ir+" "+ir+" 0 "+large+" 0 "+ix1+" "+iy1;
+    const fill=colorForChange(d.change);
+    const slice=svgEl("path",{d:path,fill:fill,opacity:.8,stroke:"var(--bg)","stroke-width":1.5});
+    slice.style.cursor="pointer";
+    slice.addEventListener("mouseenter",e=>showTip(e,d.name+"<br>权重 "+d.weight+"% - "+d.count+"只 - 平均 "+fmtPct(d.change)));
+    slice.addEventListener("mouseleave",hideTip);
+    svg.appendChild(slice);
+    ang+=a;
+  });
+  svg.appendChild(svgEl("text",{x:cx,y:cy-6,"text-anchor":"middle",fill:TEXT,"font-size":14,"font-weight":800})).textContent="行业";
+  // 外圈光晕
+  svg.appendChild(svgEl("circle",{cx:cx,cy:cy,r:95,fill:"none",stroke:GLOW,"stroke-width":18,opacity:.08}));
+  const leg=document.getElementById("sectorLegend");
+  data.forEach(d=>{
+    const item=document.createElement("div");item.className="legend-item";
+    item.innerHTML='<span class="legend-dot" style="background:'+colorForChange(d.change)+'"></span><span>'+d.name+" "+d.weight+"%</span>";
+    leg.appendChild(item);
+  });
+})();
+
+// 涨跌分布柱图
+(function(){
+  const svg=document.getElementById("distChart");
+  const labels=DATA.bins.labels;
+  const counts=DATA.bins.counts;
+  const max=Math.max(...counts);
+  const W=400,H=220,padL=40,padB=30,padT=20,padR=20;
+  const bw=(W-padL-padR)/labels.length-4;
+  for(let i=0;i<=4;i++){const y=padT+(H-padT-padB)*(1-i/4);svg.appendChild(svgEl("line",{x1:padL,y1:y,x2:W-padR,y2:y,stroke:BORDER,"stroke-width":.5}));svg.appendChild(svgEl("text",{x:padL-6,y:y+4,"text-anchor":"end",fill:TEXT4,"font-size":10})).textContent=Math.round(max*i/4)}
+  labels.forEach((lbl,i)=>{
+    const h=(counts[i]/max)*(H-padT-padB);
+    const x=padL+i*(W-padL-padR)/labels.length+2;
+    const y=H-padB-h;
+    const isUp=i>=4;
+    const bar=svgEl("rect",{x:x,y:y,width:bw,height:h||1,rx:4,fill:isUp?RISE:FALL,opacity:.9});
+    bar.style.cursor="pointer";
+    bar.addEventListener("mouseenter",e=>showTip(e,lbl+": "+counts[i]+"只"));
+    bar.addEventListener("mouseleave",hideTip);
+    svg.appendChild(bar);
+    svg.appendChild(svgEl("text",{x:x+bw/2,y:H-padB+14,"text-anchor":"middle",fill:TEXT2,"font-size":10,"font-weight":600})).textContent=lbl;
+    if(counts[i]>0){svg.appendChild(svgEl("text",{x:x+bw/2,y:y-6,"text-anchor":"middle",fill:isUp?RISE:FALL,"font-size":11,"font-weight":700})).textContent=counts[i]}
+  });
+  const zeroX=padL+4*(W-padL-padR)/labels.length;
+  svg.appendChild(svgEl("line",{x1:zeroX,y1:padT,x2:zeroX,y2:H-padB,stroke:TEXT,"stroke-width":1,"stroke-dasharray":"4,4",opacity:.3}));
+})();
+
+// 行业柱图 - 零轴居中，上涨文字在左bar在右，下跌文字在右bar在左
+(function(){
+  const svg = document.getElementById("sectorBar");
+  const data = DATA.sectors
+    .filter(d => typeof d.change === 'number' && !isNaN(d.change))
+    .map(d => ({...d}));
+
+  if(data.length === 0){
+    svg.appendChild(svgEl("text", {x:200, y:160, "text-anchor":"middle", fill:TEXT4, "font-size":14}))
+       .textContent = "行业数据暂缺";
+    return;
+  }
+
+  data.sort((a,b) => b.change - a.change);
+  const W = 400, H = 320, padT = 16, padB = 16, textGap = 60;
+  const zeroX = W / 2;
+  const maxC = Math.max(...data.map(d => Math.abs(d.change)), 0.01);
+  const scale = (W / 2 - textGap - 10) / maxC;
+  const rowH = (H - padT - padB) / data.length;
+  const barH = Math.min(rowH - 10, 22);
+
+  // 零轴线
+  svg.appendChild(svgEl("line", {
+    x1: zeroX, y1: padT, x2: zeroX, y2: H - padB,
+    stroke: BORDER, "stroke-width": 1, "stroke-dasharray": "3,3", opacity: .5
+  }));
+
+  data.forEach((d, i) => {
+    const y = padT + i * rowH + (rowH - barH) / 2;
+    const w = Math.max(Math.abs(d.change) * scale, 3);
+    const isUp = d.change >= 0;
+    const c = colorForChange(d.change);
+    const x = isUp ? zeroX : zeroX - w;
+
+    const bar = svgEl("rect", {
+      x: x, y: y, width: w, height: barH, rx: 3,
+      fill: c, opacity: .9
+    });
+    bar.style.cursor = "pointer";
+    bar.addEventListener("mouseenter", e => showTip(e, d.name + "<br>平均 " + fmtPct(d.change)));
+    bar.addEventListener("mouseleave", hideTip);
+    svg.appendChild(bar);
+
+    if(isUp){
+      // 上涨：行业名在左(zero轴左侧)，数值在bar右侧
+      svg.appendChild(svgEl("text", {
+        x: zeroX - 8, y: y + barH/2 + 4,
+        "text-anchor": "end", fill: TEXT2, "font-size": 11, "font-weight": 600
+      })).textContent = d.name;
+      svg.appendChild(svgEl("text", {
+        x: zeroX + w + 6, y: y + barH/2 + 4,
+        "text-anchor": "start", fill: c, "font-size": 11, "font-weight": 700
+      })).textContent = fmtPct(d.change);
+    } else {
+      // 下跌：数值在bar左侧，行业名在右(zero轴右侧)
+      svg.appendChild(svgEl("text", {
+        x: zeroX - w - 6, y: y + barH/2 + 4,
+        "text-anchor": "end", fill: c, "font-size": 11, "font-weight": 700
+      })).textContent = fmtPct(d.change);
+      svg.appendChild(svgEl("text", {
+        x: zeroX + 8, y: y + barH/2 + 4,
+        "text-anchor": "start", fill: TEXT2, "font-size": 11, "font-weight": 600
+      })).textContent = d.name;
+    }
+  });
+})();
+
+// 走势线图
+(function(){
+  const svg=document.getElementById("trendLine");
+  const data=DATA.history;
+  if(data.length<2){svg.appendChild(svgEl("text",{x:400,y:120,"text-anchor":"middle",fill:TEXT4,"font-size":14})).textContent="历史数据暂缺";return}
+  const W=800,H=240,padL=50,padB=30,padT=30,padR=30;
+  const min=Math.min(...data),max=Math.max(...data);
+  const range=max-min||1;
+  const x=i=>padL+i*(W-padL-padR)/(data.length-1);
+  const y=v=>padT+(max-v)/range*(H-padT-padB);
+  let areaD="M "+x(0)+" "+y(data[0]);
+  data.forEach((v,i)=>areaD+=" L "+x(i)+" "+y(v));
+  areaD+=" L "+x(data.length-1)+" "+(H-padB)+" L "+x(0)+" "+(H-padB)+" Z";
+  svg.appendChild(svgEl("path",{d:areaD,fill:GLOW,opacity:.06}));
+  let lineD="M "+x(0)+" "+y(data[0]);
+  data.forEach((v,i)=>lineD+=" L "+x(i)+" "+y(v));
+  svg.appendChild(svgEl("path",{d:lineD,fill:"none",stroke:GLOW,"stroke-width":2.5,"stroke-linecap":"round","stroke-linejoin":"round"}));
+  data.forEach((v,i)=>{
+    const c=svgEl("circle",{cx:x(i),cy:y(v),r:3,fill:"var(--bg)",stroke:GLOW,"stroke-width":1.5});
+    c.style.cursor="pointer";
+    const daysAgo = data.length - i;
+    const dayLabel = daysAgo === 1 ? "今日" : daysAgo + "天前";
+    c.addEventListener("mouseenter",e=>showTip(e,dayLabel+"<br>收盘 "+Math.round(v).toLocaleString()));
+    c.addEventListener("mouseleave",hideTip);
+    svg.appendChild(c);
+  });
+  svg.appendChild(svgEl("text",{x:padL,y:H-8,fill:TEXT4,"font-size":10,"font-weight":600})).textContent="30日前";
+  svg.appendChild(svgEl("text",{x:W-padR,y:H-8,"text-anchor":"end",fill:TEXT4,"font-size":10,"font-weight":600})).textContent="今日";
+  svg.appendChild(svgEl("text",{x:padL-10,y:padT+4,"text-anchor":"end",fill:TEXT4,"font-size":10})).textContent=Math.round(max).toLocaleString();
+  svg.appendChild(svgEl("text",{x:padL-10,y:H-padB,"text-anchor":"end",fill:TEXT4,"font-size":10})).textContent=Math.round(min).toLocaleString();
+})();
+
+// 股票网格
+(function(){
+  const grid=document.getElementById("stockGrid");
+  DATA.stocks.forEach(s=>{
+    const cell=document.createElement("div");
+    cell.className="stock-cell";
+    const c=colorForChange(s.change);
+    cell.style.border="1px solid "+c+"30";
+    cell.style.color=c;
+    cell.innerHTML='<div style="font-weight:800;font-size:13px">'+s.ticker+'</div><div style="font-size:11px;opacity:.9">'+fmtPct(s.change)+"</div>";
+    cell.addEventListener("mouseenter",e=>showTip(e,s.ticker+" "+s.name+"<br>权重 "+s.weight+"% - "+fmtPct(s.change)+" - "+s.sector));
+    cell.addEventListener("mouseleave",hideTip);
+    grid.appendChild(cell);
+  });
+})();
+
+// 主题切换
+function toggleTheme(){
+  const root=document.documentElement;
+  const icon=document.getElementById("theme-icon");
+  if(root.classList.contains("light")){root.classList.remove("light");icon.innerHTML='<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>'}
+  else{root.classList.add("light");icon.innerHTML='<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>'}
+}
+
+// 跟随系统主题
+if(window.matchMedia&&window.matchMedia("(prefers-color-scheme: light)").matches){
+  document.documentElement.classList.add("light");
+  document.getElementById("theme-icon").innerHTML='<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+}
+
+const tip=document.getElementById("tooltip");
+function showTip(e,html){
+  tip.innerHTML=html;
+  tip.style.opacity="1";
+  // 先让浏览器渲染以获取正确尺寸
+  const tw=tip.offsetWidth, th=tip.offsetHeight;
+  let left=e.pageX-tw/2;
+  let top=e.pageY-th-14;
+  // 边界保护
+  if(left<8)left=8;
+  if(left+tw>document.documentElement.scrollWidth-8)left=document.documentElement.scrollWidth-tw-8;
+  if(top<window.scrollY+8)top=e.pageY+14;
+  tip.style.left=left+"px";tip.style.top=top+"px";
+}
+function hideTip(){tip.style.opacity="0"}
+</script>
+</body></html>
