@@ -425,7 +425,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--glow-color)">
       <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
     </svg>
-    <span>AI ANALYZED BY QWEN</span>
+    <span>AI ANALYZED BY KIMI</span>
   </div>
 </div>
 </div>
@@ -896,60 +896,45 @@ def generate_html(data, is_history=False, history_dates=None):
 
 
 
-def call_siliconflow(prompt, api_key):
-    """调用 SiliconFlow API (Qwen3-8B)，失败返回 None。超时15秒，自动重试3次。"""
+def call_kimi(prompt, api_key):
+    """调用 Kimi API (moonshot-v1-8k)，失败返回 None。超时15秒。"""
     if not api_key:
         return None
+    try:
+        import urllib.request
+        import urllib.error
+        import time
+        time.sleep(1)  # Kimi 免费 tier 3 RPM，每次间隔1秒
 
-    import urllib.request
-    import urllib.error
-    import socket
-    import time
-
-    for attempt in range(3):
-        try:
-            time.sleep(0.5)
-            old_timeout = socket.getdefaulttimeout()
-            socket.setdefaulttimeout(15)
-
-            try:
-                req = urllib.request.Request(
-                    "https://api.siliconflow.cn/v1/chat/completions",
-                    data=json.dumps({
-                        "model": "Qwen/Qwen3-8B",
-                        "messages": [{"role": "user", "content": prompt}],
-                        "temperature": 0.6,
-                        "max_tokens": 250
-                    }).encode("utf-8"),
-                    headers={
-                        "Content-Type": "application/json",
-                        "Authorization": f"Bearer {api_key}"
-                    }
-                )
-                with urllib.request.urlopen(req, timeout=15) as resp:
-                    result = json.loads(resp.read().decode("utf-8"))
-                    text = result["choices"][0]["message"]["content"].strip()
-                    print(f"    [SiliconFlow]: {text[:60]}...")
-                    if len(text) < 15:
-                        print("    [响应过短，fallback]")
-                        return None
-                    return text
-            finally:
-                socket.setdefaulttimeout(old_timeout)
-
-        except Exception as e:
-            print(f"  SiliconFlow 第{attempt+1}次失败: {e}")
-            if attempt < 2:
-                print(f"  等待2秒后重试...")
-                time.sleep(2)
-            else:
-                print(f"  3次均失败，使用本地生成")
+        req = urllib.request.Request(
+            "https://api.moonshot.cn/v1/chat/completions",
+            data=json.dumps({
+                "model": "moonshot-v1-8k",
+                "messages": [{"role": "user", "content": prompt}],
+                "temperature": 0.6,
+                "max_tokens": 250
+            }).encode("utf-8"),
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {api_key}"
+            }
+        )
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            result = json.loads(resp.read().decode("utf-8"))
+            text = result["choices"][0]["message"]["content"].strip()
+            print(f"    [Kimi]: {text[:60]}...")
+            if len(text) < 15:
+                print("    [Kimi 响应过短，fallback]")
                 return None
+            return text
+    except Exception as e:
+        print(f"  Kimi API 失败: {e}")
+        return None
 
 
 def generate_summary(data, summary_type="overview"):
     """生成行情总结，支持多种类型：overview/stocks/sectors/distribution/industry"""
-    api_key = os.environ.get("SILICONFLOW_API_KEY")
+    api_key = os.environ.get("MOONSHOT_API_KEY")
     idx = data["index"]
     sectors = data["sectors"]
     stocks = data["stocks"]
@@ -1039,7 +1024,7 @@ Top5涨：{top5_str}。Bottom5跌：{bottom5_str}。指数整体{idx['change']:+
         return None
 
     # 优先调用 Gemini
-    summary = call_siliconflow(prompt, api_key)
+    summary = call_kimi(prompt, api_key)
     if summary:
         print(f"  Gemini [{summary_type}]: {summary[:50]}...")
         return summary
