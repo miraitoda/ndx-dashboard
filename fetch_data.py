@@ -684,23 +684,19 @@ function getMarketStatus(){
   document.getElementById("dateStr").textContent=DATA.date;
   document.getElementById("statusBadge").textContent=getMarketStatus();
 
-  // INDEX 价格滚动动画
   const priceEl=document.getElementById("idxPrice");
   const chgEl=document.getElementById("idxChange");
+
   if(idx.price&&idx.prev_close){
-    const fromPrice=idx.prev_close;
-    const toPrice=idx.price;
-    const fromDiff=0;
-    const toDiff=idx.price-idx.prev_close;
-    const isUp=idx.change>=0;
-    chgEl.className="kpi-change "+(isUp?"up":"down");
-    animateNumber(priceEl, fromPrice, toPrice, 5000, function(v){
-      return v.toLocaleString("en-US",{minimumFractionDigits:1,maximumFractionDigits:1});
-    });
-    // 涨跌金额同步动画
-    animateNumber({textContent:fromDiff, set textContent(v){
-      chgEl.textContent=(v>=0?"▲ +":"▼ ")+idx.change.toFixed(2)+"% ("+(v>=0?"+":"")+v.toFixed(2)+")";
-    }}, fromDiff, toDiff, 5000, null);
+    // 价格 odometer 滚动（从昨日收盘价滚到今日）
+    rollNumber(priceEl, idx.price, 5000);
+
+    // 涨跌幅直接设置，不参与滚动（避免格式复杂化）
+    const diff=idx.price-idx.prev_close;
+    const sign=idx.change>=0?"▲ +":"▼ ";
+    const diffSign=diff>=0?"+":"";
+    chgEl.textContent=sign+idx.change.toFixed(2)+"% ("+diffSign+diff.toFixed(2)+")";
+    chgEl.className="kpi-change "+(idx.change>=0?"up":"down");
   }else{
     priceEl.textContent=idx.price?idx.price.toLocaleString():"估算中";
     chgEl.textContent=fmtPct(idx.change)+(idx.price?(" ("+(idx.price-idx.prev_close).toFixed(2)+")"):"");
@@ -942,20 +938,57 @@ if(window.matchMedia&&window.matchMedia("(prefers-color-scheme: light)").matches
   if(btn)btn.textContent="夜间模式";
 }
 
-// 数字滚动动画
-function animateNumber(el, fromVal, toVal, duration, formatter){
-  const start=performance.now();
-  const diff=toVal-fromVal;
-  function easeOutQuart(t){return 1-Math.pow(1-t,4)}
-  function tick(now){
-    const elapsed=now-start;
-    const progress=Math.min(elapsed/duration,1);
-    const eased=easeOutQuart(progress);
-    const current=fromVal+diff*eased;
-    el.textContent=formatter?formatter(current):current.toFixed(2);
-    if(progress<1)requestAnimationFrame(tick);
-  }
-  requestAnimationFrame(tick);
+// Odometer 数字滚动效果（逐位翻滚）
+function rollNumber(el, targetValue, duration){
+  const finalStr=targetValue.toLocaleString("en-US",{minimumFractionDigits:1,maximumFractionDigits:1});
+  el.innerHTML="";
+  el.style.display="inline-flex";
+  el.style.alignItems="flex-end";
+
+  const chars=finalStr.split("");
+  const digits=[];
+
+  chars.forEach((ch,i)=>{
+    if(ch===","||ch==="."){
+      const span=document.createElement("span");
+      span.textContent=ch;
+      span.style.display="inline-block";
+      el.appendChild(span);
+    }else{
+      const wrap=document.createElement("span");
+      wrap.style.display="inline-block";
+      wrap.style.overflow="hidden";
+      wrap.style.height="1em";
+      wrap.style.lineHeight="1em";
+      wrap.style.verticalAlign="bottom";
+
+      const strip=document.createElement("span");
+      strip.style.display="flex";
+      strip.style.flexDirection="column";
+      strip.style.transition=`transform ${duration}ms cubic-bezier(0.25,1,0.5,1)`;
+
+      for(let n=0;n<=9;n++){
+        const num=document.createElement("span");
+        num.textContent=n;
+        num.style.display="block";
+        num.style.height="1em";
+        num.style.lineHeight="1em";
+        strip.appendChild(num);
+      }
+
+      wrap.appendChild(strip);
+      el.appendChild(wrap);
+      digits.push({strip,target:parseInt(ch),delay:i*70});
+    }
+  });
+
+  requestAnimationFrame(()=>{
+    digits.forEach(({strip,target,delay})=>{
+      setTimeout(()=>{
+        strip.style.transform=`translateY(-${target}em)`;
+      },delay);
+    });
+  });
 }
 
 // Tooltip
