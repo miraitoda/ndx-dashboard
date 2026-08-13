@@ -354,7 +354,7 @@ section{padding:60px 0}
 .hero-tag-text{font-size:11px;font-weight:700;color:var(--text2);letter-spacing:1px}
 .hero-title{font-size:64px;font-weight:900;letter-spacing:-3px;margin:0;line-height:1;color:var(--text)}
 .hero-accent{color:var(--accent)}
-.hero-triangle{display:inline-block;margin-left:6px;font-size:0.4em;vertical-align:middle}
+.hero-triangle{display:inline-block;margin-left:16px;font-size:1em;vertical-align:middle}
 .hero-desc{margin-top:20px;font-size:15px;color:var(--text2);line-height:1.6;max-width:400px}
 .hero-meta{margin-top:24px;display:flex;align-items:center;gap:12px}
 .hero-date{font-size:13px;color:var(--text3);font-weight:500}
