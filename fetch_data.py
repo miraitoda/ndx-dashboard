@@ -442,12 +442,19 @@ section{padding:60px 0}
   transform: scaleY(1);
 }
 
-.pie-ring-segment {
-  stroke-dashoffset: var(--arc-len);
-  transition: stroke-dashoffset 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+.pie-container {
+  perspective: 800px;
+  transform-style: preserve-3d;
 }
-.pie-ring-segment.animate {
-  stroke-dashoffset: 0;
+.pie-segment {
+  opacity: 0;
+  transform: rotateY(180deg);
+  transform-origin: center;
+  transition: all 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.pie-segment.animate {
+  opacity: 1;
+  transform: rotateY(0);
 }
 
 .sector-bar {
@@ -899,28 +906,25 @@ function getMarketStatus(){
   svg.appendChild(svgEl("circle",{cx:cx,cy:cy,r:r+strokeW/2+10,fill:"none",stroke:RISE,"stroke-width":20,opacity:0.06}));
   svg.appendChild(svgEl("circle",{cx:cx,cy:cy,r:r+strokeW/2+4,fill:"none",stroke:RISE,"stroke-width":14,opacity:0.1}));
   const defs=svgEl("defs",{});
-  let accAngle=0;
+  let startAngle=-90;
   data.forEach((d,idx)=>{
     const angle=(d.weight/total)*360;
     const arcLen=(angle/360)*C;
     const color=colorForChange(d.change);
     const gradId="sg-"+idx;
     const grad=svgEl("radialGradient",{id:gradId,cx:"50%",cy:"50%",r:"50%"});
-    grad.appendChild(svgEl("stop",{offset:"70%","stop-color":color,"stop-opacity":"0.25"}));
+    grad.appendChild(svgEl("stop",{offset:"0%","stop-color":color,"stop-opacity":"0.2"}));
     grad.appendChild(svgEl("stop",{offset:"100%","stop-color":color,"stop-opacity":"1"}));
     defs.appendChild(grad);
-    const seg=svgEl("circle",{cx:cx,cy:cy,r:r,fill:"none",stroke:"url(#"+gradId+")","stroke-width":strokeW,"stroke-dasharray":arcLen+" "+C,transform:"rotate(-90 "+cx+" "+cy+")",class:"pie-ring-segment"});
-    seg.style.setProperty("--arc-len",arcLen);
+    const seg=svgEl("circle",{cx:cx,cy:cy,r:r,fill:"none",stroke:"url(#"+gradId+")","stroke-width":strokeW,"stroke-dasharray":arcLen+" "+C,transform:"rotate("+startAngle+" "+cx+" "+cy+")",class:"pie-segment"});
     seg.style.transitionDelay=(idx*0.06)+"s";
     svg.appendChild(seg);
-    accAngle+=angle;
+    startAngle+=angle;
   });
   svg.appendChild(defs);
-  // 中心文字
   svg.appendChild(svgEl("text",{x:200,y:158,"text-anchor":"middle",fill:TEXT,"font-size":28,"font-weight":900,"letter-spacing":"-1"})).textContent="NDX";
   svg.appendChild(svgEl("text",{x:200,y:185,"text-anchor":"middle",fill:RISE,"font-size":18,"font-weight":800,"font-family":"'SF Mono',monospace"})).textContent=fmtPct(DATA.index.change);
   container.appendChild(svg);
-  // Legend
   const leg=document.getElementById("stockLegend");
   data.slice(0,6).forEach(d=>{
     const item=document.createElement("div");item.className="pie-legend-item";
@@ -936,28 +940,25 @@ function getMarketStatus(){
   svg.setAttribute("viewBox","0 0 400 340");svg.style.width="100%";svg.style.maxWidth="380px";svg.style.height="auto";
   const cx=200,cy=170,r=110,strokeW=50;
   const C=2*Math.PI*r;
-  // 外圈光晕
   svg.appendChild(svgEl("circle",{cx:cx,cy:cy,r:r+strokeW/2+10,fill:"none",stroke:ACCENT,"stroke-width":20,opacity:0.06}));
   svg.appendChild(svgEl("circle",{cx:cx,cy:cy,r:r+strokeW/2+4,fill:"none",stroke:ACCENT,"stroke-width":14,opacity:0.1}));
   const defs=svgEl("defs",{});
-  let accAngle=0;
+  let startAngle=-90;
   data.forEach((d,idx)=>{
     const angle=(d.weight/total)*360;
     const arcLen=(angle/360)*C;
     const color=colorForChange(d.change);
     const gradId="ig-"+idx;
     const grad=svgEl("radialGradient",{id:gradId,cx:"50%",cy:"50%",r:"50%"});
-    grad.appendChild(svgEl("stop",{offset:"70%","stop-color":color,"stop-opacity":"0.25"}));
+    grad.appendChild(svgEl("stop",{offset:"0%","stop-color":color,"stop-opacity":"0.2"}));
     grad.appendChild(svgEl("stop",{offset:"100%","stop-color":color,"stop-opacity":"1"}));
     defs.appendChild(grad);
-    const seg=svgEl("circle",{cx:cx,cy:cy,r:r,fill:"none",stroke:"url(#"+gradId+")","stroke-width":strokeW,"stroke-dasharray":arcLen+" "+C,transform:"rotate(-90 "+cx+" "+cy+")",class:"pie-ring-segment"});
-    seg.style.setProperty("--arc-len",arcLen);
+    const seg=svgEl("circle",{cx:cx,cy:cy,r:r,fill:"none",stroke:"url(#"+gradId+")","stroke-width":strokeW,"stroke-dasharray":arcLen+" "+C,transform:"rotate("+startAngle+" "+cx+" "+cy+")",class:"pie-segment"});
     seg.style.transitionDelay=(idx*0.06)+"s";
     svg.appendChild(seg);
-    accAngle+=angle;
+    startAngle+=angle;
   });
   svg.appendChild(defs);
-  // 中心文字
   svg.appendChild(svgEl("text",{x:200,y:158,"text-anchor":"middle",fill:TEXT,"font-size":24,"font-weight":900,"letter-spacing":"-0.5"})).textContent="SECTORS";
   const upSectors=data.filter(d=>d.change>=0);
   const downSectors=data.filter(d=>d.change<0);
@@ -966,7 +967,6 @@ function getMarketStatus(){
   svg.appendChild(svgEl("text",{x:200,y:185,"text-anchor":"middle",fill:RISE,"font-size":16,"font-weight":800,"font-family":"'SF Mono',monospace"})).textContent="▲ "+fmtPctRaw(upAvg);
   svg.appendChild(svgEl("text",{x:200,y:205,"text-anchor":"middle",fill:FALL,"font-size":14,"font-weight":700,"font-family":"'SF Mono',monospace"})).textContent="▼ "+fmtPctRaw(downAvg);
   container.appendChild(svg);
-  // Legend
   const leg=document.getElementById("sectorLegend");
   data.forEach(d=>{
     const item=document.createElement("div");item.className="pie-legend-item";
@@ -1117,7 +1117,7 @@ function hideTip(){tip.style.opacity="0"}
         });
       }
       else if (target.id === 'stockPie' || target.id === 'sectorPie') {
-        target.querySelectorAll('.pie-ring-segment').forEach(seg => seg.classList.add('animate'));
+        target.querySelectorAll('.pie-segment').forEach(seg => seg.classList.add('animate'));
       }
       else if (target.id === 'sectorBar') {
         target.querySelectorAll('.sector-bar').forEach((bar, i) => {
