@@ -413,9 +413,6 @@ section{padding:60px 0}
 
 /* Pie charts */
 .pie-container{display:flex;align-items:center;justify-content:center;position:relative}
-.pie-glow{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);width:200px;height:50px;border-radius:50%;filter:blur(30px);opacity:0.35;pointer-events:none;z-index:0;transition:background .3s}
-.pie-glow.up{background:var(--rise)}
-.pie-glow.down{background:var(--fall)}
 .pie-legend{display:flex;flex-wrap:wrap;gap:10px 16px;margin-top:24px;font-size:13px;font-weight:600}
 .pie-legend-item{display:flex;align-items:center;gap:6px;color:var(--text2)}
 .pie-legend-dot{width:10px;height:10px;border-radius:3px}
