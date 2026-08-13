@@ -311,7 +311,7 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:
 .ticker-bar-bottom{position:fixed;bottom:0;left:0;right:0;z-index:100;border-top:1px solid var(--ticker-border)}
 .ticker-grid{position:absolute;inset:0;pointer-events:none;opacity:0.3}
 .ticker-grid svg{width:100%;height:100%}
-.ticker-track{display:flex;white-space:nowrap;position:relative;z-index:1}
+.ticker-track{display:flex;white-space:nowrap;position:relative;z-index:1;height:100%;align-items:center}
 .ticker-item{display:inline-flex;align-items:center;padding:0 20px;font-size:13px;font-weight:700;font-family:'SF Mono',monospace;letter-spacing:0.3px;flex-shrink:0}
 .ticker-name{color:var(--text2);margin-right:8px}
 .ticker-change.up{color:var(--rise)}
