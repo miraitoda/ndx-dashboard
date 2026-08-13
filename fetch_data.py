@@ -1071,8 +1071,8 @@ function rollNumber(el, fromValue, toValue, duration){
       const wrap=document.createElement("span");
       wrap.style.display="inline-block";
       wrap.style.overflow="hidden";
-      wrap.style.height="1.25em";
-      wrap.style.lineHeight="1.25em";
+      wrap.style.height="1em";
+      wrap.style.lineHeight="1em";
       wrap.style.verticalAlign="bottom";
 
       const strip=document.createElement("span");
@@ -1092,8 +1092,8 @@ function rollNumber(el, fromValue, toValue, duration){
         const d=document.createElement("span");
         d.textContent=num;
         d.style.display="block";
-        d.style.height="1.25em";
-        d.style.lineHeight="1.25em";
+        d.style.height="1em";
+        d.style.lineHeight="1em";
         strip.appendChild(d);
       });
 
