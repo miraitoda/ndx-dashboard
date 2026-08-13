@@ -306,13 +306,13 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:
 .hero-glow{position:fixed;top:0;left:0;right:0;height:500px;pointer-events:none;z-index:0;background:radial-gradient(ellipse at 50% 0%, var(--hero-glow) 0%, transparent 60%)}
 
 /* Ticker */
-.ticker-bar{position:sticky;z-index:100;background:var(--ticker-bg);overflow:hidden;backdrop-filter:blur(20px);height:38px;box-sizing:border-box}
+.ticker-bar{position:sticky;z-index:100;background:var(--ticker-bg);overflow:hidden;backdrop-filter:blur(20px);height:36px;box-sizing:border-box}
 .ticker-bar-top{top:0;border-bottom:1px solid var(--ticker-border)}
 .ticker-bar-bottom{position:fixed;bottom:0;left:0;right:0;z-index:100;border-top:1px solid var(--ticker-border)}
 .ticker-grid{position:absolute;inset:0;pointer-events:none;opacity:0.3}
 .ticker-grid svg{width:100%;height:100%}
 .ticker-track{display:flex;white-space:nowrap;position:relative;z-index:1;height:100%;align-items:center}
-.ticker-item{display:inline-flex;align-items:center;padding:0 20px;font-size:13px;font-weight:700;font-family:'SF Mono',monospace;letter-spacing:0.3px;flex-shrink:0}
+.ticker-item{display:inline-flex;align-items:center;padding:0 20px;font-size:13px;font-weight:700;font-family:'SF Mono',monospace;letter-spacing:0.3px;flex-shrink:0;line-height:1}
 .ticker-name{color:var(--text2);margin-right:8px}
 .ticker-change.up{color:var(--rise)}
 .ticker-change.down{color:var(--fall)}
@@ -523,7 +523,6 @@ section{padding:60px 0}
       <div class="hero-left">
         <div class="hero-tag"><span class="hero-tag-dot"></span><span class="hero-tag-text">NASDAQ-100</span></div>
         <h1 class="hero-title">纳斯达克<br><span class="hero-accent">100</span></h1>
-        <p class="hero-desc">每日自动更新的纳斯达克100指数可视化仪表盘。基于 Yahoo Finance 实时数据。</p>
         <div class="hero-meta">
           <span class="hero-date" id="dateStr"></span>
           <span class="hero-dot"></span>
