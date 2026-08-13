@@ -486,9 +486,59 @@ section{padding:60px 0}
   opacity: 1;
 }
 
+/* ===== 背景等高线纹理 ===== */
+.contour-texture {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+.contour-green, .contour-purple {
+  position: absolute;
+  inset: -50%;
+  filter: blur(0.5px);
+}
+.contour-green {
+  background:
+    radial-gradient(ellipse 600px 400px at 20% 30%, rgba(57,255,20,0.04) 0%, transparent 70%),
+    radial-gradient(ellipse 500px 350px at 70% 60%, rgba(57,255,20,0.03) 0%, transparent 65%),
+    radial-gradient(ellipse 400px 300px at 40% 80%, rgba(57,255,20,0.035) 0%, transparent 60%),
+    radial-gradient(ellipse 700px 450px at 80% 20%, rgba(57,255,20,0.025) 0%, transparent 75%),
+    radial-gradient(ellipse 350px 280px at 10% 70%, rgba(57,255,20,0.03) 0%, transparent 55%);
+  animation: drift-green 25s ease-in-out infinite alternate;
+}
+.contour-purple {
+  background:
+    radial-gradient(ellipse 550px 380px at 60% 40%, rgba(191,0,255,0.04) 0%, transparent 70%),
+    radial-gradient(ellipse 480px 320px at 30% 70%, rgba(191,0,255,0.03) 0%, transparent 65%),
+    radial-gradient(ellipse 420px 350px at 85% 15%, rgba(191,0,255,0.035) 0%, transparent 60%),
+    radial-gradient(ellipse 650px 400px at 15% 50%, rgba(191,0,255,0.025) 0%, transparent 75%),
+    radial-gradient(ellipse 380px 260px at 55% 85%, rgba(191,0,255,0.03) 0%, transparent 55%);
+  animation: drift-purple 30s ease-in-out infinite alternate;
+}
+@keyframes drift-green {
+  0% { transform: translate(0,0) scale(1); }
+  33% { transform: translate(2%,-1%) scale(1.02); }
+  66% { transform: translate(-1%,2%) scale(0.98); }
+  100% { transform: translate(1%,1%) scale(1.01); }
+}
+@keyframes drift-purple {
+  0% { transform: translate(0,0) scale(1); }
+  33% { transform: translate(-2%,1%) scale(0.99); }
+  66% { transform: translate(1%,-2%) scale(1.03); }
+  100% { transform: translate(-1%,-1%) scale(1); }
+}
+
 </style></head><body>
 
 <div id="app">
+
+<!-- 等高线纹理背景 -->
+<div class="contour-texture">
+  <div class="contour-green"></div>
+  <div class="contour-purple"></div>
+</div>
 
 <!-- 全局背景网格 -->
 <div class="global-grid">
