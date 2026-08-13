@@ -738,6 +738,7 @@ function getMarketStatus(){
   const idx=DATA.index;
   document.getElementById("dateStr").textContent=DATA.date;
   document.getElementById("statusBadge").textContent=getMarketStatus();
+  document.querySelector('.hero-accent').style.color = idx.change >= 0 ? 'var(--rise)' : 'var(--fall)';
 
   const priceEl=document.getElementById("idxPrice");
   const chgEl=document.getElementById("idxChange");
