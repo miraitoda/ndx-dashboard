@@ -245,7 +245,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NDX Dashboard</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap');
 
 :root {
   --bg: #0a0a0a;
@@ -312,7 +312,7 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:
 .ticker-grid{position:absolute;inset:0;pointer-events:none;opacity:0.3}
 .ticker-grid svg{width:100%;height:100%}
 .ticker-track{display:flex;white-space:nowrap;position:relative;z-index:1;height:100%;align-items:center}
-.ticker-item{display:inline-flex;align-items:center;padding:0 20px;font-size:13px;font-weight:700;font-family:'SF Mono',monospace;letter-spacing:0.3px;flex-shrink:0;line-height:1}
+.ticker-item{display:inline-flex;align-items:center;padding:0 20px;font-size:13px;font-weight:700;font-family:'JetBrains Mono',monospace;letter-spacing:0.3px;flex-shrink:0;line-height:1}
 .ticker-name{color:var(--text2);margin-right:8px}
 .ticker-change.up{color:var(--rise)}
 .ticker-change.down{color:var(--fall)}
@@ -361,11 +361,11 @@ section{padding:60px 0}
 .hero-badge{padding:4px 12px;border-radius:100px;background:var(--badge-bg);color:var(--badge-color);border:1px solid var(--badge-border);font-size:12px;font-weight:700;letter-spacing:0.5px}
 .hero-kpis{display:flex;gap:40px;flex-wrap:wrap}
 .kpi-label{font-size:11px;font-weight:800;color:var(--text3);letter-spacing:2px;margin-bottom:8px}
-.kpi-value{font-size:52px;font-weight:900;letter-spacing:-2px;color:var(--text);font-family:'SF Mono',monospace;line-height:1}
-.kpi-change{font-size:18px;font-weight:800;margin-top:8px;font-family:'SF Mono',monospace}
+.kpi-value{font-size:52px;font-weight:900;letter-spacing:-2px;color:var(--text);font-family:'JetBrains Mono',monospace;line-height:1}
+.kpi-change{font-size:18px;font-weight:800;margin-top:8px;font-family:'JetBrains Mono',monospace}
 .kpi-change.up{color:var(--rise)}
 .kpi-change.down{color:var(--fall)}
-.kpi-sub{font-size:13px;color:var(--text3);margin-top:8px;font-family:'SF Mono',monospace}
+.kpi-sub{font-size:13px;color:var(--text3);margin-top:8px;font-family:'JetBrains Mono',monospace}
 
 /* AI Summary */
 .ai-summary p{margin:0;font-size:28px;font-weight:700;line-height:1.4;color:var(--text);max-width:900px;letter-spacing:-0.5px}
@@ -381,7 +381,7 @@ section{padding:60px 0}
 /* Distribution bars */
 .dist-chart{display:flex;align-items:flex-end;gap:4px;height:200px;padding:20px 0;border-bottom:1px solid var(--border)}
 .dist-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px}
-.dist-count{font-size:11px;font-weight:800;font-family:'SF Mono',monospace}
+.dist-count{font-size:11px;font-weight:800;font-family:'JetBrains Mono',monospace}
 .dist-count.up{color:var(--rise)}
 .dist-count.down{color:var(--fall)}
 .dist-bar{width:100%;border-radius:4px 4px 0 0}
@@ -396,7 +396,7 @@ section{padding:60px 0}
 .sector-bar{height:100%;position:relative}
 .sector-bar.up{background:var(--rise);border-radius:0 4px 4px 0}
 .sector-bar.down{background:var(--fall);border-radius:4px 0 0 4px;margin-left:auto}
-.sector-bar-label{position:absolute;top:50%;transform:translateY(-50%);font-size:12px;font-weight:800;font-family:'SF Mono',monospace;white-space:nowrap}
+.sector-bar-label{position:absolute;top:50%;transform:translateY(-50%);font-size:12px;font-weight:800;font-family:'JetBrains Mono',monospace;white-space:nowrap}
 .sector-bar-label.up{right:12px;color:rgba(0,0,0,0.6)}
 .sector-bar-label.down{left:12px;color:rgba(255,255,255,0.9)}
 
@@ -408,8 +408,8 @@ section{padding:60px 0}
 .stock-cell{padding:14px 10px;border-radius:12px;text-align:center;border:1px solid var(--rise-border);color:var(--rise);background:var(--surface-raised);cursor:pointer;transition:all 0.15s}
 .stock-cell.down{border-color:var(--fall-border);color:var(--fall)}
 .stock-cell:hover{transform:translateY(-2px) scale(1.02);border-color:var(--border-strong)}
-.stock-ticker{font-size:14px;font-weight:800;font-family:'SF Mono',monospace;letter-spacing:0.5px}
-.stock-pct{font-size:12px;font-weight:600;font-family:'SF Mono',monospace;margin-top:4px;opacity:0.9}
+.stock-ticker{font-size:14px;font-weight:800;font-family:'JetBrains Mono',monospace;letter-spacing:0.5px}
+.stock-pct{font-size:12px;font-weight:600;font-family:'JetBrains Mono',monospace;margin-top:4px;opacity:0.9}
 
 /* Pie charts */
 .pie-container{display:flex;align-items:center;justify-content:center;position:relative}
@@ -421,7 +421,7 @@ section{padding:60px 0}
 .footer-text{font-size:12px;color:var(--text3);font-weight:500;letter-spacing:0.3px}
 
 /* Tooltip */
-.tooltip{position:fixed;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--text);pointer-events:none;opacity:0;transition:opacity .15s;z-index:1000;box-shadow:0 8px 32px rgba(0,0,0,0.4);font-family:'SF Mono',monospace;white-space:nowrap}
+.tooltip{position:fixed;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--text);pointer-events:none;opacity:0;transition:opacity .15s;z-index:1000;box-shadow:0 8px 32px rgba(0,0,0,0.4);font-family:'JetBrains Mono',monospace;white-space:nowrap}
 
 @media(max-width:720px){
   .hero-title{font-size:40px!important}
@@ -932,7 +932,7 @@ function getMarketStatus(){
   const shadow="text-shadow:0 2px 10px rgba(0,0,0,0.85)";
   svg.appendChild(svgEl("text",{x:cx,y:cy-12,"text-anchor":"middle",fill:"var(--text)","font-size":28,"font-weight":900,"letter-spacing":"-1",style:shadow})).textContent="NDX";
   const chgColor=DATA.index.change>=0?"var(--rise)":"var(--fall)";
-  svg.appendChild(svgEl("text",{x:cx,y:cy+15,"text-anchor":"middle",fill:chgColor,"font-size":18,"font-weight":800,"font-family":"'SF Mono',monospace",style:shadow})).textContent=fmtPct(DATA.index.change);
+  svg.appendChild(svgEl("text",{x:cx,y:cy+15,"text-anchor":"middle",fill:chgColor,"font-size":18,"font-weight":800,"font-family":"'JetBrains Mono',monospace",style:shadow})).textContent=fmtPct(DATA.index.change);
 
   container.appendChild(svg);
   const leg=document.getElementById("stockLegend");
@@ -987,8 +987,8 @@ function getMarketStatus(){
   const downSectors=data.filter(d=>d.change<0);
   const upAvg=upSectors.length?upSectors.reduce((a,b)=>a+b.change,0)/upSectors.length:0;
   const downAvg=downSectors.length?downSectors.reduce((a,b)=>a+b.change,0)/downSectors.length:0;
-  svg.appendChild(svgEl("text",{x:cx,y:cy+5,"text-anchor":"middle",fill:"var(--rise)","font-size":16,"font-weight":800,"font-family":"'SF Mono',monospace",style:shadow})).textContent="▲ "+fmtPctRaw(upAvg);
-  svg.appendChild(svgEl("text",{x:cx,y:cy+25,"text-anchor":"middle",fill:"var(--fall)","font-size":14,"font-weight":700,"font-family":"'SF Mono',monospace",style:shadow})).textContent="▼ "+fmtPctRaw(downAvg);
+  svg.appendChild(svgEl("text",{x:cx,y:cy+5,"text-anchor":"middle",fill:"var(--rise)","font-size":16,"font-weight":800,"font-family":"'JetBrains Mono',monospace",style:shadow})).textContent="▲ "+fmtPctRaw(upAvg);
+  svg.appendChild(svgEl("text",{x:cx,y:cy+25,"text-anchor":"middle",fill:"var(--fall)","font-size":14,"font-weight":700,"font-family":"'JetBrains Mono',monospace",style:shadow})).textContent="▼ "+fmtPctRaw(downAvg);
 
   container.appendChild(svg);
   const leg=document.getElementById("sectorLegend");
