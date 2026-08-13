@@ -1220,7 +1220,7 @@ function hideTip(){tip.style.opacity="0"}
 </body></html>"""
 
 def generate_summary(data, summary_type):
-    """本地生成AI总结，使用丰富的随机话术模板，每天固定组合保证一致性。"""
+    """本地生成AI总结，使用丰富的专业话术模板，每天固定组合保证一致性。"""
     import random
     from datetime import datetime
 
@@ -1234,8 +1234,8 @@ def generate_summary(data, summary_type):
     history = data.get("history", [])
     date_str = data.get("date", "")
 
-    up = index.get("up", 0)
-    down = index.get("down", 0)
+    up = index.get("up", 0)      # 上涨家数（绿）
+    down = index.get("down", 0)  # 下跌家数（红）
     total = index.get("total", 0)
     change = index.get("change", 0)
 
@@ -1252,131 +1252,131 @@ def generate_summary(data, summary_type):
     def pick(*args):
         return random.choice(args)
 
-    # 辅助：获取一些常用数据
     top1 = top5[0] if top5 else None
     bot1 = bottom5[-1] if bottom5 else None
 
-    # 判断涨跌氛围
     up_ratio = up / total if total else 0
     is_bullish = change > 0 and up_ratio > 0.55
     is_bearish = change < 0 and up_ratio < 0.45
     is_mixed = not is_bullish and not is_bearish
 
+    # -------- overview：大盘综述 --------
     if summary_type == "overview":
         if change > 1.5:
             templates = [
-                f"今天纳指100直接起飞，收了{fmt_pct(change)}，{up}只涨{down}只跌，这行情看着就舒服。",
-                f"大盘硬得很，NDX大涨{fmt_pct(change)}，上涨家数冲到{up}只，空头今天估计很难受。",
-                f"今天这走势，说实话有点超预期。纳指100收{fmt_pct(change)}，{up}涨{down}跌，赚钱效应不错。",
-                f"{up}只成分股收红，NDX涨了{fmt_pct(change)}，科技龙头集体发力，这波有点猛。",
-                f"今天市场给面子，纳指100直接{fmt_pct(change)}，{down}只下跌几乎可以忽略不计。",
-                f"开盘就往上冲，收盘也没掉下来，NDX今天{fmt_pct(change)}，{up}只上涨，稳。",
-                f"难得一见的普涨行情，{up}只涨{down}只跌，NDX收{fmt_pct(change)}，持仓的朋友今晚可以加个鸡腿。",
-                f"今天这涨幅{fmt_pct(change)}，放在最近一个月都算大的。{up}只上涨，市场信心明显回来了。",
-                f"纳指100今天{fmt_pct(change)}，{up}只成分股飘红，感觉资金在回流科技股。",
-                f"大盘单边上行，NDX收{fmt_pct(change)}，{up}涨{down}跌，基本没什么悬念的一天。",
-                f"今天行情有点猛，{fmt_stock(top1)}涨了{fmt_pct(top1['change'])}，带动指数直接{fmt_pct(change)}。",
-                f"{up}只上涨、{down}只下跌，这比例看着就踏实。NDX今天{fmt_pct(change)}，多头完全控盘。",
-                f"今天纳指100的表现，可以说是近期最强之一。{fmt_pct(change)}的涨幅，{up}只上涨，服气。",
-                f"大盘给力，NDX{fmt_pct(change)}，上涨家数{up}只，今天基本就是捡钱行情。",
-                f"今天这行情，空头估计要怀疑人生了。NDX{fmt_pct(change)}，{up}涨{down}跌，一边倒。",
-                f"纳指100强势收涨{fmt_pct(change)}，{up}只成分股上涨，市场情绪明显偏暖。",
-                f"今天NDX大涨{fmt_pct(change)}，科技龙头集体爆发，{fmt_stock(top1)}领涨{fmt_pct(top1['change'])}。",
-                f"大盘单边上行，纳指100收{fmt_pct(change)}，{up}涨{down}跌，多头主导毫无悬念。",
-                f"强势格局延续，NDX今日{fmt_pct(change)}，前五大权重股贡献显著。",
-                f"多头攻势凌厉，纳指100大涨{fmt_pct(change)}，仅{down}只下跌，普涨特征明显。",
-                f"今天这盘面，说实话有点强得离谱。NDX{fmt_pct(change)}，{up}只涨，跌的{down}只几乎可以忽略。",
-                f"行情来了挡都挡不住，纳指100直接{fmt_pct(change)}，{up}只成分股收红，这势头可以。",
-                f"今天大盘给足面子，NDX{fmt_pct(change)}，上涨家数{up}只，持仓的朋友应该都笑了。",
-                f"纳指100今天这表现，{fmt_pct(change)}的涨幅，{up}只上涨，科技股的春天回来了？",
-                f"今天市场有点疯，NDX{fmt_pct(change)}，{up}涨{down}跌，感觉资金在抢筹。",
+                f"纳斯达克100指数今日强势收涨{fmt_pct(change)}，上涨成分股{up}只，下跌{down}只，多头情绪主导全场。",
+                f"NDX大涨{fmt_pct(change)}，上涨家数达{up}只，科技板块全面走强，空头回补迹象显著。",
+                f"今日行情超出预期，纳斯达克100指数录得{fmt_pct(change)}涨幅，涨跌比{up}:{down}，赚钱效应突出。",
+                f"科技龙头集中发力，NDX收高{fmt_pct(change)}，{up}只成分股收于昨日收盘价上方，下跌仅{down}只。",
+                f"指数单边上行，纳斯达克100收报{fmt_pct(change)}，{up}只个股录得正收益，市场风险偏好明显回升。",
+                f"开盘即呈现强势特征，NDX最终收涨{fmt_pct(change)}，上涨家数占比达{up/total*100:.1f}%，普涨格局明确。",
+                f"近期罕见之普涨行情，NDX大涨{fmt_pct(change)}，涨跌家数比{up}:{down}，多头完全掌控盘面。",
+                f"今日涨幅{fmt_pct(change)}为近一个月最大单日涨幅之一，{up}只成分股收高，市场信心显著修复。",
+                f"纳斯达克100收涨{fmt_pct(change)}，{up}只成分股飘绿（涨），资金回流科技主线的迹象明显。",
+                f"大盘呈单边上涨态势，NDX收高{fmt_pct(change)}，{up}涨{down}跌，日内几乎未见有效抛压。",
+                f"{fmt_stock(top1)}大涨{fmt_pct(top1['change'])}领跑权重股，带动NDX录得{fmt_pct(change)}的强劲涨幅。",
+                f"涨跌比{up}:{down}凸显多头压倒性优势，NDX今日大涨{fmt_pct(change)}，为近期最强表现之一。",
+                f"纳指100今日表现堪称近期最强，{fmt_pct(change)}的涨幅配合{up}只上涨成分股，多头格局稳固。",
+                f"指数强势突破，NDX收涨{fmt_pct(change)}，上涨家数{up}只，市场呈现典型的risk-on模式。",
+                f"今日空头遭受重挫，NDX飙升{fmt_pct(change)}，{up}只个股收涨，{down}只收跌，单边行情特征显著。",
+                f"纳斯达克100指数上涨{fmt_pct(change)}，{up}只成分股录得涨幅，市场情绪明显偏向乐观。",
+                f"权重股集体爆发，{fmt_stock(top1)}领涨{fmt_pct(top1['change'])}，NDX今日劲升{fmt_pct(change)}。",
+                f"多头全日控盘，纳指100收高{fmt_pct(change)}，{up}涨{down}跌，趋势强度超出预期。",
+                f"强势格局延续，NDX今日上涨{fmt_pct(change)}，前五大权重股贡献了主要涨幅。",
+                f"多头攻势凌厉，纳指100大涨{fmt_pct(change)}，仅{down}只成分股收跌，呈现全面开花格局。",
+                f"今日盘面之强劲令人侧目，NDX收高{fmt_pct(change)}，{up}只个股录得正收益，下跌个股几乎可忽略。",
+                f"行情势头猛烈，纳指100直接拉涨{fmt_pct(change)}，{up}只成分股收绿（涨），多头势不可挡。",
+                f"今日大盘表现亮眼，NDX上涨{fmt_pct(change)}，上涨家数{up}只，持仓者普遍录得正回报。",
+                f"纳指100今日表现抢眼，{fmt_pct(change)}的涨幅配合{up}只上涨个股，科技股或迎来新一轮上行周期。",
+                f"市场呈现抢筹行情，NDX飙升{fmt_pct(change)}，{up}涨{down}跌，资金流入意愿强烈。",
             ]
         elif change > 0:
             templates = [
-                f"今天纳指100小涨{fmt_pct(change)}，{up}涨{down}跌，市场温和向好，不算惊艳但也能接受。",
-                f"NDX今天微涨{fmt_pct(change)}，{up}只收红，整体涨跌互现，算是平稳的一天。",
-                f"大盘窄幅波动后收红，纳指100{fmt_pct(change)}，上涨家数略占优，但力度一般。",
-                f"市场小幅反弹，NDX收{fmt_pct(change)}，{up}只成分股收红，{down}只收绿，分化还在。",
-                f"温和上涨格局，纳斯达克100指数{fmt_pct(change)}，板块轮动有序，但没什么大动静。",
-                f"今天NDX涨了{fmt_pct(change)}，{up}只涨{down}只跌，怎么说呢，有涨就好，不挑。",
-                f"大盘小幅收红，纳指100{fmt_pct(change)}，{up}只上涨，但涨幅都不大，观望情绪还在。",
-                f"今天市场给了一颗小糖，NDX{fmt_pct(change)}，{up}涨{down}跌，聊胜于无吧。",
-                f"纳指100今天{fmt_pct(change)}，{up}只成分股上涨，整体偏暖但力度有限。",
-                f"今天这行情，说强不强说弱不弱，NDX{fmt_pct(change)}，{up}涨{down}跌，继续磨。",
-                f"小涨{fmt_pct(change)}，{up}只上涨，市场温和反弹，但感觉资金还在犹豫。",
-                f"NDX今日{fmt_pct(change)}，{up}涨{down}跌，大盘小幅走高，但热点不太集中。",
-                f"今天纳指100收了根小阳线，{fmt_pct(change)}，{up}只涨，算是给这周开了个好头。" if date_str.endswith("-01") or date_str.endswith("-02") or date_str.endswith("-03") else f"今天纳指100收了根小阳线，{fmt_pct(change)}，{up}只涨，继续稳步推进。",
-                f"大盘小幅收红，NDX{fmt_pct(change)}，{up}只成分股上涨，市场情绪偏谨慎乐观。",
-                f"今天这走势，不温不火，NDX{fmt_pct(change)}，{up}涨{down}跌，等待方向选择。",
-                f"纳指100小幅收涨{fmt_pct(change)}，{up}涨{down}跌，市场温和向好。",
-                f"NDX今日微涨{fmt_pct(change)}，{fmt_stock(top1)}领涨，整体涨跌互现。",
-                f"大盘窄幅波动后收红，纳指100{fmt_pct(change)}，上涨家数略占优。",
-                f"市场小幅反弹，NDX收{fmt_pct(change)}，{up}只成分股收红，{down}只收绿。",
-                f"温和上涨格局，纳斯达克100指数{fmt_pct(change)}，板块轮动有序。",
-                f"今天NDX涨了{fmt_pct(change)}，{up}只涨{down}只跌，有涨就好，知足常乐。",
-                f"大盘小幅收红，纳指100{fmt_pct(change)}，{up}只上涨，力度一般但方向对了。",
-                f"今天市场给了一颗小糖，NDX{fmt_pct(change)}，{up}涨{down}跌，继续观察。",
-                f"纳指100今天{fmt_pct(change)}，{up}只成分股上涨，偏暖但不够兴奋。",
-                f"今天这行情，说强不强说弱不弱，NDX{fmt_pct(change)}，{up}涨{down}跌，继续磨底。",
+                f"纳斯达克100指数小幅收高{fmt_pct(change)}，涨跌家数{up}:{down}，市场呈现温和的正面基调。",
+                f"NDX微涨{fmt_pct(change)}，{up}只成分股收绿（涨），整体涨跌互现，日内交投相对平淡。",
+                f"指数窄幅震荡后收于正值区间，纳指100上涨{fmt_pct(change)}，上涨家数略占优势，但上行动能有限。",
+                f"市场录得温和反弹，NDX收高{fmt_pct(change)}，{up}只成分股收涨，{down}只收跌，分化格局延续。",
+                f"纳斯达克100指数小幅走高{fmt_pct(change)}，板块轮动有序，但缺乏明确的方向性突破。",
+                f"NDX今日收涨{fmt_pct(change)}，涨跌家数{up}:{down}，虽涨幅有限但方向偏上，多头略占优势。",
+                f"指数微幅收高，纳指100上涨{fmt_pct(change)}，{up}只个股录得涨幅，但整体涨幅温和，观望氛围尚存。",
+                f"今日市场提供有限的正回报，NDX收高{fmt_pct(change)}，涨跌家数{up}:{down}，信号偏正面但力度不足。",
+                f"纳斯达克100指数上涨{fmt_pct(change)}，{up}只成分股录得正收益，整体情绪偏暖但交投清淡。",
+                f"今日走势缺乏方向性，NDX微涨{fmt_pct(change)}，涨跌家数{up}:{down}，市场仍在消化近期信息。",
+                f"指数温和上行，NDX收涨{fmt_pct(change)}，上涨家数{up}只，反弹力度有限，资金略显犹豫。",
+                f"纳斯达克100今日录得{fmt_pct(change)}的小幅涨幅，{up}涨{down}跌，大盘处于区间震荡上沿。",
+                f"NDX收于小幅正区间，{fmt_pct(change)}，{up}只成分股走高，本周开局偏正面。",
+                f"大盘温和收红（涨），纳指100上涨{fmt_pct(change)}，{up}只成分股收涨，市场情绪偏向谨慎乐观。",
+                f"今日走势不温不火，NDX微涨{fmt_pct(change)}，{up}涨{down}跌，市场等待新的催化剂。",
+                f"纳斯达克100指数小幅收涨{fmt_pct(change)}，涨跌家数{up}:{down}，整体维持区间震荡格局。",
+                f"NDX今日微幅走高{fmt_pct(change)}，{fmt_stock(top1)}领涨，但整体涨跌互现，方向尚未明朗。",
+                f"大盘窄幅波动后收于正值区间，纳指100上涨{fmt_pct(change)}，上涨家数略占优势。",
+                f"市场录得温和涨幅，NDX收高{fmt_pct(change)}，{up}只成分股收涨，{down}只收跌，多空相对均衡。",
+                f"纳斯达克100指数小幅走高{fmt_pct(change)}，板块轮动有序，上行动能有待加强。",
+                f"NDX今日收涨{fmt_pct(change)}，涨跌家数{up}:{down}，方向正确但力度温和，保持耐心。",
+                f"大盘微幅收涨，纳指100上涨{fmt_pct(change)}，{up}只个股上涨，趋势方向偏上但动能不足。",
+                f"今日市场提供温和正收益，NDX收高{fmt_pct(change)}，{up}涨{down}跌，继续观察后续发展。",
+                f"纳斯达克100指数今日上涨{fmt_pct(change)}，{up}只成分股收涨，偏暖基调延续但缺乏爆发力。",
+                f"今日行情偏正面但缺乏激情，NDX涨{fmt_pct(change)}，{up}涨{down}跌，市场仍在寻找方向。",
             ]
         elif change > -1:
             templates = [
-                f"今天纳指100微{fmt_pct(change)}，{up}涨{down}跌，市场观望情绪较浓， basically 原地踏步。",
-                f"NDX今天窄幅收{fmt_pct(change)}，多空力量相对均衡，{fmt_stock(top1)}与{fmt_stock(bot1)}分化明显。",
-                f"大盘平盘震荡，纳指100{fmt_pct(change)}，涨跌家数接近，方向感不强。",
-                f"市场小幅整理，NDX{fmt_pct(change)}，{up}只上涨，{down}只下跌，成交清淡的一天。",
-                f"指数微幅收绿，纳斯达克100{fmt_pct(change)}，板块表现参差不齐，没什么主线。",
-                f"今天NDX绿了{fmt_pct(change).replace('-', '')}，{up}涨{down}跌，幅度很小，基本可以忽略。",
-                f"大盘小幅收绿，纳指100{fmt_pct(change)}，{up}只上涨，多空博弈没什么结果。",
-                f"今天市场有点无聊，NDX{fmt_pct(change)}，{up}涨{down}跌，大家都在等消息。",
-                f"纳指100今天{fmt_pct(change)}，{up}只成分股上涨，整体偏弱但跌幅有限。",
-                f"今天这行情，食之无味弃之可惜，NDX{fmt_pct(change)}，{up}涨{down}跌，继续耗着。",
-                f"微跌{fmt_pct(change).replace('-', '')}，{up}只上涨，市场小幅调整，但没什么恐慌。",
-                f"NDX今日{fmt_pct(change)}，{up}涨{down}跌，大盘窄幅走低，情绪偏谨慎。",
-                f"今天纳指100收了个小阴线，{fmt_pct(change)}，{down}只跌，调整幅度很小。",
-                f"大盘微幅收绿，NDX{fmt_pct(change)}，{up}只成分股上涨，市场等待催化剂。",
-                f"今天这走势，平淡无奇，NDX{fmt_pct(change)}，{up}涨{down}跌，多看少动。",
-                f"纳斯达克100指数微{fmt_pct(change)}，{up}涨{down}跌，市场观望情绪较浓。",
-                f"NDX今天窄幅收{fmt_pct(change)}，多空力量相对均衡，个股分化明显。",
-                f"大盘平盘震荡，纳指100{fmt_pct(change)}，涨跌家数接近，等待方向选择。",
-                f"市场小幅整理，NDX{fmt_pct(change)}，{up}只上涨，{down}只下跌，成交清淡。",
-                f"指数微幅收绿，纳斯达克100{fmt_pct(change)}，板块表现参差不齐。",
-                f"今天NDX绿了{fmt_pct(change).replace('-', '')}，{up}涨{down}跌，幅度很小，不用太担心。",
-                f"大盘小幅收绿，纳指100{fmt_pct(change)}，{up}只上涨，多空还在拉锯。",
-                f"今天市场有点无聊，NDX{fmt_pct(change)}，{up}涨{down}跌，大家都在等方向。",
-                f"纳指100今天{fmt_pct(change)}，{up}只成分股上涨，整体偏弱但可控。",
-                f"今天这行情，食之无味弃之可惜，NDX{fmt_pct(change)}，{up}涨{down}跌，继续观望。",
+                f"纳斯达克100指数微幅收跌{fmt_pct(change)}，涨跌家数{up}:{down}，市场处于观望模式，方向性不强。",
+                f"NDX窄幅收低{fmt_pct(change)}，多空力量大致均衡，{fmt_stock(top1)}与{fmt_stock(bot1)}走势分化显著。",
+                f"指数围绕平盘震荡，纳指100收跌{fmt_pct(change)}，涨跌家数接近，缺乏明确趋势信号。",
+                f"市场录得小幅整理，NDX下跌{fmt_pct(change)}，{up}只上涨，{down}只下跌，交投清淡。",
+                f"纳斯达克100指数微幅收低{fmt_pct(change)}，板块表现参差不齐，未形成清晰主线。",
+                f"NDX今日下跌{fmt_pct(change).replace('-', '')}，涨跌家数{up}:{down}，调整幅度有限，属正常波动。",
+                f"大盘微幅收跌，纳指100下滑{fmt_pct(change)}，{up}只个股逆势上涨，多空博弈陷入僵局。",
+                f"今日市场乏善可陈，NDX收低{fmt_pct(change)}，涨跌家数{up}:{down}，投资者等待新数据指引。",
+                f"纳斯达克100指数下跌{fmt_pct(change)}，{up}只成分股收涨，整体偏弱但下行空间有限。",
+                f"今日走势索然无味，NDX微跌{fmt_pct(change)}，{up}涨{down}跌，市场处于消化阶段。",
+                f"指数小幅走低，NDX收跌{fmt_pct(change)}，上涨家数{up}只，调整幅度可控，未见恐慌情绪。",
+                f"纳斯达克100今日录得{fmt_pct(change)}的小幅下跌，{up}涨{down}跌，大盘在近期区间内运行。",
+                f"NDX收于平盘下方，{fmt_pct(change)}，{up}只成分股走高，{down}只走低，方向感缺失。",
+                f"大盘微幅收阴（跌），纳指100下跌{fmt_pct(change)}，{up}只成分股收涨，市场等待新的催化因素。",
+                f"今日走势平淡无奇，NDX微跌{fmt_pct(change)}，{up}涨{down}跌，建议保持观望。",
+                f"纳斯达克100指数微幅收低{fmt_pct(change)}，涨跌家数{up}:{down}，市场观望情绪较浓。",
+                f"NDX窄幅收低{fmt_pct(change)}，多空力量相对均衡，个股层面分化明显。",
+                f"大盘平盘震荡，纳指100收跌{fmt_pct(change)}，涨跌家数接近，等待方向性突破。",
+                f"市场录得小幅整理，NDX下跌{fmt_pct(change)}，{up}只上涨，{down}只下跌，成交趋于清淡。",
+                f"指数微幅收低，纳斯达克100下跌{fmt_pct(change)}，板块表现分化，缺乏合力。",
+                f"NDX今日微跌{fmt_pct(change).replace('-', '')}，涨跌家数{up}:{down}，幅度温和，无需过度解读。",
+                f"大盘小幅收跌，纳指100下滑{fmt_pct(change)}，{up}只个股上涨，多空拉锯仍在继续。",
+                f"今日市场略显沉闷，NDX收低{fmt_pct(change)}，{up}涨{down}跌，大家都在等待方向信号。",
+                f"纳斯达克100指数下跌{fmt_pct(change)}，{up}只成分股收涨，整体偏弱但仍在可控范围内。",
+                f"今日走势缺乏亮点，NDX微跌{fmt_pct(change)}，{up}涨{down}跌，继续观望为上。",
             ]
         else:
             templates = [
-                f"今天纳指100收跌{fmt_pct(change).replace('-', '')}，{down}只成分股下跌，市场承压调整，有点难受。",
-                f"NDX今天大跌{fmt_pct(change).replace('-', '')}，{fmt_stock(bot1)}领跌{fmt_pct(bot1['change'])}，避险情绪升温。",
-                f"大盘回调明显，纳指100{fmt_pct(change)}，仅{up}只上涨，空头占据主导。",
-                f"市场全线走弱，NDX收{fmt_pct(change)}，{down}只成分股收绿，权重股拖累显著。",
-                f"调整格局延续，纳斯达克100{fmt_pct(change)}，{fmt_stock(bot1)}、{fmt_stock(bottom5[-2] if len(bottom5) > 1 else bot1)}跌幅居前。",
-                f"今天大盘不给力，NDX跌了{fmt_pct(change).replace('-', '')}，{down}只下跌，赚钱效应很差。",
-                f"纳指100今天{fmt_pct(change)}，{up}只涨{down}只跌，绿盘家数有点多，注意风险。",
-                f"市场今天有点崩，NDX{fmt_pct(change)}，仅{up}只收红，空头肆虐。",
-                f"大盘单边下行，纳指100{fmt_pct(change)}，{down}只成分股下跌，信心受挫。",
-                f"今天这跌幅{fmt_pct(change)}，放在最近不算小。{down}只下跌，市场情绪偏冷。",
-                f"NDX今天{fmt_pct(change)}，{up}涨{down}跌，跌的家数远超涨的，谨慎为上。",
-                f"今天纳指100收了个中阴，{fmt_pct(change)}，{down}只跌，短期可能需要消化。",
-                f"大盘走弱，NDX{fmt_pct(change)}，{fmt_stock(bot1)}跌得最多，带崩了情绪。",
-                f"今天市场有点惨，NDX{fmt_pct(change)}，{down}只成分股收绿，持仓的朋友今晚可能睡不着。",
-                f"纳指100今天这表现，{fmt_pct(change)}，{down}只下跌，科技股集体回调。",
-                f"今天空头占了上风，NDX{fmt_pct(change)}，{up}涨{down}跌，短期偏空。",
-                f"大盘回调，纳指100{fmt_pct(change)}，{down}只下跌，市场进入调整模式。",
-                f"今天这行情，说实话有点伤人。NDX{fmt_pct(change)}，{down}只跌，赚钱效应极差。",
-                f"纳指100收跌{fmt_pct(change).replace('-', '')}，{down}只成分股下跌，市场承压调整。",
-                f"NDX今天大跌{fmt_pct(change).replace('-', '')}，{fmt_stock(bot1)}领跌，避险情绪升温。",
-                f"大盘回调明显，纳指100{fmt_pct(change)}，仅{up}只上涨，空头主导。",
-                f"市场全线走弱，NDX收{fmt_pct(change)}，{down}只成分股收绿，权重股拖累。",
-                f"调整格局延续，纳斯达克100{fmt_pct(change)}，头部科技股跌幅居前。",
-                f"今天大盘不给力，NDX跌了{fmt_pct(change).replace('-', '')}，{down}只下跌，注意防守。",
-                f"纳指100今天{fmt_pct(change)}，{up}只涨{down}只跌，绿盘家数偏多，短期偏谨慎。",
+                f"纳斯达克100指数今日承压收跌{fmt_pct(change).replace('-', '')}，{down}只成分股录得下跌，市场进入调整模式。",
+                f"NDX大幅下挫{fmt_pct(change).replace('-', '')}，{fmt_stock(bot1)}领跌{fmt_pct(bot1['change'])}，避险情绪显著升温。",
+                f"大盘回调明显，纳指100下跌{fmt_pct(change)}，仅{up}只个股收涨，空头占据主导地位。",
+                f"市场全面走弱，NDX收低{fmt_pct(change)}，{down}只成分股收跌，权重股拖累效应显著。",
+                f"调整格局延续，纳斯达克100下跌{fmt_pct(change)}，{fmt_stock(bot1)}、{fmt_stock(bottom5[-2] if len(bottom5) > 1 else bot1)}跌幅居前。",
+                f"今日大盘表现疲软，NDX下跌{fmt_pct(change).replace('-', '')}，{down}只个股收跌，赚钱效应匮乏。",
+                f"纳斯达克100今日下挫{fmt_pct(change)}，涨跌家数{up}:{down}，下跌家数显著占优，风险偏好回落。",
+                f"市场遭遇明显抛压，NDX大跌{fmt_pct(change)}，仅{up}只收涨，空头肆虐。",
+                f"指数单边下行，纳指100收低{fmt_pct(change)}，{down}只成分股下跌，市场信心受挫。",
+                f"今日跌幅{fmt_pct(change)}在近期属于较大水平，{down}只个股下跌，市场情绪偏向悲观。",
+                f"NDX今日下挫{fmt_pct(change)}，涨跌家数{up}:{down}，下跌家数远超上涨，建议保持防御姿态。",
+                f"纳斯达克100今日收出中阴线，下跌{fmt_pct(change)}，{down}只个股收跌，短期或需进一步消化。",
+                f"大盘走弱，NDX下跌{fmt_pct(change)}，{fmt_stock(bot1)}领跌，拖累整体市场情绪。",
+                f"今日市场表现惨淡，NDX重挫{fmt_pct(change)}，{down}只成分股收跌，持仓者普遍承压。",
+                f"纳斯达克100今日表现不佳，下跌{fmt_pct(change)}，{down}只个股收跌，科技板块集体回调。",
+                f"今日空头占据上风，NDX下跌{fmt_pct(change)}，涨跌家数{up}:{down}，短期趋势偏空。",
+                f"大盘进入回调模式，纳指100下跌{fmt_pct(change)}，{down}只个股收跌，市场进入调整阶段。",
+                f"今日行情令人失望，NDX下挫{fmt_pct(change)}，{down}只个股收跌，赚钱效应极差。",
+                f"纳斯达克100收跌{fmt_pct(change).replace('-', '')}，{down}只成分股下跌，市场承压调整。",
+                f"NDX今日大幅下挫{fmt_pct(change).replace('-', '')}，{fmt_stock(bot1)}领跌，避险情绪蔓延。",
+                f"大盘回调明显，纳指100下跌{fmt_pct(change)}，仅{up}只上涨，空头主导格局。",
+                f"市场全面走弱，NDX收低{fmt_pct(change)}，{down}只成分股收跌，权重股拖累显著。",
+                f"调整格局延续，纳斯达克100下跌{fmt_pct(change)}，头部科技股跌幅较大。",
+                f"今日大盘表现疲软，NDX下跌{fmt_pct(change).replace('-', '')}，{down}只个股收跌，建议加强防守。",
+                f"纳斯达克100今日下挫{fmt_pct(change)}，涨跌家数{up}:{down}，下跌家数偏多，短期维持谨慎。",
             ]
         return pick(*templates)
 
+    # -------- stocks：权重股点评 --------
     elif summary_type == "stocks":
         pie = data.get("pie_stocks", [])
         heavy = [s for s in pie if s.get("weight", 0) > 3 and s.get("ticker") != "其他"][:3]
@@ -1389,154 +1389,157 @@ def generate_summary(data, summary_type):
 
             if all_up:
                 return pick(
-                    f"头部那几家今天集体走强，{names}合计权重{wsum:.1f}%，妥妥的定海神针。",
-                    f"权重股今天很给面子，{names}三家都红了，合计占{wsum:.1f}%，指数想不涨都难。",
-                    f"{names}这三家老大哥今天齐发力，权重加起来{wsum:.1f}%，带动效应明显。",
-                    f"头部集中度确实高，{names}三家就占了{wsum:.1f}%，今天还集体上涨，指数自然好看。",
-                    f"不得不说，{names}这几只权重股今天表现真不错，{wsum:.1f}%的权重全部收红。",
-                    f"权重股方面，{names}合计权重达{wsum:.1f}%，今天集体走强，对指数贡献很大。",
-                    f"头部科技龙头{names}今天齐涨，{wsum:.1f}%的权重集体发力，指数直接被带飞。",
-                    f"{names}这三家扛把子今天都红了，合计{wsum:.1f}%权重，是今天上涨的核心动力。",
+                    f"权重股集体走强，{names}合计权重{wsum:.1f}%，对指数形成显著支撑。",
+                    f"头部权重股今日表现强劲，{names}三家均录得正收益，合计权重{wsum:.1f}%，是推动指数上行的核心力量。",
+                    f"{names}三大权重股齐齐发力，合计权重达{wsum:.1f}%，带动效应十分明显。",
+                    f"指数权重高度集中，{names}三家合计占比{wsum:.1f}%，今日集体上涨，为NDX提供强劲上行动能。",
+                    f"权重股方面，{names}表现优异，合计{wsum:.1f}%的权重全部收涨（涨），对指数贡献显著。",
+                    f"头部科技龙头{names}今日全线走高，合计权重{wsum:.1f}%，集中发力推动指数上扬。",
+                    f"{names}三家权重股今日同步上涨，合计权重{wsum:.1f}%，构成今日上涨的核心驱动力。",
+                    f"指数权重前几名的{names}今日集体收涨，合计权重{wsum:.1f}%，多头弹药集中于此。",
                 )
             elif all_down:
                 return pick(
-                    f"头部那几家今天集体扑街，{names}合计权重{wsum:.1f}%，指数被拖累了。",
-                    f"权重股今天集体走弱，{names}三家都绿了，合计占{wsum:.1f}%，指数自然好看不了。",
-                    f"{names}这三家老大哥今天齐跌，权重加起来{wsum:.1f}%，带崩效应明显。",
-                    f"头部集中度确实高，{names}三家就占了{wsum:.1f}%，今天还集体下跌，指数承压。",
-                    f"不得不说，{names}这几只权重股今天表现拉胯，{wsum:.1f}%的权重全部收绿。",
-                    f"权重股方面，{names}合计权重达{wsum:.1f}%，今天集体走弱，是下跌的主因。",
-                    f"头部科技龙头{names}今天齐跌，{wsum:.1f}%的权重集体扑街，指数直接被带下来。",
-                    f"{names}这三家扛把子今天都绿了，合计{wsum:.1f}%权重，是今天下跌的核心压力。",
+                    f"权重股集体承压，{names}合计权重{wsum:.1f}%，成为拖累指数的主要因素。",
+                    f"头部权重股今日全面走弱，{names}三家均录得下跌，合计权重{wsum:.1f}%，对指数形成显著拖累。",
+                    f"{names}三大权重股齐齐下挫，合计权重达{wsum:.1f}%，带跌效应明显。",
+                    f"指数权重高度集中，{names}三家合计占比{wsum:.1f}%，今日集体下跌，对NDX构成较大压力。",
+                    f"权重股方面，{names}表现疲软，合计{wsum:.1f}%的权重全部收跌，拖累指数表现。",
+                    f"头部科技龙头{names}今日全线走低，合计权重{wsum:.1f}%，集中下挫压制指数。",
+                    f"{names}三家权重股今日同步下跌，合计权重{wsum:.1f}%，构成今日下行的核心压力。",
+                    f"指数权重前几名的{names}今日集体收跌，合计权重{wsum:.1f}%，空头弹药集中于此。",
                 )
             else:
                 return pick(
-                    f"头部那几家今天分化明显，{names}合计权重{wsum:.1f}%，有涨有跌互相抵消。",
-                    f"权重股今天走势不一，{names}三家占了{wsum:.1f}%权重，表现分化。",
-                    f"{names}这三家老大哥今天有红有绿，权重加起来{wsum:.1f}%，对指数影响中性。",
-                    f"头部集中度确实高，{names}三家就占了{wsum:.1f}%，今天涨跌互现，指数波动不大。",
-                    f"不得不说，{names}这几只权重股今天表现分化，{wsum:.1f}%的权重有涨有跌。",
-                    f"权重股方面，{names}合计权重达{wsum:.1f}%，今天走势分化，对指数影响有限。",
-                    f"头部科技龙头{names}今天有强有弱，{wsum:.1f}%的权重涨跌互现。",
-                    f"{names}这三家扛把子今天表现不一，合计{wsum:.1f}%权重，互相拉扯。",
+                    f"权重股走势分化，{names}合计权重{wsum:.1f}%，涨跌互现，对指数影响相互抵消。",
+                    f"头部权重股表现不一，{names}三家合计权重{wsum:.1f}%，分化格局明显。",
+                    f"{names}三大权重股今日有涨有跌，合计权重达{wsum:.1f}%，对指数方向影响中性。",
+                    f"指数权重高度集中，{names}三家合计占比{wsum:.1f}%，今日涨跌互现，指数波动有限。",
+                    f"权重股方面，{names}表现分化，合计{wsum:.1f}%的权重涨跌互现。",
+                    f"头部科技龙头{names}今日强弱不一，合计权重{wsum:.1f}%，多空互相拉扯。",
+                    f"{names}三家权重股今日涨跌各半，合计权重{wsum:.1f}%，对指数贡献中性。",
+                    f"指数权重前几名的{names}今日走势分化，合计权重{wsum:.1f}%，方向不明确。",
                 )
         return pick(
-            "权重股今天表现分化，头部科技龙头涨跌互现，没什么特别突出的。",
-            "前十大权重股走势不一，市场缺乏明确主线，各自为战。",
-            "权重股整体平稳，对指数贡献中性，今天不是权重行情。",
-            "头部个股今天没什么大动静，权重分布稳定，指数走势比较真实。",
-            "权重股表现中规中矩，没有哪只特别出彩，也没有谁拖后腿。",
-            "今天权重股整体偏平淡，对指数的影响不大，主要看中小票。",
-            "头部那几个今天涨跌参半，权重效应不明显，市场比较分散。",
-            "权重股今天集体佛系，没什么大波动，指数走势比较温和。",
+            "权重股今日表现分化，头部科技龙头涨跌互现，缺乏明确的方向性指引。",
+            "前十大权重股走势不一，市场主线模糊，各标的各自为战。",
+            "权重股整体平稳运行，对指数贡献中性，今日并非权重行情。",
+            "头部个股今日波动有限，权重分布稳定，指数走势较为真实地反映了市场整体状况。",
+            "权重股表现中规中矩，无明显领涨或领跌品种，指数走势相对客观。",
+            "今日权重股整体偏平淡，对指数影响有限，市场焦点或集中在中小盘标的。",
+            "头部权重股今日涨跌参半，权重效应不明显，市场呈分散化特征。",
+            "权重股今日整体温和，未见剧烈波动，指数走势较为平缓。",
         )
 
+    # -------- sectors：最强/最弱板块 --------
     elif summary_type == "sectors":
         if not sectors:
-            return "行业数据暂缺，不过不影响看大盘，等后续更新吧。"
+            return "行业板块数据暂缺，建议关注指数整体走势及后续行业数据更新。"
         best = max(sectors, key=lambda x: x["change"])
         worst = min(sectors, key=lambda x: x["change"])
         return pick(
-            f"从赛道来看，{best['name']}今天一枝独秀，收了{fmt_pct(best['change'])}；{worst['name']}就差点意思，{fmt_pct(worst['change'])}。",
-            f"板块分化挺明显的，{best['name']}领涨{fmt_pct(best['change'])}，而{worst['name']}垫底{fmt_pct(worst['change'])}。",
-            f"{best['name']}今天强势，板块平均{fmt_pct(best['change'])}；{worst['name']}承压，{fmt_pct(worst['change'])}，差距不小。",
-            f"从行业看，{best['name']}与{worst['name']}形成鲜明对比，分别{fmt_pct(best['change'])}和{fmt_pct(worst['change'])}，冰火两重天。",
-            f"今天{best['name']}这个赛道最亮眼，{fmt_pct(best['change'])}；{worst['name']}就比较惨，{fmt_pct(worst['change'])}。",
-            f"板块方面，{best['name']}领跑全场{fmt_pct(best['change'])}，{worst['name']}拖后腿{fmt_pct(worst['change'])}。",
-            f"{best['name']}今天成了全场最靓的仔，{fmt_pct(best['change'])}；{worst['name']}就默默吃面，{fmt_pct(worst['change'])}。",
-            f"行业层面，{best['name']}表现最佳{fmt_pct(best['change'])}，{worst['name']}相对落后{fmt_pct(worst['change'])}。",
-            f"今天资金明显偏爱{best['name']}，板块{fmt_pct(best['change'])}；{worst['name']}被冷落，{fmt_pct(worst['change'])}。",
-            f"赛道分化严重，{best['name']}大涨{fmt_pct(best['change'])}，{worst['name']}大跌{fmt_pct(worst['change']).replace('-', '')}，选错赛道差别巨大。",
-            f"{best['name']}今天给板块长脸了，{fmt_pct(best['change'])}；{worst['name']}就比较尴尬，{fmt_pct(worst['change'])}。",
-            f"从行业表现看，{best['name']}和{worst['name']}是两个极端，一个{fmt_pct(best['change'])}一个{fmt_pct(worst['change'])}。",
-            f"今天{best['name']}这个方向最强，{fmt_pct(best['change'])}；{worst['name']}最弱，{fmt_pct(worst['change'])}，结构性行情明显。",
-            f"板块轮动到了{best['name']}，今天{fmt_pct(best['change'])}；{worst['name']}则被资金抛弃，{fmt_pct(worst['change'])}。",
-            f"{best['name']}今天扛起了大旗，{fmt_pct(best['change'])}；{worst['name']}则成了累赘，{fmt_pct(worst['change'])}。",
+            f"从板块表现来看，{best['name']}今日表现最佳，录得{fmt_pct(best['change'])}的涨幅；{worst['name']}则表现滞后，收跌{fmt_pct(worst['change'])}。",
+            f"行业板块呈现显著分化，{best['name']}领涨{fmt_pct(best['change'])}，而{worst['name']}垫底{fmt_pct(worst['change'])}。",
+            f"{best['name']}今日走势强劲，板块平均涨幅{fmt_pct(best['change'])}；{worst['name']}承压下行，录得{fmt_pct(worst['change'])}，板块间差距扩大。",
+            f"从行业维度看，{best['name']}与{worst['name']}形成鲜明对比，分别录得{fmt_pct(best['change'])}和{fmt_pct(worst['change'])}，呈冰火两重天格局。",
+            f"今日{best['name']}板块表现最为亮眼，上涨{fmt_pct(best['change'])}；{worst['name']}则表现不佳，下跌{fmt_pct(worst['change'])}。",
+            f"板块方面，{best['name']}领跑全市场，录得{fmt_pct(best['change'])}的涨幅；{worst['name']}则拖累整体表现，下跌{fmt_pct(worst['change'])}。",
+            f"{best['name']}成为今日板块中的佼佼者，上涨{fmt_pct(best['change'])}；{worst['name']}则表现落后，下跌{fmt_pct(worst['change'])}。",
+            f"行业层面，{best['name']}表现最佳，录得{fmt_pct(best['change'])}的正收益；{worst['name']}相对弱势，下跌{fmt_pct(worst['change'])}。",
+            f"今日资金明显偏向{best['name']}板块，录得{fmt_pct(best['change'])}的涨幅；{worst['name']}则遭到抛售，下跌{fmt_pct(worst['change'])}。",
+            f"行业分化加剧，{best['name']}大幅上涨{fmt_pct(best['change'])}，{worst['name']}大幅下跌{fmt_pct(worst['change']).replace('-', '')}，选对赛道至关重要。",
+            f"{best['name']}今日为板块增色，上涨{fmt_pct(best['change'])}；{worst['name']}则表现尴尬，下跌{fmt_pct(worst['change'])}。",
+            f"从行业表现看，{best['name']}和{worst['name']}处于两个极端，分别录得{fmt_pct(best['change'])}和{fmt_pct(worst['change'])}。",
+            f"今日{best['name']}方向最强，上涨{fmt_pct(best['change'])}；{worst['name']}方向最弱，下跌{fmt_pct(worst['change'])}，结构性行情特征明显。",
+            f"板块轮动今日轮至{best['name']}，录得{fmt_pct(best['change'])}的涨幅；{worst['name']}则遭到资金撤离，下跌{fmt_pct(worst['change'])}。",
+            f"{best['name']}今日扛起领涨大旗，上涨{fmt_pct(best['change'])}；{worst['name']}则成为拖累，下跌{fmt_pct(worst['change'])}。",
         )
 
+    # -------- distribution：涨跌分布 --------
     elif summary_type == "distribution":
         counts = bins.get("counts", [])
         labels = bins.get("labels", [])
         if not counts or total == 0:
-            return "涨跌分布数据暂缺，不过看大盘走势也能猜个大概。"
+            return "涨跌分布数据暂缺，但可从指数涨跌幅大致判断市场结构。"
         max_idx = counts.index(max(counts))
         max_label = labels[max_idx]
         max_count = counts[max_idx]
         up_count = sum(counts[4:])
         down_count = sum(counts[:4])
 
-        # 判断分布形状
         if max_idx < 2:
-            shape_desc = "今天跌得多的票比较集中"
+            shape_desc = "跌幅较大的个股相对集中"
         elif max_idx > 5:
-            shape_desc = "今天涨得多的票比较集中"
+            shape_desc = "涨幅较大的个股相对集中"
         elif max_idx in [2, 3, 4, 5]:
-            shape_desc = "今天大部分票波动都不大，集中在中间区间"
+            shape_desc = "多数个股涨跌幅集中在中间区间，波动有限"
         else:
-            shape_desc = "涨跌分布比较分散"
+            shape_desc = "涨跌幅分布较为分散，个股表现各异"
 
         return pick(
-            f"{shape_desc}。{max_label}这个区间最多，有{max_count}只，占了{max_count/total*100:.0f}%。",
-            f"从分布看，{max_label}区间股票最多（{max_count}只），上涨{up_count}只、下跌{down_count}只，{'涨多跌少' if up_count > down_count else '跌多涨少'}。",
-            f"今天{max_label}为最大阵营（{max_count}只），市场整体{'偏向上涨' if up_count > down_count else '偏向调整'}，分布还算{'均衡' if abs(up_count - down_count) < 15 else '一边倒'}。",
-            f"分布图显示{max_label}集中了{max_count}只成分股，涨跌比约{up_count}:{down_count}，{'赚钱效应不错' if up_count > down_count else '亏钱效应明显'}。",
-            f"今天大部分票的涨跌幅落在{max_label}区间，共{max_count}只。整体{'涨多跌少' if up_count > down_count else '跌多涨少'}，{up_count}只涨{down_count}只跌。",
-            f"从涨跌分布来看，{max_label}是最拥挤的区间，有{max_count}只。{up_count}只上涨、{down_count}只下跌，{'多头占优' if up_count > down_count else '空头占优'}。",
-            f"{max_label}这个区间今天扎堆了{max_count}只票，占了近{max_count/total*100:.0f}%。整体{up_count}涨{down_count}跌，{'盘面偏暖' if up_count > down_count else '盘面偏冷'}。",
-            f"今天涨跌分布的峰值在{max_label}，{max_count}只。{up_count}只收红、{down_count}只收绿，{'普涨格局' if up_count > down_count + 20 else '普跌格局' if down_count > up_count + 20 else '涨跌参半'}。",
-            f"看分布图，{max_label}区间最密集（{max_count}只），{'上涨家数占优' if up_count > down_count else '下跌家数占优'}，{up_count}对{down_count}。",
-            f"今天{max_count}只票集中在{max_label}区间，整体{up_count}涨{down_count}跌，{'市场情绪偏乐观' if up_count > down_count else '市场情绪偏谨慎'}。",
-            f"涨跌分布呈现{max_label}区间集中，共{max_count}只，占总数{max_count/total*100:.0f}%。",
-            f"从分布看，{max_label}区间股票最多（{max_count}只），上涨{up_count}只、下跌{down_count}只。",
-            f"今天{max_label}为最大阵营（{max_count}只），市场整体{'偏向上涨' if up_count > down_count else '偏向调整'}。",
-            f"分布图显示{max_label}集中了{max_count}只成分股，涨跌比约{up_count}:{down_count}。",
-            f"今天大部分票的涨跌幅落在{max_label}区间，共{max_count}只，整体{'涨多跌少' if up_count > down_count else '跌多涨少'}。",
+            f"{shape_desc}。{max_label}区间聚集了{max_count}只个股，占比{max_count/total*100:.0f}%。",
+            f"从分布结构看，{max_label}区间个股最多（{max_count}只），上涨家数{up_count}、下跌家数{down_count}，呈{'涨多跌少' if up_count > down_count else '跌多涨少'}格局。",
+            f"今日{max_label}为最大分布区间（{max_count}只），市场整体{'偏向上行' if up_count > down_count else '偏向调整'}，分布{'相对均衡' if abs(up_count - down_count) < 15 else '呈单边特征'}。",
+            f"分布数据显示{max_label}区间集中了{max_count}只成分股，涨跌比约为{up_count}:{down_count}，{'多头占优' if up_count > down_count else '空头占优'}。",
+            f"今日多数个股涨跌幅落在{max_label}区间，共{max_count}只。整体{'涨多跌少' if up_count > down_count else '跌多涨少'}，具体为{up_count}只上涨、{down_count}只下跌。",
+            f"从涨跌分布来看，{max_label}是最为拥挤的区间，有{max_count}只个股。{up_count}只上涨、{down_count}只下跌，{'多头格局' if up_count > down_count else '空头格局'}明显。",
+            f"{max_label}区间今日扎堆了{max_count}只个股，占比近{max_count/total*100:.0f}%。整体{up_count}涨{down}跌，{'盘面偏暖' if up_count > down_count else '盘面偏冷'}。",
+            f"今日涨跌分布的峰值位于{max_label}，共{max_count}只。{up_count}只收涨、{down_count}只收跌，{'普涨格局' if up_count > down_count + 20 else '普跌格局' if down_count > up_count + 20 else '涨跌参半'}。",
+            f"观察分布图，{max_label}区间最为密集（{max_count}只），{'上涨家数占优' if up_count > down_count else '下跌家数占优'}，比例为{up_count}:{down_count}。",
+            f"今日{max_count}只个股集中在{max_label}区间，整体{up_count}涨{down_count}跌，{'市场情绪偏乐观' if up_count > down_count else '市场情绪偏谨慎'}。",
+            f"涨跌分布呈{max_label}区间集中态势，共{max_count}只，占总数的{max_count/total*100:.0f}%。",
+            f"从分布看，{max_label}区间个股最多（{max_count}只），上涨{up_count}只、下跌{down_count}只。",
+            f"今日{max_label}为最大阵营（{max_count}只），市场整体{'偏向上行' if up_count > down_count else '偏向调整'}。",
+            f"分布图显示{max_label}集中了{max_count}只成分股，涨跌比约为{up_count}:{down_count}。",
+            f"今日多数个股涨跌幅落在{max_label}区间，共{max_count}只，整体{'涨多跌少' if up_count > down_count else '跌多涨少'}。",
         )
 
+    # -------- industry：行业涨跌家数 --------
     elif summary_type == "industry":
         if not sectors:
-            return "行业数据暂缺，等后续更新再看吧。"
+            return "行业板块数据暂缺，建议后续补充以完善行业维度分析。"
         up_sectors = [s for s in sectors if s["change"] > 0]
         down_sectors = [s for s in sectors if s["change"] < 0]
         flat_sectors = [s for s in sectors if s["change"] == 0]
 
         if len(up_sectors) > len(down_sectors) + 2:
             return pick(
-                f"{len(up_sectors)}个赛道收红，{len(down_sectors)}个收绿，板块整体偏强，选对的概率大。",
-                f"多数板块上涨，{len(up_sectors)}个行业收涨，仅{len(down_sectors)}个收跌，赚钱效应不错。",
-                f"行业普涨格局，{len(up_sectors)}个板块飘红，{len(down_sectors)}个板块飘绿，整体偏暖。",
-                f"今天{len(up_sectors)}个赛道红了，{len(down_sectors)}个绿了，板块层面多头占优。",
-                f"从行业看，{len(up_sectors)}个上涨、{len(down_sectors)}个下跌，红盘板块明显更多。",
-                f"板块今天给面子，{len(up_sectors)}个收红，{len(down_sectors)}个收绿，整体氛围不错。",
-                f"{len(up_sectors)}个行业收红，{len(down_sectors)}个收绿，板块整体偏强。",
-                f"多数板块上涨，{len(up_sectors)}个行业收涨，仅{len(down_sectors)}个收跌。",
-                f"行业普涨格局，{len(up_sectors)}个板块飘红，{len(down_sectors)}个板块飘绿。",
+                f"{len(up_sectors)}个板块收涨，{len(down_sectors)}个板块收跌，行业层面整体偏强，上涨板块占据多数。",
+                f"多数板块录得正收益，{len(up_sectors)}个行业上涨，仅{len(down_sectors)}个下跌，赚钱效应较好。",
+                f"行业呈现普涨格局，{len(up_sectors)}个板块飘红（涨），{len(down_sectors)}个板块飘绿（跌），整体基调偏暖。",
+                f"今日{len(up_sectors)}个板块上涨，{len(down_sectors)}个板块下跌，行业维度多头占优。",
+                f"从行业来看，{len(up_sectors)}个上涨、{len(down_sectors)}个下跌，上涨板块数量明显领先。",
+                f"板块今日表现正面，{len(up_sectors)}个收涨，{len(down_sectors)}个收跌，整体氛围良好。",
+                f"{len(up_sectors)}个行业收涨，{len(down_sectors)}个收跌，行业整体偏强。",
+                f"多数板块上涨，{len(up_sectors)}个行业录得正收益，仅{len(down_sectors)}个收跌。",
+                f"行业普涨格局明确，{len(up_sectors)}个板块上涨，{len(down_sectors)}个板块下跌。",
             )
         elif len(down_sectors) > len(up_sectors) + 2:
             return pick(
-                f"{len(up_sectors)}个赛道收红，{len(down_sectors)}个收绿，板块整体偏弱，选错的概率大。",
-                f"多数板块调整，{len(down_sectors)}个行业收跌，仅{len(up_sectors)}个行业收涨，亏钱效应明显。",
-                f"行业跌多涨少，{len(down_sectors)}个板块飘绿，{len(up_sectors)}个板块飘红，整体偏冷。",
-                f"今天{len(down_sectors)}个赛道绿了，{len(up_sectors)}个红了，板块层面空头占优。",
-                f"从行业看，{len(up_sectors)}个上涨、{len(down_sectors)}个下跌，绿盘板块明显更多。",
-                f"板块今天不太给力，{len(down_sectors)}个收绿，{len(up_sectors)}个收红，整体氛围偏冷。",
-                f"{len(up_sectors)}个行业收红，{len(down_sectors)}个行业收绿，板块整体偏弱。",
-                f"多数板块调整，{len(down_sectors)}个行业收跌，仅{len(up_sectors)}个行业收涨。",
-                f"行业跌多涨少，{len(down_sectors)}个板块飘绿，{len(up_sectors)}个板块飘红。",
+                f"{len(up_sectors)}个板块收涨，{len(down_sectors)}个板块收跌，行业整体偏弱，下跌板块占据多数。",
+                f"多数板块录得负收益，{len(down_sectors)}个行业下跌，仅{len(up_sectors)}个上涨，亏钱效应明显。",
+                f"行业呈现跌多涨少格局，{len(down_sectors)}个板块飘绿（跌），{len(up_sectors)}个板块飘红（涨），整体基调偏冷。",
+                f"今日{len(down_sectors)}个板块下跌，{len(up_sectors)}个板块上涨，行业维度空头占优。",
+                f"从行业来看，{len(up_sectors)}个上涨、{len(down_sectors)}个下跌，下跌板块数量明显领先。",
+                f"板块今日表现负面，{len(down_sectors)}个收跌，{len(up_sectors)}个收涨，整体氛围偏冷。",
+                f"{len(up_sectors)}个行业收涨，{len(down_sectors)}个收跌，行业整体偏弱。",
+                f"多数板块下跌，{len(down_sectors)}个行业录得负收益，仅{len(up_sectors)}个收涨。",
+                f"行业跌多涨少格局明确，{len(down_sectors)}个板块下跌，{len(up_sectors)}个板块上涨。",
             )
         else:
             return pick(
-                f"{len(up_sectors)}个赛道收红，{len(down_sectors)}个收绿，板块涨跌参半，结构性行情明显。",
-                f"板块涨跌各半，{len(up_sectors)}个行业收涨，{len(down_sectors)}个收跌，分化严重。",
-                f"行业层面基本平衡，{len(up_sectors)}个板块飘红，{len(down_sectors)}个板块飘绿，选赛道比看大盘重要。",
-                f"今天{len(up_sectors)}个赛道红了，{len(down_sectors)}个绿了，板块之间互相抵消。",
-                f"从行业看，{len(up_sectors)}个上涨、{len(down_sectors)}个下跌，基本五五开。",
-                f"板块今天涨跌参半，{len(up_sectors)}个收红，{len(down_sectors)}个收绿，结构性机会为主。",
-                f"{len(up_sectors)}个行业收红，{len(down_sectors)}个行业收绿，板块涨跌参半。",
-                f"板块涨跌各半，{len(up_sectors)}个行业收涨，{len(down_sectors)}个收跌。",
-                f"行业层面基本平衡，{len(up_sectors)}个板块飘红，{len(down_sectors)}个板块飘绿。",
+                f"{len(up_sectors)}个板块收涨，{len(down_sectors)}个板块收跌，行业涨跌参半，结构性特征突出。",
+                f"板块涨跌各半，{len(up_sectors)}个行业上涨，{len(down_sectors)}个下跌，分化格局显著。",
+                f"行业层面基本均衡，{len(up_sectors)}个板块上涨，{len(down_sectors)}个板块下跌，选股重于择时。",
+                f"今日{len(up_sectors)}个板块上涨，{len(down_sectors)}个板块下跌，板块间相互对冲。",
+                f"从行业来看，{len(up_sectors)}个上涨、{len(down_sectors)}个下跌，基本呈五五开格局。",
+                f"板块今日涨跌互现，{len(up_sectors)}个收涨，{len(down_sectors)}个收跌，结构性机会为主。",
+                f"{len(up_sectors)}个行业收涨，{len(down_sectors)}个收跌，板块涨跌参半。",
+                f"板块涨跌各半，{len(up_sectors)}个行业上涨，{len(down_sectors)}个下跌。",
+                f"行业层面基本平衡，{len(up_sectors)}个板块上涨，{len(down_sectors)}个板块下跌。",
             )
 
+    # -------- trend：30日趋势 --------
     elif summary_type == "trend":
         if len(history) >= 2:
             trend_change = (history[-1] - history[0]) / history[0] * 100
@@ -1545,57 +1548,56 @@ def generate_summary(data, summary_type):
 
             if trend_change > 5:
                 return pick(
-                    f"回头看这30天，NDX累计涨了{trend_change:.2f}%，从{history[0]:,.0f}点爬到{history[-1]:,.0f}点，走势相当稳健。区间高点{high:,.0f}、低点{low:,.0f}。",
-                    f"近一个月NDX涨了{trend_change:.2f}%，整体重心明显上移。最高冲到{high:,.0f}，最低探到{low:,.0f}，趋势不错。",
-                    f"30日趋势向上，累计+{trend_change:.2f}%，当前{history[-1]:,.0f}点。这期间最高{high:,.0f}、最低{low:,.0f}，稳步爬升。",
-                    f"近一个月回头看，NDX涨了{trend_change:.2f}%，走势挺健康的。区间{low:,.0f}-{high:,.0f}，重心不断上移。",
-                    f"30日走势显示指数累计上涨{trend_change:.2f}%，从{history[0]:,.0f}到{history[-1]:,.0f}，中间最高{high:,.0f}，趋势偏强。",
-                    f"这一个月NDX表现不错，涨了{trend_change:.2f}%，当前{history[-1]:,.0f}点。波动区间{low:,.0f}-{high:,.0f}，整体向上。",
-                    f"回头看30天，NDX累计上涨{trend_change:.2f}%，走势相当给力。高点{high:,.0f}，低点{low:,.0f}，趋势明确。",
-                    f"近30日NDX累计上涨{trend_change:.2f}%，区间高点{high:,.0f}、低点{low:,.0f}，整体重心上移。",
+                    f"过去30个交易日，纳斯达克100指数累计上涨{trend_change:.2f}%，从{history[0]:,.0f}点升至{history[-1]:,.0f}点，上行趋势稳健。区间高点{high:,.0f}、低点{low:,.0f}。",
+                    f"近一个月NDX累计上涨{trend_change:.2f}%，重心持续上移。最高触及{high:,.0f}，最低下探{low:,.0f}，中期趋势向好。",
+                    f"30日趋势向上，累计涨幅{trend_change:.2f}%，当前报{history[-1]:,.0f}点。期间最高{high:,.0f}、最低{low:,.0f}，呈稳步攀升格局。",
+                    f"过去一个月，NDX累计上涨{trend_change:.2f}%，走势健康。区间{low:,.0f}-{high:,.0f}，高点不断抬高，低点同步上移。",
+                    f"30日走势显示，指数累计上涨{trend_change:.2f}%，从{history[0]:,.0f}升至{history[-1]:,.0f}，期间最高{high:,.0f}，中期趋势偏强。",
+                    f"近一个月NDX表现良好，累计上涨{trend_change:.2f}%，当前位于{history[-1]:,.0f}点。波动区间{low:,.0f}-{high:,.0f}，整体方向向上。",
+                    f"过去30个交易日，NDX累计上涨{trend_change:.2f}%，上行趋势明确。高点{high:,.0f}，低点{low:,.0f}，多头格局稳固。",
+                    f"近30日NDX累计上涨{trend_change:.2f}%，区间高点{high:,.0f}、低点{low:,.0f}，整体重心稳步上移。",
                 )
             elif trend_change > 0:
                 return pick(
-                    f"回头看这30天，NDX累计微涨{trend_change:.2f}%，从{history[0]:,.0f}点到{history[-1]:,.0f}点，涨幅不大但方向对了。区间高点{high:,.0f}、低点{low:,.0f}。",
-                    f"近一个月NDX涨了{trend_change:.2f}%，整体重心小幅上移。最高{high:,.0f}，最低{low:,.0f}，走势温和。",
-                    f"30日趋势小幅向上，累计+{trend_change:.2f}%，当前{history[-1]:,.0f}点。这期间最高{high:,.0f}、最低{low:,.0f}，不温不火。",
-                    f"近一个月回头看，NDX涨了{trend_change:.2f}%，走势比较平淡。区间{low:,.0f}-{high:,.0f}，没什么大波动。",
-                    f"30日走势显示指数累计上涨{trend_change:.2f}%，从{history[0]:,.0f}到{history[-1]:,.0f}，中间最高{high:,.0f}，趋势偏暖但力度有限。",
-                    f"这一个月NDX表现一般，涨了{trend_change:.2f}%，当前{history[-1]:,.0f}点。波动区间{low:,.0f}-{high:,.0f}，继续磨。",
-                    f"回头看30天，NDX累计上涨{trend_change:.2f}%，走势比较纠结。高点{high:,.0f}，低点{low:,.0f}，方向不明。",
+                    f"过去30个交易日，纳斯达克100指数累计微涨{trend_change:.2f}%，从{history[0]:,.0f}点至{history[-1]:,.0f}点，涨幅温和但方向偏上。区间高点{high:,.0f}、低点{low:,.0f}。",
+                    f"近一个月NDX累计上涨{trend_change:.2f}%，重心小幅上移。最高{high:,.0f}，最低{low:,.0f}，走势温和。",
+                    f"30日趋势小幅向上，累计涨幅{trend_change:.2f}%，当前报{history[-1]:,.0f}点。期间最高{high:,.0f}、最低{low:,.0f}，呈窄幅攀升态势。",
+                    f"过去一个月，NDX累计上涨{trend_change:.2f}%，走势较为平淡。区间{low:,.0f}-{high:,.0f}，缺乏明显趋势。",
+                    f"30日走势显示，指数累计上涨{trend_change:.2f}%，从{history[0]:,.0f}升至{history[-1]:,.0f}，期间最高{high:,.0f}，趋势偏暖但力度有限。",
+                    f"近一个月NDX表现一般，累计上涨{trend_change:.2f}%，当前位于{history[-1]:,.0f}点。波动区间{low:,.0f}-{high:,.0f}，延续震荡格局。",
+                    f"过去30个交易日，NDX累计上涨{trend_change:.2f}%，走势较为纠结。高点{high:,.0f}，低点{low:,.0f}，方向尚未明朗。",
                     f"近30日NDX累计上涨{trend_change:.2f}%，区间高点{high:,.0f}、低点{low:,.0f}，整体重心小幅上移。",
                 )
             elif trend_change > -5:
                 return pick(
-                    f"回头看这30天，NDX累计跌了{abs(trend_change):.2f}%，从{history[0]:,.0f}点滑到{history[-1]:,.0f}点，调整幅度不大。区间高点{high:,.0f}、低点{low:,.0f}。",
-                    f"近一个月NDX跌了{abs(trend_change):.2f}%，整体重心小幅下移。最高{high:,.0f}，最低{low:,.0f}，温和调整。",
-                    f"30日趋势小幅向下，累计{trend_change:.2f}%，当前{history[-1]:,.0f}点。这期间最高{high:,.0f}、最低{low:,.0f}，偏弱震荡。",
-                    f"近一个月回头看，NDX跌了{abs(trend_change):.2f}%，走势比较平淡。区间{low:,.0f}-{high:,.0f}，没什么大波动。",
-                    f"30日走势显示指数累计下跌{abs(trend_change):.2f}%，从{history[0]:,.0f}到{history[-1]:,.0f}，中间最高{high:,.0f}，趋势偏冷但力度有限。",
-                    f"这一个月NDX表现一般，跌了{abs(trend_change):.2f}%，当前{history[-1]:,.0f}点。波动区间{low:,.0f}-{high:,.0f}，继续磨底。",
-                    f"回头看30天，NDX累计下跌{abs(trend_change):.2f}%，走势比较纠结。高点{high:,.0f}，低点{low:,.0f}，方向不明。",
+                    f"过去30个交易日，纳斯达克100指数累计下跌{abs(trend_change):.2f}%，从{history[0]:,.0f}点回落至{history[-1]:,.0f}点，调整幅度温和。区间高点{high:,.0f}、低点{low:,.0f}。",
+                    f"近一个月NDX累计下跌{abs(trend_change):.2f}%，重心小幅下移。最高{high:,.0f}，最低{low:,.0f}，呈温和调整格局。",
+                    f"30日趋势小幅向下，累计跌幅{abs(trend_change):.2f}%，当前报{history[-1]:,.0f}点。期间最高{high:,.0f}、最低{low:,.0f}，偏弱震荡。",
+                    f"过去一个月，NDX累计下跌{abs(trend_change):.2f}%，走势平淡。区间{low:,.0f}-{high:,.0f}，波动有限。",
+                    f"30日走势显示，指数累计下跌{abs(trend_change):.2f}%，从{history[0]:,.0f}回落至{history[-1]:,.0f}，期间最高{high:,.0f}，趋势偏冷但跌幅可控。",
+                    f"近一个月NDX表现一般，累计下跌{abs(trend_change):.2f}%，当前位于{history[-1]:,.0f}点。波动区间{low:,.0f}-{high:,.0f}，继续寻底。",
+                    f"过去30个交易日，NDX累计下跌{abs(trend_change):.2f}%，走势较为纠结。高点{high:,.0f}，低点{low:,.0f}，方向不明。",
                     f"近30日NDX累计下跌{abs(trend_change):.2f}%，区间高点{high:,.0f}、低点{low:,.0f}，整体重心小幅下移。",
                 )
             else:
                 return pick(
-                    f"回头看这30天，NDX累计跌了{abs(trend_change):.2f}%，从{history[0]:,.0f}点掉到{history[-1]:,.0f}点，调整幅度不小。区间高点{high:,.0f}、低点{low:,.0f}。",
-                    f"近一个月NDX跌了{abs(trend_change):.2f}%，整体重心明显下移。最高{high:,.0f}，最低{low:,.0f}，趋势偏弱。",
-                    f"30日趋势向下，累计{trend_change:.2f}%，当前{history[-1]:,.0f}点。这期间最高{high:,.0f}、最低{low:,.0f}，走势不太好看。",
-                    f"近一个月回头看，NDX跌了{abs(trend_change):.2f}%，走势比较弱。区间{low:,.0f}-{high:,.0f}，重心不断下移。",
-                    f"30日走势显示指数累计下跌{abs(trend_change):.2f}%，从{history[0]:,.0f}到{history[-1]:,.0f}，中间最高{high:,.0f}，趋势偏空。",
-                    f"这一个月NDX表现不佳，跌了{abs(trend_change):.2f}%，当前{history[-1]:,.0f}点。波动区间{low:,.0f}-{high:,.0f}，整体向下。",
-                    f"回头看30天，NDX累计下跌{abs(trend_change):.2f}%，走势比较弱。高点{high:,.0f}，低点{low:,.0f}，需要警惕。",
+                    f"过去30个交易日，纳斯达克100指数累计下跌{abs(trend_change):.2f}%，从{history[0]:,.0f}点显著回落至{history[-1]:,.0f}点，调整幅度较大。区间高点{high:,.0f}、低点{low:,.0f}。",
+                    f"近一个月NDX累计下跌{abs(trend_change):.2f}%，重心明显下移。最高{high:,.0f}，最低{low:,.0f}，中期趋势偏弱。",
+                    f"30日趋势向下，累计跌幅{abs(trend_change):.2f}%，当前报{history[-1]:,.0f}点。期间最高{high:,.0f}、最低{low:,.0f}，走势承压。",
+                    f"过去一个月，NDX累计下跌{abs(trend_change):.2f}%，表现疲软。区间{low:,.0f}-{high:,.0f}，重心持续下探。",
+                    f"30日走势显示，指数累计下跌{abs(trend_change):.2f}%，从{history[0]:,.0f}回落至{history[-1]:,.0f}，期间最高{high:,.0f}，中期趋势偏空。",
+                    f"近一个月NDX表现不佳，累计下跌{abs(trend_change):.2f}%，当前位于{history[-1]:,.0f}点。波动区间{low:,.0f}-{high:,.0f}，整体承压。",
+                    f"过去30个交易日，NDX累计下跌{abs(trend_change):.2f}%，走势较弱。高点{high:,.0f}，低点{low:,.0f}，需保持警惕。",
                     f"近30日NDX累计下跌{abs(trend_change):.2f}%，区间高点{high:,.0f}、低点{low:,.0f}，整体重心下移。",
                 )
         return pick(
-            "30日趋势数据暂缺，建议关注后续走势变化，别急着下结论。",
-            "历史数据不足，无法判断中期趋势，等数据齐了再看。",
-            "30天走势数据缺失，短期先看日线级别的表现吧。",
-            "趋势数据暂缺，不过单日走势也能说明一些问题。",
+            "30日趋势数据暂缺，建议关注后续中期走势变化，暂不急于做出趋势判断。",
+            "历史数据不足，无法有效评估中期趋势，待数据积累后再行分析。",
+            "30天走势数据缺失，短期建议先以日线级别表现作为参考依据。",
+            "趋势数据暂缺，但单日走势亦能提供一定的方向性参考。",
         )
 
     return ""
-
 def get_existing_history_dates(output_dir="docs"):
     import glob
     import re
