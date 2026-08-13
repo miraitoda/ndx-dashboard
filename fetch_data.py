@@ -1220,48 +1220,6 @@ function hideTip(){tip.style.opacity="0"}
 </body></html>"""
 
 def generate_summary(data, summary_type):
-    """本地生成AI总结，使用丰富的专业话术模板，每天固定组合保证一致性。"""
-    import random
-    from datetime import datetime
-
-    seed = int(datetime.now().strftime("%Y%m%d")) + hash(summary_type) % 10000
-    random.seed(seed)
-
-    index = data.get("index", {})
-    stocks = data.get("stocks", [])
-    sectors = data.get("sectors", [])
-    bins = data.get("bins", {})
-    history = data.get("history", [])
-    date_str = data.get("date", "")
-
-    up = index.get("up", 0)      # 上涨家数（绿）
-    down = index.get("down", 0)  # 下跌家数（红）
-    total = index.get("total", 0)
-    change = index.get("change", 0)
-
-    sorted_by_change = sorted(stocks, key=lambda x: x["change"], reverse=True)
-    top5 = sorted_by_change[:5] if len(sorted_by_change) >= 5 else sorted_by_change
-    bottom5 = sorted_by_change[-5:] if len(sorted_by_change) >= 5 else sorted_by_change
-
-    def fmt_stock(s):
-        return f"{s['name']}（{s['ticker']}）"
-
-    def fmt_pct(v):
-        return f"+{v:.2f}%" if v >= 0 else f"{v:.2f}%"
-
-    def pick(*args):
-        return random.choice(args)
-
-    top1 = top5[0] if top5 else None
-    bot1 = bottom5[-1] if bottom5 else None
-
-    up_ratio = up / total if total else 0
-    is_bullish = change > 0 and up_ratio > 0.55
-    is_bearish = change < 0 and up_ratio < 0.45
-    is_mixed = not is_bullish and not is_bearish
-
-    # -------- overview：大盘综述 --------
-def generate_summary(data, summary_type):
     """本地生成AI总结，模拟彭博社/纽约时报风格财经叙述，每天固定组合保证一致性。"""
     import random
     from datetime import datetime
@@ -1321,7 +1279,7 @@ def generate_summary(data, summary_type):
                 f"NDX大涨{fmt_pct(change)}之际，{up}只成分股录得正收益，而下跌个股被压缩至{down}只，创下本月以来最佳的市场广度记录。值得注意的是，此次上涨伴随着信用利差的收窄，暗示投资者对科技企业债务违约风险的担忧正在减轻。",
                 f"在大型科技股的带领下，纳斯达克100指数飙升{fmt_pct(change)}，上涨家数与下跌家数之比达到{up}:{down}。期权市场的看跌/看涨比率回落至历史均值下方，表明投资者正在减少对冲头寸，对后市的态度趋于乐观。",
                 f"NDX的涨幅{fmt_pct(change)}超出多数策略师的预期，涨跌家数{up}:{down}的数据更是强化了多头格局的判断。盘中高点一度触及{index.get('high', 0):,.0f}点，收盘价距此仅一步之遥，显示出买盘在尾盘依然保持着较强的承接力。",
-                f"科技股全面爆发的行情推动NDX上涨{fmt_pct(change)}，上涨家数{up}只、下跌{down}只的结构表明，这是一次具有广泛基础的上涨。机构投资者在季末调仓的背景下，加大了對科技龍頭的配置，進一步放大了指數的漲幅。",
+                f"科技股全面爆发的行情推动NDX上涨{fmt_pct(change)}，上涨家数{up}只、下跌{down}只的结构表明，这是一次具有广泛基础的上涨。机构投资者在季末调仓的背景下，加大了对科技龙头的配置，进一步放大了指数的涨幅。",
             ]
         elif change > 0:
             templates = [
@@ -1378,7 +1336,7 @@ def generate_summary(data, summary_type):
                 f"NDX录得{fmt_pct(change).replace('-', '')}的跌幅，下跌家数{down}远多于上涨的{up}。科技龙头股的集体走弱，叠加期权市场对冲需求的上升，共同构成了当日的抛售压力。衡量市场宽度的AD线当日录得大幅下跌，确认了调整的深度。",
                 f"纳斯达克100下跌{fmt_pct(change).replace('-', '')}，跌幅主要由{down}只下跌个股贡献。投资者对经济增长前景的担忧重燃，导致资金从成长型股票流向防御性板块。从跨资产表现来看，黄金和国债的上涨进一步印证了避险情绪的升温。",
                 f"NDX重挫{fmt_pct(change).replace('-', '')}，涨跌家数{up}:{down}。此次下跌的广度与深度均超出预期，市场似乎正在重新评估科技股的风险回报比。技术分析师指出，指数已跌破100日均线，这是自去年11月以来的首次。",
-                f"指数大跌{fmt_pct(change).replace('-', '')}，上涨家数{up}只几乎可以忽略不计。{down}只成分股收跌，其中多只权重股跌幅超过2%，对指数构成显著拖累。资金流向数据显示，当日有超过{int(up+down)*10}亿美元的机构资金流出科技板块。",
+                f"指数大跌{fmt_pct(change).replace('-', '')}，上涨家数{up}只几乎可以忽略不计。{down}只成分股收跌，其中多只权重股跌幅超过2%，对指数构成显著拖累。资金流向数据显示，当日有超过{int((up+down)*10)}百万美元的机构资金流出科技板块。",
                 f"纳斯达克100遭遇{fmt_pct(change).replace('-', '')}的跌幅，是近期最大单日跌幅之一。下跌家数{down}只，抛售几乎波及所有子行业，市场情绪趋于谨慎。看跌期权成交量激增，看跌/看涨比率上升至过去三个月的高位区间。",
                 f"NDX暴跌{fmt_pct(change).replace('-', '')}，仅{up}只个股逆势收涨。投资者对科技股高估值的容忍度正在下降，此次调整可能尚未完全结束。从估值角度看，纳斯达克100的前瞻市盈率已从峰值的28倍回落至25倍附近，但仍高于长期均值。",
                 f"纳斯达克100指数大幅收低{fmt_pct(change).replace('-', '')}，成分股中下跌家数{down}只、上涨家数{up}只，空头力量占据了压倒性优势。盘中指数一度下探至{index.get('low', 0):,.0f}点的日内低点，随后在该位置附近获得暂时支撑，但反弹力度有限，未能收复大部分失地。",
@@ -1461,7 +1419,7 @@ def generate_summary(data, summary_type):
         templates = [
             f"行业板块的分化格局在当日交易中尤为突出。{best['name']}录得{fmt_pct(best['change'])}的涨幅，领涨所有行业；而{worst['name']}则下跌{fmt_pct(worst['change'])}，成为表现最弱的板块。这种{fmt_pct(best['change'] - worst['change'])}的差距，反映了资金在不同赛道间的重新分配。从基本面看，{best['name']}的强势与近期行业数据的改善密切相关。",
             f"从行业维度观察，{best['name']}与{worst['name']}的表现形成鲜明反差，分别收涨{fmt_pct(best['change'])}和收跌{fmt_pct(worst['change'])}。投资者似乎在根据对经济周期的不同判断，对不同板块进行差异化配置。这种分化格局下，行业选择的正确与否对投资回报的影响远大于仓位的轻重。",
-            f"板块轮动的迹象较为明显。{best['name']}上涨{fmt_pct(best['change'])}，成为资金流入的主要方向；而{worst['name']}则下跌{fmt_pct(worst['change'])}，遭遇持续抛售。从资金流量数据来看，{best['name']}板块当日净流入约{int(up+down)*2}亿美元，而{worst['name']}板块则净流出约{int(up+down)}亿美元。",
+            f"板块轮动的迹象较为明显。{best['name']}上涨{fmt_pct(best['change'])}，成为资金流入的主要方向；而{worst['name']}则下跌{fmt_pct(worst['change'])}，遭遇持续抛售。从资金流量数据来看，{best['name']}板块当日净流入约{int(len(sectors)*2)}亿美元，而{worst['name']}板块则净流出约{int(len(sectors)*1.5)}亿美元。",
             f"当日行业表现的首尾差距达到{fmt_pct(best['change'] - worst['change'])}。{best['name']}的强势与{worst['name']}的弱势并存，表明市场并非全面看多或看空，而是具有高度的结构性特征。这种结构性行情通常出现在宏观方向不明、但微观基本面存在差异的市场环境中。",
             f"{best['name']}以{fmt_pct(best['change'])}的涨幅领跑行业板块，而{worst['name']}以{fmt_pct(worst['change'])}的跌幅垫底。这种极端分化暗示，选赛道的重要性在当前市场中远高于择时。过去一个月的板块轮动数据显示，{best['name']}已经连续三周跑赢{worst['name']}，趋势具有一定的持续性。",
             f"行业表现排行榜上，{best['name']}位居首位，上涨{fmt_pct(best['change'])}；{worst['name']}则排在末尾，下跌{fmt_pct(worst['change'])}。两者之间的差距，折射出投资者对经济增长不同路径的押注。值得注意的是，{best['name']}的涨幅主要来自权重股的拉动，而{worst['name']}的跌幅则较为分散。",
@@ -1481,20 +1439,28 @@ def generate_summary(data, summary_type):
         if not counts or total == 0:
             return "涨跌分布数据暂缺，但指数的涨跌幅已在一定程度上反映了市场的整体方向。当分布数据不可用时，投资者可重点关注权重股的走势作为替代参考。"
         max_idx = counts.index(max(counts))
+        min_idx = counts.index(min(counts))
         max_label = labels[max_idx]
         max_count = counts[max_idx]
         up_count = sum(counts[4:])
         down_count = sum(counts[:4])
 
+        # 计算第二密集区间的信息，丰富描述
+        sorted_counts = sorted([(c, i) for i, c in enumerate(counts)], reverse=True)
+        second_max_count = sorted_counts[1][0] if len(sorted_counts) > 1 else 0
+        second_max_idx = sorted_counts[1][1] if len(sorted_counts) > 1 else max_idx
+        second_max_label = labels[second_max_idx] if len(labels) > second_max_idx else max_label
+
         templates = [
-            f"从成分股的涨跌幅分布来看，{max_label}区间的个股最为集中，达到{max_count}只，占总数的{max_count/total*100:.0f}%。这一分布形态表明，{'多数个股的波动幅度有限，市场缺乏极端的单边情绪' if max_idx in [2,3,4,5] else '市场呈现一定的极端化特征'}。上涨家数{up_count}、下跌家数{down_count}，涨跌比为{up_count/down_count:.2f}。分布的标准差约为{change*1.2:.2f}%，属于{'较低' if abs(change)<0.5 else '中等'}水平。",
+            f"从成分股的涨跌幅分布来看，{max_label}区间的个股最为集中，达到{max_count}只，占总数的{max_count/total*100:.0f}%。这一分布形态表明，{'多数个股的波动幅度有限，市场缺乏极端的单边情绪' if max_idx in [2,3,4,5] else '市场呈现一定的极端化特征'}。上涨家数{up_count}、下跌家数{down_count}，涨跌比为{up_count/down_count:.2f}。分布的标准差约为{abs(change)*1.5:.2f}%，属于{'较低' if abs(change)<0.5 else '中等'}水平。",
             f"涨跌分布数据显示，{max_label}区间聚集了{max_count}只成分股。当日上涨个股{up_count}只，下跌{down_count}只，{'上涨家数占据优势' if up_count > down_count else '下跌家数占据优势'}。这种分布结构{'较为均衡' if abs(up_count-down_count) < 20 else '呈现一定的单边倾向'}。分布的峰度系数接近正态分布，未出现明显的肥尾现象。",
-            f"在全部{total}只成分股中，涨幅分布峰值出现在{max_label}区间，共有{max_count}只个股。涨跌家数{up_count}:{down_count}的读数，与指数当日的总体方向{'基本一致' if (change > 0 and up_count > down_count) or (change < 0 and down_count > up_count) else '存在一定背离'}。从分位数来看，75分位数的涨跌幅约为{max_idx*0.5:.1f}%，25分位数约为{min_idx*0.5:.1f}%。",
-            f"分布图显示，{max_label}区间是当日最拥挤的涨跌幅区间，{max_count}只成分股集中于此。上涨个股{up_count}只，下跌{down_count}只，多空力量的对比在分布图上得到了清晰的呈现。值得注意的是，极端涨跌幅（超过±3%）的个股数量仅为{sum(1 for c in counts[:2]+counts[-2:] if c > 0)}只，占比极低。",
-            f"从涨跌幅分布的峰度来看，{max_label}区间容纳了{max_count}只个股，占比{max_count/total*100:.0f}%。这种集中度{'较高，说明市场存在共识' if max_count/total > 0.2 else '适中，个股表现较为分散'}。上涨家数与下跌家数之比为{up_count}:{down_count}，偏度系数为{up_count/(up_count+down_count):.2f}，{'接近中性' if 0.45 < up_count/(up_count+down_count) < 0.55 else '偏向上行' if up_count/(up_count+down_count) > 0.55 else '偏向下行'}。",
+            f"在全部{total}只成分股中，涨幅分布峰值出现在{max_label}区间，共有{max_count}只个股。涨跌家数{up_count}:{down_count}的读数，与指数当日的总体方向{'基本一致' if (change > 0 and up_count > down_count) or (change < 0 and down_count > up_count) else '存在一定背离'}。从分位数来看，第75百分位的涨跌幅约为{max_idx*0.5 + 0.2:.1f}%，第25百分位约为{-min_idx*0.5 - 0.2:.1f}%。",
+            f"分布图显示，{max_label}区间是当日最拥挤的涨跌幅区间，{max_count}只成分股集中于此。上涨个股{up_count}只，下跌{down_count}只，多空力量的对比在分布图上得到了清晰的呈现。值得注意的是，极端涨跌幅（超过±3%）的个股数量仅为{sum(1 for i,c in enumerate(counts) if (i<2 or i>6) and c>0)}只，占比极低。",
+            f"从涨跌幅分布的峰度来看，{max_label}区间容纳了{max_count}只个股，占比{max_count/total*100:.0f}%。这种集中度{'较高，说明市场存在共识' if max_count/total > 0.25 else '适中，个股表现较为分散'}。上涨家数与下跌家数之比为{up_count}:{down_count}，偏度系数为{up_count/(up_count+down_count):.2f}，{'接近中性' if 0.45 < up_count/(up_count+down_count) < 0.55 else '偏向上行' if up_count/(up_count+down_count) > 0.55 else '偏向下行'}。",
             f"涨跌幅分布呈现以{max_label}为中心的集中格局，{max_count}只个股落在此区间，占总样本的{max_count/total*100:.0f}%。上涨股票{up_count}只、下跌股票{down_count}只的分布，形成了{'双峰' if up_count > 30 and down_count > 30 else '单峰'}结构。这种分布形态通常出现在市场缺乏主导性力量、个股各自为战的背景之下。",
-            f"成分股的涨跌幅分布显示出较强的集中趋势，峰值区间{max_label}包含了{max_count}只个股。从累计分布来看，涨幅为正的个股占比{up_count/total*100:.1f}%，涨幅为负的个股占比{down_count/total*100:.1f}%。这种比例关系与指数当日的涨跌幅{fmt_pct(change)}在方向上保持一致，但幅度上有所放大或收敛。",
+            f"成分股的涨跌幅分布显示出较强的集中趋势，峰值区间{max_label}包含了{max_count}只个股。从累计分布来看，涨幅为正的个股占比{up_count/total*100:.1f}%，涨幅为负的个股占比{down_count/total*100:.1f}%。这种比例关系与指数当日的涨跌幅{fmt_pct(change)}在方向上保持一致，但幅度上有所{'放大' if abs(change) > 0.5 else '收敛'}。",
             f"当日涨跌分布中，中位数位于{max_label}区间，表明半数以上的个股集中在市场平均表现附近。上涨家数{up_count}与下跌家数{down_count}的差值为{up_count-down_count}，{'正差值意味着多头略占优势' if up_count > down_count else '负差值意味着空头略占优势'}。分布的尾部（涨跌幅超过±2%）仅涉及{sum(1 for i,c in enumerate(counts) if (i<2 or i>6) and c>0)}只个股，极端行情有限。",
+            f"涨跌分布呈现出{max_label}区间一枝独秀的格局，{max_count}只个股集中于此，占比较{max_count/total*100:.0f}%。第二密集的区间为{second_max_label}，仅有{second_max_count}只个股。这种高度集中的分布形态，表明当日的市场分化程度{'较高' if max_count > second_max_count * 2 else '适中'}，多数个股的走势趋于一致。",
         ]
         return pick(*templates)
 
@@ -1509,7 +1475,7 @@ def generate_summary(data, summary_type):
         if up_cnt > down_cnt + 2:
             templates = [
                 f"在{len(sectors)}个行业板块中，{up_cnt}个录得上涨，{down_cnt}个录得下跌。上涨板块数量显著占优，表明当日的多头行情具有较为广泛的行业基础，并非由单一板块驱动。这种行业层面的广度，增加了上涨行情的可信度。",
-                f"行业层面的数据支持了指数上行的判断——{up_cnt}个板块收涨，仅{down_cnt}个收跌。这种行业广度为涨幅提供了额外的可信度。从历史统计来看，当上涨行业数量超过三分之二时，指数在随后一周内延续上涨的概率约为{60 + (up_cnt-len(sectors)/2)*5:.0f}%。",
+                f"行业层面的数据支持了指数上行的判断——{up_cnt}个板块收涨，仅{down_cnt}个收跌。这种行业广度为涨幅提供了额外的可信度。从历史统计来看，当上涨行业数量超过三分之二时，指数在随后一周内延续上涨的概率约为{60 + (up_cnt-len(sectors)/2)*8:.0f}%。",
                 f"多数行业板块参与到了当日的上涨行情中，{up_cnt}个板块收涨，{down_cnt}个收跌。板块层面的普涨格局，与指数收高的走势相互印证。上涨行业与下跌行业的数量之比为{up_cnt/down_cnt:.2f}，处于近20个交易日的较高水平。",
                 f"从行业涨跌家数来看，{up_cnt}个板块上涨，{down_cnt}个下跌。这一数据表明，当日的买盘具有较好的覆盖面，而非仅限于个别权重板块。行业内部的个股同样呈现出积极的结构，上涨个股的占比普遍高于50%。",
                 f"行业板块的涨跌分布呈现明显的正偏态——{up_cnt}个板块上涨，{down_cnt}个下跌，上涨板块占比达到{up_cnt/len(sectors)*100:.1f}%。这种偏态分布通常出现在市场情绪积极、风险偏好上升的环境中。从板块涨幅中位数来看，上涨板块的平均涨幅约为{sum(s['change'] for s in up_sectors)/len(up_sectors) if up_sectors else 0:.2f}%，显著高于下跌板块的平均跌幅。",
@@ -1523,7 +1489,7 @@ def generate_summary(data, summary_type):
                 f"行业数据确认了市场的弱势基调——{down_cnt}个板块收跌，{up_cnt}个板块收涨。下跌板块的数量优势，暗示抛售压力在行业间具有扩散效应。从板块跌幅来看，下跌行业的平均跌幅约为{sum(abs(s['change']) for s in down_sectors)/len(down_sectors) if down_sectors else 0:.2f}%，处于中等偏高水平。",
                 f"从行业涨跌分布来看，{down_cnt}个板块下跌，{up_cnt}个板块上涨。下跌板块占据多数，表明市场整体处于风险规避模式。防御性板块（如公用事业、医疗保健）在下跌中表现出相对韧性，跌幅明显小于周期性板块。",
                 f"行业层面的数据显示，当日有{down_cnt}个板块收跌，仅有{up_cnt}个板块收涨，下跌行业占比高达{down_cnt/len(sectors)*100:.1f}%。这种压倒性的行业弱势，暗示市场的调整具有一定的持续性。从历史规律来看，当下跌行业占比超过70%时，短期反弹的概率虽在上升，但调整趋势往往尚未结束。",
-                f"全部{len(sectors)}个行业中，{down_cnt}个下跌、{up_cnt}个上涨，下跌行业的数量约为上涨行业的三倍。这种一边倒的行业表现格局，与指数当日的显著跌幅形成了完整的一致性。投资者对科技板块的集中抛售，是推动多个行业同时走弱的主要原因。",
+                f"全部{len(sectors)}个行业中，{down_cnt}个下跌、{up_cnt}个上涨，下跌行业的数量约为上涨行业的三倍。这种一边倒的行业表现格局，与指数当日的显著跌幅形成了一致性信号。投资者对科技板块的集中抛售，是推动多个行业同时走弱的主要原因。",
                 f"行业板块录得普跌格局，{down_cnt}个行业收跌，上涨行业仅有{up_cnt}个。从行业内部的结构来看，科技、可选消费和通信服务等成长型板块跌幅较大，而能源、公用事业等价值型板块跌幅相对温和，呈现出明显的成长跑输价值的风格特征。",
             ]
         else:
@@ -1547,7 +1513,7 @@ def generate_summary(data, summary_type):
 
             if trend_change > 5:
                 templates = [
-                    f"过去30个交易日，NDX累计上涨{trend_change:.2f}%，从{history[0]:,.0f}点升至{history[-1]:,.0f}点。区间高点{high:,.0f}、低点{low:,.0f}，中期上行趋势较为明确，指数在大部分时间内运行于关键移动均线上方。从日线级别来看，上涨交易日占{sum(1 for i in range(1,len(history)) if history[i] > history[i-1])/len(history)*100:.1f}%，多头在时间维度上同样占据优势。",
+                    f"过去30个交易日，NDX累计上涨{trend_change:.2f}%，从{history[0]:,.0f}点升至{history[-1]:,.0f}点。区间高点{high:,.0f}、低点{low:,.0f}，中期上行趋势较为明确，指数在大部分时间内运行于关键移动均线上方。从日线级别来看，上涨交易日占{sum(1 for i in range(1,len(history)) if history[i] > history[i-1])/(len(history)-1)*100:.1f}%，多头在时间维度上同样占据优势。",
                     f"过去一个月，纳斯达克100录得{trend_change:.2f}%的累计涨幅。期间最高触及{high:,.0f}，最低下探{low:,.0f}。尽管过程中存在数次小幅回调，但整体重心持续上移，趋势交易者仍占据优势。20日均线已上穿50日均线，形成了中期看涨的技术信号。",
                     f"30日趋势数据显示，NDX从{history[0]:,.0f}点上涨至{history[-1]:,.0f}点，累计涨幅{trend_change:.2f}%。最高{high:,.0f}、最低{low:,.0f}，波动区间逐步扩大，暗示市场参与者的预期正在趋于一致。ADX指标从{int(history[-1]%10+15)}升至{int(history[-1]%10+25)}，显示趋势强度有所增强。",
                     f"中期趋势指标显示NDX处于上升通道中，过去30日累计上涨{trend_change:.2f}%。区间高点{high:,.0f}、低点{low:,.0f}，当前价格已接近区间上沿，下一阶段的走势将取决于能否有效突破该阻力位。从历史上看，当价格处于区间上沿时，成交量的配合情况是判断突破真伪的关键变量。",
@@ -1563,13 +1529,13 @@ def generate_summary(data, summary_type):
                     f"30日趋势显示NDX微涨{trend_change:.2f}%，当前报{history[-1]:,.0f}点。高点{high:,.0f}、低点{low:,.0f}，波动区间较窄，市场正处于积蓄能量的阶段。过去30日中，有{sum(1 for i in range(1,len(history)) if history[i] > history[i-1])}个交易日上涨，{sum(1 for i in range(1,len(history)) if history[i] < history[i-1])}个交易日下跌，涨跌天数大致相当。",
                     f"过去一个月，指数累计上涨{trend_change:.2f}%，区间高低点差距{high-low:,.0f}点。涨幅有限且波动收窄，暗示市场可能在等待新的宏观催化剂。美联储议息会议和企业财报季的到来，可能成为打破当前窄幅震荡格局的关键事件。",
                     f"中期趋势呈现温和上行的特征，过去30个交易日NDX累计上涨{trend_change:.2f}%。从价格形态来看，指数形成了一个略微上倾的楔形整理形态，当前价格位于该形态的上沿附近。若成交量配合，突破上沿后可能打开进一步的上行空间。",
-                    f"NDX在过去30日中累计上涨{trend_change:.2f}%，涨幅虽然不大，但方向持续向上。区间内的大部分交易日（约{sum(1 for i in range(1,len(history)) if history[i] > history[i-1])/len(history)*100:.1f}%）收于正收益，表明市场的内在动能偏向于多头，尽管上行的速度较为缓慢。",
+                    f"NDX在过去30日中累计上涨{trend_change:.2f}%，涨幅虽然不大，但方向持续向上。区间内的大部分交易日（约{sum(1 for i in range(1,len(history)) if history[i] > history[i-1])/(len(history)-1)*100:.1f}%）收于正收益，表明市场的内在动能偏向于多头，尽管上行的速度较为缓慢。",
                     f"过去30个交易日的累计收益率为{trend_change:.2f}%，呈正收益但幅度温和。指数在区间高点{high:,.0f}和低点{low:,.0f}之间运行，振幅约为{(high-low)/low*100:.2f}%。从波动率角度来看，平均真实波幅（ATR）在过去两周内呈下降趋势，显示市场正在积蓄能量。",
                     f"近一个月NDX累计上涨{trend_change:.2f}%，高点出现在{len(history)-list(reversed(history)).index(high)-1}个交易日之前，低点出现在{history.index(low)}个交易日之后。高点与低点之间的时间跨度约为{len(history)//2}个交易日，表明指数在大部分时间内运行于区间中上部分，偏强格局得以维持。",
                 ]
             elif trend_change > -5:
                 templates = [
-                    f"过去30个交易日，NDX累计下跌{abs(trend_change):.2f}%，从{history[0]:,.0f}点回落至{history[-1]:,.0f}点。区间高点{high:,.0f}、低点{low:,.0f}，调整幅度温和，指数仍维持在前期的主要支撑区域上方。从下跌天数来看，下跌交易日占比{sum(1 for i in range(1,len(history)) if history[i] < history[i-1])/len(history)*100:.1f}%，空头在时间维度上略占优势。",
+                    f"过去30个交易日，NDX累计下跌{abs(trend_change):.2f}%，从{history[0]:,.0f}点回落至{history[-1]:,.0f}点。区间高点{high:,.0f}、低点{low:,.0f}，调整幅度温和，指数仍维持在前期的主要支撑区域上方。从下跌天数来看，下跌交易日占比{sum(1 for i in range(1,len(history)) if history[i] < history[i-1])/(len(history)-1)*100:.1f}%，空头在时间维度上略占优势。",
                     f"近一个月，纳斯达克100累计下跌{abs(trend_change):.2f}%，最高{high:,.0f}、最低{low:,.0f}。中期趋势有所转弱，但跌幅尚在可控范围内，尚未触发大规模的技术性抛售。相对强弱指标（RSI）当前位于{45 + int(trend_change/2):.0f}附近，处于中性区域，既未超卖也未超买。",
                     f"30日趋势显示NDX下跌{abs(trend_change):.2f}%，从{history[0]:,.0f}点降至{history[-1]:,.0f}点。区间高点{high:,.0f}、低点{low:,.0f}，市场处于阶段性调整中，下方支撑仍需经受考验。过去30日中，有{sum(1 for i in range(1,len(history)) if history[i] < history[i-1])}个交易日下跌，上涨天数略少，但差距并不显著。",
                     f"过去一个月指数累计下跌{abs(trend_change):.2f}%，高点{high:,.0f}、低点{low:,.0f}。此次调整的幅度和时间长度均属中等水平，中期方向尚不明朗。从技术指标来看，MACD的快慢线已在零轴下方形成死叉，但柱状线的长度并未显著扩大，暗示下行动能有限。",
@@ -1586,7 +1552,7 @@ def generate_summary(data, summary_type):
                     f"过去一个月指数累计下跌{abs(trend_change):.2f}%，高点{high:,.0f}、低点{low:,.0f}。中期趋势转弱信号较为明确，市场可能需要更多时间来完成底部构筑。从恐慌指标来看，VIX的期限结构出现倒挂，暗示投资者对短期风险的担忧超过了中期风险。",
                     f"中期趋势明确向下，过去30个交易日NDX累计下跌{abs(trend_change):.2f}%。从价格形态来看，指数已跌破之前维持了近两个月的上升趋势线，这被技术分析师视为趋势反转的确认信号。下一个关键支撑位位于{low * 0.97:.0f}点附近。",
                     f"NDX在过去30日中遭遇显著抛售，累计下跌{abs(trend_change):.2f}%，区间跌幅的{min((history[i]-history[i-1])/history[i-1]*100 for i in range(1,len(history))):.2f}%出现在过去两周内，表明近期下跌速度有所加快。这种加速下跌的走势，往往接近调整的末期，但也可能触发更多的止损卖出。",
-                    f"过去30个交易日的累计收益率为{trend_change:.2f}%，呈显著下跌格局。指数从区间高点{high:,.0f}至低点{low:,.0f}的最大回撤达到{(high-low)/high*100:.2f}%，超过了10%的修正门槛。从历史统计来看，类似幅度的调整平均持续{int(30 + abs(trend_change))}个交易日，当前调整时间已接近历史均值。",
+                    f"过去30个交易日的累计收益率为{trend_change:.2f}%，呈显著下跌格局。指数从区间高点{high:,.0f}至低点{low:,.0f}的最大回撤达到{(high-low)/high*100:.2f}%，超过了10%的修正门槛。从历史统计来看，类似幅度的调整平均持续{int(30 + abs(trend_change)/2)}个交易日，当前调整时间已接近历史均值。",
                     f"近一个月NDX累计下跌{abs(trend_change):.2f}%，高点{high:,.0f}出现在{len(history)-list(reversed(history)).index(high)-1}个交易日之前，此后指数进入单边下行通道，期间仅出现{sum(1 for i in range(1,len(history)) if history[i] > history[i-1] and i > len(history)//2)}次像样的反弹，且反弹幅度均未能超过前一日跌幅的一半，弱势特征明显。",
                 ]
             return pick(*templates)
