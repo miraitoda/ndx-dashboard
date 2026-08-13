@@ -21,7 +21,7 @@ import yfinance as yf
 from ndx_components import STOCKS
 from fetch_data import generate_html, generate_summary, ensure_dir
 
-TARGET_DATES = ['2026-08-11', '2026-08-10', '2026-08-07', '2026-08-06']
+TARGET_DATES = ['2026-08-12', '2026-08-11', '2026-08-010', '2026-08-07']
 OUTPUT_DIR = "docs"
 
 
