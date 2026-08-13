@@ -1152,156 +1152,550 @@ function hideTip(){tip.style.opacity="0"}
 </script>
 </body></html>"""
 
-def generate_summary(data, summary_type):
-    """本地生成AI总结，使用丰富的随机话术模板，每天固定组合保证一致性。"""
+def generate_summary(
+    index_change,
+    advancers,
+    decliners,
+    unchanged,
+    total_stocks,
+    top_gainers=None,
+    top_losers=None,
+    sector_data=None,
+    distribution_data=None,
+    industry_data=None,
+    trend_data=None,
+):
+    """
+    中文财经编辑式市场总结引擎。
+
+    设计目标：
+    1. 不再只是把数字塞进固定句子；
+    2. 先识别市场状态，再选择叙事；
+    3. 根据市场广度、权重股、行业轮动、涨跌分布、30日趋势形成不同评论；
+    4. 输出六个维度：总览、个股、行业、分布、行业广度、趋势；
+    5. 保持旧版调用方式兼容：只传前四个参数也可以运行。
+    """
+
     import random
-    from datetime import datetime
+    from math import isfinite
 
-    seed = int(datetime.now().strftime("%Y%m%d")) + hash(summary_type) % 10000
-    random.seed(seed)
+    def _num(x, default=0.0):
+        try:
+            v = float(x)
+            return v if isfinite(v) else default
+        except Exception:
+            return default
 
-    index = data.get("index", {})
-    stocks = data.get("stocks", [])
-    sectors = data.get("sectors", [])
-    bins = data.get("bins", {})
-    history = data.get("history", [])
-    date_str = data.get("date", "")
+    def _pct(x):
+        return f"{_num(x):+.2f}%"
 
-    up = index.get("up", 0)
-    down = index.get("down", 0)
-    total = index.get("total", 0)
-    change = index.get("change", 0)
+    def _name(item, default=""):
+        if isinstance(item, dict):
+            for k in ("name", "symbol", "ticker", "code", "sector", "industry"):
+                if item.get(k):
+                    return str(item[k])
+        elif isinstance(item, (list, tuple)) and item:
+            return str(item[0])
+        elif item:
+            return str(item)
+        return default
 
-    sorted_by_change = sorted(stocks, key=lambda x: x["change"], reverse=True)
-    top5 = sorted_by_change[:5]
-    bottom5 = sorted_by_change[-5:]
+    def _change(item, default=0.0):
+        if isinstance(item, dict):
+            for k in ("change", "pct_change", "change_pct", "return", "pct"):
+                if k in item:
+                    return _num(item[k], default)
+        elif isinstance(item, (list, tuple)) and len(item) > 1:
+            return _num(item[1], default)
+        return default
 
-    def fmt_stock(s):
-        return f"{s['name']}（{s['ticker']}）"
+    def _weight(item, default=0.0):
+        if isinstance(item, dict):
+            for k in ("weight", "index_weight", "weight_pct"):
+                if k in item:
+                    return _num(item[k], default)
+        elif isinstance(item, (list, tuple)) and len(item) > 2:
+            return _num(item[2], default)
+        return default
 
-    def fmt_pct(v):
-        return f"+{v:.2f}%" if v >= 0 else f"{v:.2f}%"
+    def _items(data):
+        if data is None:
+            return []
+        if isinstance(data, dict):
+            # 常见结构：{"data": [...]} / {"items": [...]} / {"sectors": [...]}
+            for k in ("data", "items", "sectors", "industries", "rows"):
+                if isinstance(data.get(k), (list, tuple)):
+                    return list(data[k])
+            return list(data.values()) if data else []
+        if isinstance(data, (list, tuple)):
+            return list(data)
+        return []
 
-    def pick(*args):
-        return random.choice(args)
+    def _first_name(data, reverse=False):
+        arr = _items(data)
+        if not arr:
+            return ""
+        arr = sorted(arr, key=_change, reverse=reverse)
+        return _name(arr[0])
 
-    if summary_type == "overview":
-        templates = []
-        if change > 1.5:
-            templates = [
-                f"纳斯达克100指数强势收涨{fmt_pct(change)}，{up}只成分股上涨，{down}只下跌，多头主导市场。",
-                f"今日NDX大涨{fmt_pct(change)}，{fmt_stock(top5[0])}领涨{fmt_pct(top5[0]['change'])}，科技龙头集体发力。",
-                f"大盘单边上行，纳指100收{fmt_pct(change)}，上涨家数达{up}只，市场情绪积极。",
-                f"强势格局延续，NDX今日{fmt_pct(change)}，前五大权重股贡献显著，{fmt_stock(top5[0])}、{fmt_stock(top5[1])}表现亮眼。",
-                f"多头攻势凌厉，纳指100大涨{fmt_pct(change)}，仅{down}只下跌，普涨特征明显。",
-            ]
-        elif change > 0:
-            templates = [
-                f"纳斯达克100指数小幅收{fmt_pct(change)}，{up}涨{down}跌，市场温和向好。",
-                f"NDX今日微涨{fmt_pct(change)}，{fmt_stock(top5[0])}领涨，整体涨跌互现。",
-                f"大盘窄幅波动后收红，纳指100{fmt_pct(change)}，上涨家数略占优。",
-                f"市场小幅反弹，NDX收{fmt_pct(change)}，{up}只成分股收红，{down}只收绿。",
-                f"温和上涨格局，纳斯达克100指数{fmt_pct(change)}，板块轮动有序。",
-            ]
-        elif change > -1:
-            templates = [
-                f"纳斯达克100指数微{fmt_pct(change)}，{up}涨{down}跌，市场观望情绪较浓。",
-                f"NDX今日窄幅收{fmt_pct(change)}，多空力量相对均衡，{fmt_stock(top5[0])}与{fmt_stock(bottom5[-1])}分化明显。",
-                f"大盘平盘震荡，纳指100{fmt_pct(change)}，涨跌家数接近，等待方向选择。",
-                f"市场小幅整理，NDX{fmt_pct(change)}，{up}只上涨，{down}只下跌，成交清淡。",
-                f"指数微幅收绿，纳斯达克100{fmt_pct(change)}，板块表现参差不齐。",
-            ]
+    def _first_change(data, reverse=False):
+        arr = _items(data)
+        if not arr:
+            return 0.0
+        arr = sorted(arr, key=_change, reverse=reverse)
+        return _change(arr[0])
+
+    def _top_weight_names(data, n=3):
+        arr = sorted(_items(data), key=_weight, reverse=True)
+        return [_name(x) for x in arr[:n] if _name(x)]
+
+    # ---------- 基础数据 ----------
+    chg = _num(index_change)
+    adv = int(_num(advancers))
+    dec = int(_num(decliners))
+    unc = int(_num(unchanged))
+    total = max(int(_num(total_stocks)), adv + dec + unc, 1)
+
+    adv_ratio = adv / total * 100
+    dec_ratio = dec / total * 100
+    breadth = adv - dec
+    breadth_ratio = breadth / total * 100
+
+    gainers = sorted(_items(top_gainers), key=_change, reverse=True)
+    losers = sorted(_items(top_losers), key=_change)
+    sectors = _items(sector_data)
+    industries = _items(industry_data)
+
+    # ---------- 分布数据 ----------
+    dist = distribution_data if isinstance(distribution_data, dict) else {}
+    bins = dist.get("bins") or dist.get("distribution") or dist.get("ranges") or []
+    dominant_bin = ""
+    dominant_count = 0
+    if isinstance(bins, dict):
+        for k, v in bins.items():
+            c = int(_num(v))
+            if c > dominant_count:
+                dominant_bin, dominant_count = str(k), c
+    elif isinstance(bins, (list, tuple)):
+        for x in bins:
+            label = _name(x)
+            c = _change(x, 0)
+            if isinstance(x, dict):
+                c = _num(x.get("count", x.get("value", c)))
+            elif isinstance(x, (list, tuple)) and len(x) > 1:
+                c = _num(x[1])
+            if c > dominant_count:
+                dominant_bin, dominant_count = label, int(c)
+
+    # ---------- 趋势数据 ----------
+    trend = trend_data if isinstance(trend_data, dict) else {}
+    trend_return = _num(
+        trend.get("return_30d", trend.get("change_30d", trend.get("monthly_change", 0)))
+    )
+    distance_high = _num(
+        trend.get("distance_high", trend.get("from_high", trend.get("high_distance", 0)))
+    )
+    distance_low = _num(
+        trend.get("distance_low", trend.get("from_low", trend.get("low_distance", 0)))
+    )
+
+    # ---------- 状态识别 ----------
+    if chg >= 2.0:
+        market_state = "强势上攻"
+    elif chg >= 0.8:
+        market_state = "明显走强"
+    elif chg >= 0.2:
+        market_state = "温和走高"
+    elif chg > -0.2:
+        market_state = "窄幅整理"
+    elif chg > -0.8:
+        market_state = "温和走弱"
+    elif chg > -2.0:
+        market_state = "明显回落"
+    else:
+        market_state = "显著承压"
+
+    if adv_ratio >= 75:
+        breadth_state = "高度扩散"
+    elif adv_ratio >= 60:
+        breadth_state = "明显偏多"
+    elif adv_ratio >= 52:
+        breadth_state = "略偏多"
+    elif dec_ratio >= 75:
+        breadth_state = "高度收缩"
+    elif dec_ratio >= 60:
+        breadth_state = "明显偏空"
+    elif dec_ratio >= 52:
+        breadth_state = "略偏空"
+    else:
+        breadth_state = "多空均衡"
+
+    # 指数与广度的背离是编辑式总结中非常重要的信号。
+    breadth_divergence = ""
+    if chg >= 0.5 and adv_ratio < 50:
+        breadth_divergence = "上涨但广度偏弱"
+    elif chg >= 0.8 and adv_ratio < 60:
+        breadth_divergence = "上涨但广度有限"
+    elif chg <= -0.5 and adv_ratio > 50:
+        breadth_divergence = "下跌但广度尚有支撑"
+    elif chg <= -0.8 and adv_ratio > 40:
+        breadth_divergence = "下跌但并非全面抛售"
+
+    # ---------- 行业状态 ----------
+    sector_up = sum(1 for x in sectors if _change(x) > 0)
+    sector_down = sum(1 for x in sectors if _change(x) < 0)
+    sector_total = max(len(sectors), 1)
+    sector_up_ratio = sector_up / sector_total * 100
+
+    best_sector = _first_name(sectors, True)
+    worst_sector = _first_name(sectors, False)
+    best_sector_chg = _first_change(sectors, True)
+    worst_sector_chg = _first_change(sectors, False)
+
+    if sectors:
+        if sector_up_ratio >= 75:
+            sector_state = "行业普涨"
+        elif sector_up_ratio >= 60:
+            sector_state = "行业多数走强"
+        elif sector_up_ratio <= 25:
+            sector_state = "行业普跌"
+        elif sector_up_ratio <= 40:
+            sector_state = "行业多数承压"
         else:
-            templates = [
-                f"纳斯达克100指数收跌{fmt_pct(change)}，{down}只成分股下跌，市场承压调整。",
-                f"NDX今日大跌{fmt_pct(change)}，{fmt_stock(bottom5[-1])}领跌{fmt_pct(bottom5[-1]['change'])}，避险情绪升温。",
-                f"大盘回调明显，纳指100{fmt_pct(change)}，仅{up}只上涨，空头占据主导。",
-                f"市场全线走弱，NDX收{fmt_pct(change)}，{down}只成分股收绿，权重股拖累显著。",
-                f"调整格局延续，纳斯达克100{fmt_pct(change)}，{fmt_stock(bottom5[-1])}、{fmt_stock(bottom5[-2])}跌幅居前。",
-            ]
-        return pick(*templates)
+            sector_state = "行业分化"
+    else:
+        sector_state = "行业数据有限"
 
-    elif summary_type == "stocks":
-        pie = data.get("pie_stocks", [])
-        heavy = [s for s in pie if s.get("weight", 0) > 3 and s.get("ticker") != "其他"][:3]
-        if heavy:
-            names = "、".join([fmt_stock(s) for s in heavy])
-            wsum = sum(s["weight"] for s in heavy)
-            return pick(
-                f"权重股方面，{names}合计权重达{wsum:.1f}%，对指数走向具有决定性影响。",
-                f"头部集中度高，{names}三家权重合计超{wsum:.1f}%，其波动直接左右NDX表现。",
-                f"前三大权重股{names}占据{wsum:.1f}%权重，今日{'集体走强' if all(s['change'] > 0 for s in heavy) else '表现分化'}。",
-            )
-        return pick(
-            "权重股今日表现分化，头部科技龙头涨跌互现。",
-            "前十大权重股走势不一，市场缺乏明确主线。",
-            "权重股整体平稳，对指数贡献中性。",
-        )
+    sector_spread = best_sector_chg - worst_sector_chg
 
-    elif summary_type == "sectors":
-        if not sectors:
-            return "行业数据暂缺，请关注后续更新。"
-        best = max(sectors, key=lambda x: x["change"])
-        worst = min(sectors, key=lambda x: x["change"])
-        return pick(
-            f"行业层面，{best['name']}表现最佳{fmt_pct(best['change'])}，{worst['name']}相对落后{fmt_pct(worst['change'])}。",
-            f"板块分化显著，{best['name']}领涨{fmt_pct(best['change'])}，而{worst['name']}收跌{fmt_pct(worst['change'])}。",
-            f"{best['name']}今日强势，板块平均{fmt_pct(best['change'])}；{worst['name']}承压，{fmt_pct(worst['change'])}。",
-            f"从行业看，{best['name']}与{worst['name']}形成鲜明对比，分别{fmt_pct(best['change'])}和{fmt_pct(worst['change'])}。",
-        )
+    # ---------- 个股状态 ----------
+    top_gain_name = _name(gainers[0]) if gainers else ""
+    top_gain_chg = _change(gainers[0]) if gainers else 0
+    top_loss_name = _name(losers[0]) if losers else ""
+    top_loss_chg = _change(losers[0]) if losers else 0
 
-    elif summary_type == "distribution":
-        counts = bins.get("counts", [])
-        labels = bins.get("labels", [])
-        if not counts or total == 0:
-            return "涨跌分布数据暂缺。"
-        max_idx = counts.index(max(counts))
-        max_label = labels[max_idx]
-        max_count = counts[max_idx]
-        up_count = sum(counts[4:])
-        down_count = sum(counts[:4])
-        return pick(
-            f"涨跌分布呈现{max_label}区间集中，共{max_count}只，占总数{max_count/total*100:.0f}%。",
-            f"从分布看，{max_label}区间股票最多（{max_count}只），上涨{up_count}只、下跌{down_count}只。",
-            f"今日{max_label}为最大阵营（{max_count}只），市场整体{'偏向上涨' if up_count > down_count else '偏向调整'}。",
-            f"分布图显示{max_label}集中了{max_count}只成分股，涨跌比约{up_count}:{down_count}。",
-        )
+    weighted_names = _top_weight_names(top_gainers, 3)
+    if not weighted_names:
+        weighted_names = _top_weight_names(top_losers, 3)
 
-    elif summary_type == "industry":
-        if not sectors:
-            return "行业数据暂缺。"
-        up_sectors = [s for s in sectors if s["change"] > 0]
-        down_sectors = [s for s in sectors if s["change"] < 0]
-        if len(up_sectors) > len(down_sectors):
-            return pick(
-                f"{len(up_sectors)}个行业收红，{len(down_sectors)}个行业收绿，板块整体偏强。",
-                f"多数板块上涨，{len(up_sectors)}个行业收涨，仅{len(down_sectors)}个收跌。",
-                f"行业普涨格局，{len(up_sectors)}个板块飘红，{len(down_sectors)}个板块飘绿。",
+    # ---------- 辅助句库 ----------
+    positive_openers = [
+        "纳指100延续风险偏好修复势头",
+        "纳指100今日获得买盘支持",
+        "科技股重新成为市场上行的主要支点",
+        "纳指100维持偏强格局",
+        "成长股重新占据市场交易中心",
+        "美股科技板块延续强势表现",
+        "纳指100在震荡中进一步走高",
+        "大型科技股的反弹推动指数继续上行",
+    ]
+
+    negative_openers = [
+        "纳指100今日承受明显卖压",
+        "科技股回吐近期涨幅，纳指100走弱",
+        "成长股遭遇获利了结，拖累纳指100表现",
+        "纳指100在高位震荡中出现回落",
+        "大型科技股走弱令指数承压",
+        "风险偏好有所降温，科技板块成为主要压力来源",
+        "纳指100结束此前的上行势头，今日明显走低",
+        "市场对高估值成长股的追价意愿有所减弱",
+    ]
+
+    flat_openers = [
+        "纳指100今日维持窄幅震荡",
+        "科技股整体缺乏明确方向，纳指100基本持平",
+        "市场在近期涨跌之后进入消化阶段",
+        "纳指100在多空力量拉锯下维持震荡格局",
+        "成长股买盘与获利回吐相互抵消，指数方向并不鲜明",
+    ]
+
+    breadth_positive = [
+        "上涨个股明显占优，买盘已经从少数龙头向更广泛的成分股扩散",
+        "超过半数成分股同步收高，显示市场内部参与度正在改善",
+        "上涨覆盖面较广，今日行情并非单纯依赖个别权重股拉动",
+        "市场广度与指数方向形成共振，风险偏好呈现较为完整的修复特征",
+    ]
+
+    breadth_negative = [
+        "下跌个股占据明显优势，市场内部的风险偏好仍然偏弱",
+        "多数成分股同步走低，今日回落具有较强的市场广度特征",
+        "卖压并未局限于少数股票，市场内部呈现较为普遍的收缩",
+        "指数走弱的同时市场广度同步恶化，显示资金撤离并非局部现象",
+    ]
+
+    # ---------- 总览：按市场状态 + 广度组合 ----------
+    if chg >= 0.2:
+        opener = random.choice(positive_openers)
+        if adv_ratio >= 60:
+            middle = random.choice(breadth_positive)
+        elif breadth_divergence:
+            middle = (
+                f"不过，{breadth_divergence}，上涨主要集中在部分成分股，"
+                "指数表面的强势仍需更多个股参与来确认。"
             )
         else:
-            return pick(
-                f"{len(up_sectors)}个行业收红，{len(down_sectors)}个行业收绿，板块整体偏弱。",
-                f"多数板块调整，{len(down_sectors)}个行业收跌，仅{len(up_sectors)}个行业收涨。",
-                f"行业跌多涨少，{len(down_sectors)}个板块飘绿，{len(up_sectors)}个板块飘红。",
+            middle = (
+                f"指数上涨{abs(chg):.2f}%，共有{adv}只成分股上涨、"
+                f"{dec}只下跌，市场内部整体保持偏多格局。"
             )
-
-    elif summary_type == "trend":
-        if len(history) >= 2:
-            trend_change = (history[-1] - history[0]) / history[0] * 100
-            high = max(history)
-            low = min(history)
-            return pick(
-                f"近30日NDX{'累计上涨' if trend_change > 0 else '累计下跌'}{fmt_pct(trend_change).replace('+', '').replace('-', '')}，区间高点{high:,.0f}、低点{low:,.0f}。",
-                f"30日趋势{'向上' if trend_change > 0 else '向下'}，累计{fmt_pct(trend_change)}，当前位于{history[-1]:,.0f}点附近。",
-                f"近一个月NDX{fmt_pct(trend_change)}，波动区间{low:,.0f}-{high:,.0f}，{'整体重心上移' if trend_change > 0 else '整体重心下移'}。",
-                f"30日走势显示指数{fmt_pct(trend_change)}，期间最高{high:,.0f}、最低{low:,.0f}。",
+    elif chg <= -0.2:
+        opener = random.choice(negative_openers)
+        if dec_ratio >= 60:
+            middle = random.choice(breadth_negative)
+        elif breadth_divergence:
+            middle = (
+                f"但值得注意的是，{breadth_divergence}，"
+                "指数跌幅并未完全反映市场内部的真实强弱。"
             )
-        return pick(
-            "30日趋势数据暂缺，建议关注后续走势变化。",
-            "历史数据不足，无法判断中期趋势。",
+        else:
+            middle = (
+                f"指数下跌{abs(chg):.2f}%，共有{adv}只成分股上涨、"
+                f"{dec}只下跌，市场内部情绪偏向谨慎。"
+            )
+    else:
+        opener = random.choice(flat_openers)
+        middle = (
+            f"指数变动仅{abs(chg):.2f}%，上涨{adv}只、下跌{dec}只，"
+            "多空双方暂未形成足以推动指数脱离近期区间的力量。"
         )
 
-    return ""
+    if sector_state == "行业普涨":
+        sector_tail = (
+            f"行业层面同样偏强，约{sector_up_ratio:.0f}%的行业收高，"
+            f"{best_sector or '领涨板块'}涨幅居前。"
+        )
+    elif sector_state == "行业普跌":
+        sector_tail = (
+            f"行业层面同步承压，约{100-sector_up_ratio:.0f}%的行业收跌，"
+            f"{worst_sector or '弱势板块'}成为主要拖累。"
+        )
+    elif sectors and sector_spread >= 2:
+        sector_tail = (
+            f"板块之间的分化较为明显，{best_sector or '强势板块'}上涨"
+            f"{best_sector_chg:.2f}%，而{worst_sector or '弱势板块'}下跌"
+            f"{abs(worst_sector_chg):.2f}%，资金仍在不同科技主题之间轮动。"
+        )
+    else:
+        sector_tail = ""
+
+    ai_summary = (
+        f"{opener}，纳指100收于今日交易区间附近，日内变动{_pct(chg)}。"
+        f"{middle}"
+        f"{sector_tail}"
+    ).replace("。", "。 ", 1).strip()
+
+    # ---------- 个股总结 ----------
+    if gainers and losers:
+        if top_gain_chg >= 5:
+            stock_lead = (
+                f"{top_gain_name}上涨{top_gain_chg:.2f}%，成为今日表现最突出的成分股；"
+                f"{top_loss_name}则下跌{abs(top_loss_chg):.2f}%，位于跌幅前列。"
+            )
+        elif adv_ratio >= 65:
+            stock_lead = (
+                f"个股层面买盘较为广泛，领涨股{top_gain_name}上涨{top_gain_chg:.2f}%，"
+                f"而跌幅最大的{top_loss_name}下跌{abs(top_loss_chg):.2f}%。"
+            )
+        elif dec_ratio >= 65:
+            stock_lead = (
+                f"个股卖压较为普遍，{top_loss_name}下跌{abs(top_loss_chg):.2f}%领跌，"
+                f"{top_gain_name}仍录得{top_gain_chg:.2f}%涨幅，但难以改变整体偏弱格局。"
+            )
+        else:
+            stock_lead = (
+                f"个股表现分化，{top_gain_name}上涨{top_gain_chg:.2f}%，"
+                f"{top_loss_name}下跌{abs(top_loss_chg):.2f}%，"
+                "市场内部仍存在较明显的多空博弈。"
+            )
+    elif gainers:
+        stock_lead = f"上涨个股中，{top_gain_name}以{top_gain_chg:.2f}%的涨幅居前。"
+    elif losers:
+        stock_lead = f"下跌个股中，{top_loss_name}以{abs(top_loss_chg):.2f}%的跌幅居前。"
+    else:
+        stock_lead = "今日缺乏足够的个股数据形成明确的领涨或领跌结构。"
+
+    if weighted_names:
+        weight_tail = (
+            f"从核心成分股看，市场关注仍集中于{', '.join(weighted_names[:3])}等权重较高的股票，"
+            "其走势对指数方向具有较强影响。"
+        )
+    elif adv_ratio >= 60:
+        weight_tail = "今日指数并未呈现明显的单一龙头依赖特征，市场参与面相对均衡。"
+    else:
+        weight_tail = "个股层面的分化意味着指数表现仍需结合权重结构观察。"
+
+    ai_stocks = stock_lead + weight_tail
+
+    # ---------- 行业总结 ----------
+    if sectors:
+        if sector_up_ratio >= 70:
+            ai_sectors = (
+                f"行业表现明显偏多，{sector_up}个行业上涨、{sector_down}个行业下跌，"
+                f"上涨覆盖率约为{sector_up_ratio:.0f}%。"
+                f"{best_sector or '领涨板块'}以{best_sector_chg:.2f}%的涨幅领先，"
+                "资金参与已经从单一主题扩展至更广泛的科技板块。"
+            )
+        elif sector_up_ratio <= 30:
+            ai_sectors = (
+                f"行业表现整体偏弱，仅{sector_up}个行业上涨，而{sector_down}个行业下跌，"
+                f"下跌覆盖率约为{100-sector_up_ratio:.0f}%。"
+                f"{worst_sector or '弱势板块'}下跌{abs(worst_sector_chg):.2f}%，"
+                "显示卖压具有较明显的板块扩散特征。"
+            )
+        else:
+            ai_sectors = (
+                f"行业轮动仍是今日市场的重要特征，{sector_up}个行业上涨、"
+                f"{sector_down}个行业下跌。"
+                f"{best_sector or '强势板块'}上涨{best_sector_chg:.2f}%居前，"
+                f"{worst_sector or '弱势板块'}则下跌{abs(worst_sector_chg):.2f}%，"
+                "板块之间的收益差距显示资金正在不同科技主题之间重新定价。"
+            )
+    else:
+        ai_sectors = "行业数据暂不足以形成可靠的板块轮动判断。"
+
+    # ---------- 分布总结 ----------
+    if dominant_bin:
+        if adv_ratio >= 65:
+            dist_open = "个股涨跌幅分布呈现明显的正向聚集特征"
+        elif dec_ratio >= 65:
+            dist_open = "个股涨跌幅分布明显向负收益一侧倾斜"
+        else:
+            dist_open = "个股涨跌幅分布整体较为分散"
+
+        ai_distribution = (
+            f"{dist_open}，数量最多的收益区间为“{dominant_bin}”，"
+            f"约有{dominant_count}只成分股落在该区间。"
+        )
+        if abs(chg) >= 1 and adv_ratio >= 60:
+            ai_distribution += (
+                "指数与个股分布方向一致，说明今日行情具有较强的内部确认。"
+            )
+        elif abs(chg) >= 1 and dec_ratio >= 60:
+            ai_distribution += (
+                "指数方向与多数个股同步，市场并非局部股票造成的单点波动。"
+            )
+        elif breadth_divergence:
+            ai_distribution += (
+                "不过指数与市场广度之间存在一定背离，表面指数表现需要谨慎解读。"
+            )
+        else:
+            ai_distribution += (
+                "从分布结构看，市场尚未形成极端单边行情。"
+            )
+    else:
+        if adv_ratio >= 70:
+            dist_comment = "多数成分股收涨，市场内部呈现较强的正向扩散。"
+        elif dec_ratio >= 70:
+            dist_comment = "多数成分股收跌，卖压在市场内部形成明显扩散。"
+        else:
+            dist_comment = "个股涨跌较为均衡，市场内部缺乏极端单边特征。"
+        ai_distribution = (
+            f"{dist_comment} 今日上涨{adv}只、下跌{dec}只，"
+            f"上涨占比约{adv_ratio:.1f}%。"
+        )
+
+    # ---------- 行业广度总结 ----------
+    if sectors:
+        if sector_up_ratio >= 75:
+            ai_industry = (
+                f"行业广度明显改善，{sector_up}个行业中有{sector_up}个上涨，"
+                f"上涨比例达到{sector_up_ratio:.0f}%。"
+                "这种广泛参与通常意味着市场风险偏好并非由单一行业独立推动。"
+            )
+        elif sector_up_ratio <= 25:
+            ai_industry = (
+                f"行业广度明显恶化，仅{sector_up}个行业上涨，"
+                f"{sector_down}个行业下跌。"
+                "指数表现背后的资金参与度偏低，防御或局部主题交易特征更加突出。"
+            )
+        elif 45 <= sector_up_ratio <= 55:
+            ai_industry = (
+                f"行业广度接近均衡，{sector_up}个行业上涨、{sector_down}个下跌。"
+                "在这种环境下，指数方向更多取决于高权重成分股的相对表现。"
+            )
+        else:
+            direction = "偏强" if sector_up_ratio > 50 else "偏弱"
+            ai_industry = (
+                f"行业广度整体{direction}，上涨行业占比约{sector_up_ratio:.0f}%。"
+                f"最强与最弱行业之间相差约{sector_spread:.2f}个百分点，"
+                "板块轮动仍然是解释指数表现的重要线索。"
+            )
+    else:
+        ai_industry = (
+            f"目前可确认的市场广度为：{adv}只上涨、{dec}只下跌、{unc}只持平，"
+            "整体参与度仍需结合行业数据进一步观察。"
+        )
+
+    # ---------- 趋势总结 ----------
+    if trend_return > 5:
+        trend_phrase = "过去30个交易日仍保持较强的上行趋势"
+    elif trend_return > 1:
+        trend_phrase = "过去30个交易日维持温和上行格局"
+    elif trend_return > -1:
+        trend_phrase = "过去30个交易日整体处于震荡整理状态"
+    elif trend_return > -5:
+        trend_phrase = "过去30个交易日呈现温和回落"
+    else:
+        trend_phrase = "过去30个交易日处于明显的下行阶段"
+
+    ai_trend = (
+        f"从中期维度观察，纳指100{trend_phrase}"
+        f"，30日累计变动约为{trend_return:.2f}%。"
+    )
+
+    if distance_high:
+        if abs(distance_high) < 2:
+            ai_trend += (
+                "指数仍接近近期高位，当前价格位置意味着市场已经消化了相当一部分乐观预期，"
+                "后续走势对新的催化因素会更加敏感。"
+            )
+        elif distance_high < -5:
+            ai_trend += (
+                f"指数距离近期高点仍有约{abs(distance_high):.1f}%的空间，"
+                "中期趋势尚未完全修复，当前反弹仍需进一步观察持续性。"
+            )
+
+    if distance_low and distance_low < 5:
+        ai_trend += (
+            "与此同时，指数仍处于近期低位附近，市场尚未完全摆脱前期调整留下的压力。"
+        )
+
+    if trend_return > 1 and chg < -0.5:
+        ai_trend += (
+            "值得注意的是，今日回落与中期上行趋势形成一定背离，"
+            "更接近趋势中的短线整理，而非趋势方向已经发生明确反转。"
+        )
+    elif trend_return < -1 and chg > 0.5:
+        ai_trend += (
+            "今日反弹与中期偏弱格局形成一定背离，"
+            "在趋势尚未扭转之前，更适合视作阶段性修复而非趋势确认。"
+        )
+    elif trend_return > 1 and chg > 0.5:
+        ai_trend += (
+            "今日价格方向与中期趋势形成共振，短线动能对既有趋势构成进一步确认。"
+        )
+    elif trend_return < -1 and chg < -0.5:
+        ai_trend += (
+            "今日价格方向与中期趋势一致，短线弱势仍在强化原有下行结构。"
+        )
+    else:
+        ai_trend += (
+            "短线价格变化与中期趋势之间尚未形成足够强的方向性信号。"
+        )
+
+    # ---------- 最终风格微调 ----------
+    # 避免六段文字开头完全重复。
+    ai_summary = ai_summary.replace("纳指100纳指100", "纳指100")
+    ai_stocks = ai_stocks.replace("纳指100纳指100", "纳指100")
+
+    return {
+        "ai_summary": ai_summary,
+        "ai_stocks": ai_stocks,
+        "ai_sectors": ai_sectors,
+        "ai_distribution": ai_distribution,
+        "ai_industry": ai_industry,
+        "ai_trend": ai_trend,
+    }
 
 
 def get_existing_history_dates(output_dir="docs"):
