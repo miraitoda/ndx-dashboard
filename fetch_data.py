@@ -556,7 +556,7 @@ section{padding:60px 0}
 <!-- Header -->
 <div class="header">
   <div class="header-inner">
-    <div class="logo">NDX<span class="logo-accent">.</span>DASHBOARD</div>
+    <div class="logo" id="siteLogo">NDX100 DASHBOARD</div>
     <div class="nav-btns">
       <button class="nav-btn" id="btnPrev" disabled>← 前一日</button>
       <button class="nav-btn" id="btnToday" style="display:none">今天</button>
@@ -790,6 +790,7 @@ function getMarketStatus(){
   document.getElementById("statusBadge").textContent=getMarketStatus();
   document.querySelector('.hero-accent').style.color = idx.change >= 0 ? 'var(--rise)' : 'var(--fall)';
   document.querySelector('.hero-tag-dot').style.background=idx.change>=0?'var(--rise)':'var(--fall)';
+  document.getElementById('siteLogo').style.color=idx.change>=0?'var(--rise)':'var(--fall)';
 
   const priceEl=document.getElementById("idxPrice");
   const chgEl=document.getElementById("idxChange");
