@@ -689,7 +689,7 @@ function getMarketStatus(){
 
   if(idx.price&&idx.prev_close){
     // 价格 odometer 滚动（从昨日收盘价滚到今日）
-    rollNumber(priceEl, idx.price, 5000);
+    rollNumber(priceEl, idx.prev_close, idx.price, 5000);
 
     // 涨跌幅直接设置，不参与滚动（避免格式复杂化）
     const diff=idx.price-idx.prev_close;
@@ -938,23 +938,35 @@ if(window.matchMedia&&window.matchMedia("(prefers-color-scheme: light)").matches
   if(btn)btn.textContent="夜间模式";
 }
 
-// Odometer 数字滚动效果（逐位翻滚）
-function rollNumber(el, targetValue, duration){
-  const finalStr=targetValue.toLocaleString("en-US",{minimumFractionDigits:1,maximumFractionDigits:1});
+// Odometer 数字滚动：从 fromValue 逐位翻滚到 toValue
+function rollNumber(el, fromValue, toValue, duration){
+  const toStr=toValue.toLocaleString("en-US",{minimumFractionDigits:1,maximumFractionDigits:1});
+  const fromStr=fromValue.toLocaleString("en-US",{minimumFractionDigits:1,maximumFractionDigits:1});
+
+  // 对齐长度（前补空格）
+  const maxLen=Math.max(toStr.length,fromStr.length);
+  const toPadded=toStr.padStart(maxLen,' ');
+  const fromPadded=fromStr.padStart(maxLen,' ');
+
   el.innerHTML="";
   el.style.display="inline-flex";
   el.style.alignItems="flex-end";
 
-  const chars=finalStr.split("");
   const digits=[];
 
-  chars.forEach((ch,i)=>{
-    if(ch===","||ch==="."){
+  for(let i=0;i<maxLen;i++){
+    const fromCh=fromPadded[i];
+    const toCh=toPadded[i];
+
+    if(fromCh===","||fromCh==="."||fromCh===" "){
       const span=document.createElement("span");
-      span.textContent=ch;
+      span.textContent=toCh;
       span.style.display="inline-block";
       el.appendChild(span);
     }else{
+      const fromNum=parseInt(fromCh);
+      const toNum=parseInt(toCh);
+
       const wrap=document.createElement("span");
       wrap.style.display="inline-block";
       wrap.style.overflow="hidden";
@@ -965,27 +977,36 @@ function rollNumber(el, targetValue, duration){
       const strip=document.createElement("span");
       strip.style.display="flex";
       strip.style.flexDirection="column";
-      strip.style.transition=`transform ${duration}ms cubic-bezier(0.25,1,0.5,1)`;
 
-      for(let n=0;n<=9;n++){
-        const num=document.createElement("span");
-        num.textContent=n;
-        num.style.display="block";
-        num.style.height="1em";
-        num.style.lineHeight="1em";
-        strip.appendChild(num);
+      // 构建滚动序列：从 fromNum 向上滚动到 toNum（循环）
+      let seq=[];
+      let n=fromNum;
+      while(true){
+        seq.push(n);
+        if(n===toNum) break;
+        n=(n+1)%10;
       }
+
+      seq.forEach(num=>{
+        const d=document.createElement("span");
+        d.textContent=num;
+        d.style.display="block";
+        d.style.height="1em";
+        d.style.lineHeight="1em";
+        strip.appendChild(d);
+      });
 
       wrap.appendChild(strip);
       el.appendChild(wrap);
-      digits.push({strip,target:parseInt(ch),delay:i*70});
+      digits.push({strip,count:seq.length,delay:i*70,duration:duration});
     }
-  });
+  }
 
   requestAnimationFrame(()=>{
-    digits.forEach(({strip,target,delay})=>{
+    digits.forEach(({strip,count,delay,duration})=>{
+      strip.style.transition=`transform ${duration}ms cubic-bezier(0.25,1,0.5,1)`;
       setTimeout(()=>{
-        strip.style.transform=`translateY(-${target}em)`;
+        strip.style.transform=`translateY(-${count-1}em)`;
       },delay);
     });
   });
