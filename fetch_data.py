@@ -245,7 +245,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NDX Dashboard</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
 :root {
   --bg: #0a0a0a;
@@ -312,7 +312,7 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:
 .ticker-grid{position:absolute;inset:0;pointer-events:none;opacity:0.3}
 .ticker-grid svg{width:100%;height:100%}
 .ticker-track{display:flex;white-space:nowrap;position:relative;z-index:1;height:100%;align-items:center}
-.ticker-item{display:inline-flex;align-items:center;padding:0 20px;font-size:13px;font-weight:700;font-family:'JetBrains Mono',monospace;letter-spacing:0.3px;flex-shrink:0;line-height:1}
+.ticker-item{display:inline-flex;align-items:center;padding:0 20px;font-size:13px;font-weight:700;font-family:'SF Mono',monospace;letter-spacing:0.3px;flex-shrink:0;line-height:1}
 .ticker-name{color:var(--text2);margin-right:8px}
 .ticker-change.up{color:var(--rise)}
 .ticker-change.down{color:var(--fall)}
@@ -361,11 +361,11 @@ section{padding:60px 0}
 .hero-badge{padding:4px 12px;border-radius:100px;background:var(--badge-bg);color:var(--badge-color);border:1px solid var(--badge-border);font-size:12px;font-weight:700;letter-spacing:0.5px}
 .hero-kpis{display:flex;gap:40px;flex-wrap:wrap}
 .kpi-label{font-size:11px;font-weight:800;color:var(--text3);letter-spacing:2px;margin-bottom:8px}
-.kpi-value{font-size:52px;font-weight:900;letter-spacing:-2px;color:var(--text);font-family:'JetBrains Mono',monospace;line-height:1}
-.kpi-change{font-size:18px;font-weight:800;margin-top:8px;font-family:'JetBrains Mono',monospace}
+.kpi-value{font-size:52px;font-weight:900;letter-spacing:-2px;color:var(--text);font-family:'SF Mono',monospace;line-height:1}
+.kpi-change{font-size:18px;font-weight:800;margin-top:8px;font-family:'SF Mono',monospace}
 .kpi-change.up{color:var(--rise)}
 .kpi-change.down{color:var(--fall)}
-.kpi-sub{font-size:13px;color:var(--text3);margin-top:8px;font-family:'JetBrains Mono',monospace}
+.kpi-sub{font-size:13px;color:var(--text3);margin-top:8px;font-family:'SF Mono',monospace}
 
 /* AI Summary */
 .ai-summary p{margin:0;font-size:28px;font-weight:700;line-height:1.4;color:var(--text);max-width:900px;letter-spacing:-0.5px}
@@ -381,7 +381,7 @@ section{padding:60px 0}
 /* Distribution bars */
 .dist-chart{display:flex;align-items:flex-end;gap:4px;height:200px;padding:20px 0;border-bottom:1px solid var(--border)}
 .dist-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px}
-.dist-count{font-size:11px;font-weight:800;font-family:'JetBrains Mono',monospace}
+.dist-count{font-size:11px;font-weight:800;font-family:'SF Mono',monospace}
 .dist-count.up{color:var(--rise)}
 .dist-count.down{color:var(--fall)}
 .dist-bar{width:100%;border-radius:4px 4px 0 0}
@@ -396,7 +396,7 @@ section{padding:60px 0}
 .sector-bar{height:100%;position:relative}
 .sector-bar.up{background:var(--rise);border-radius:0 4px 4px 0}
 .sector-bar.down{background:var(--fall);border-radius:4px 0 0 4px;margin-left:auto}
-.sector-bar-label{position:absolute;top:50%;transform:translateY(-50%);font-size:12px;font-weight:800;font-family:'JetBrains Mono',monospace;white-space:nowrap}
+.sector-bar-label{position:absolute;top:50%;transform:translateY(-50%);font-size:12px;font-weight:800;font-family:'SF Mono',monospace;white-space:nowrap}
 .sector-bar-label.up{right:12px;color:rgba(0,0,0,0.6)}
 .sector-bar-label.down{left:12px;color:rgba(255,255,255,0.9)}
 
@@ -408,8 +408,8 @@ section{padding:60px 0}
 .stock-cell{padding:14px 10px;border-radius:12px;text-align:center;border:1px solid var(--rise-border);color:var(--rise);background:var(--surface-raised);cursor:pointer;transition:all 0.15s}
 .stock-cell.down{border-color:var(--fall-border);color:var(--fall)}
 .stock-cell:hover{transform:translateY(-2px) scale(1.02);border-color:var(--border-strong)}
-.stock-ticker{font-size:14px;font-weight:800;font-family:'JetBrains Mono',monospace;letter-spacing:0.5px}
-.stock-pct{font-size:12px;font-weight:600;font-family:'JetBrains Mono',monospace;margin-top:4px;opacity:0.9}
+.stock-ticker{font-size:14px;font-weight:800;font-family:'SF Mono',monospace;letter-spacing:0.5px}
+.stock-pct{font-size:12px;font-weight:600;font-family:'SF Mono',monospace;margin-top:4px;opacity:0.9}
 
 /* Pie charts */
 .pie-container{display:flex;align-items:center;justify-content:center;position:relative}
@@ -421,7 +421,7 @@ section{padding:60px 0}
 .footer-text{font-size:12px;color:var(--text3);font-weight:500;letter-spacing:0.3px}
 
 /* Tooltip */
-.tooltip{position:fixed;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--text);pointer-events:none;opacity:0;transition:opacity .15s;z-index:1000;box-shadow:0 8px 32px rgba(0,0,0,0.4);font-family:'JetBrains Mono',monospace;white-space:nowrap}
+.tooltip{position:fixed;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--text);pointer-events:none;opacity:0;transition:opacity .15s;z-index:1000;box-shadow:0 8px 32px rgba(0,0,0,0.4);font-family:'SF Mono',monospace;white-space:nowrap}
 
 @media(max-width:720px){
   .hero-title{font-size:40px!important}
@@ -932,7 +932,7 @@ function getMarketStatus(){
   const shadow="text-shadow:0 2px 10px rgba(0,0,0,0.85)";
   svg.appendChild(svgEl("text",{x:cx,y:cy-12,"text-anchor":"middle",fill:"var(--text)","font-size":28,"font-weight":900,"letter-spacing":"-1",style:shadow})).textContent="NDX";
   const chgColor=DATA.index.change>=0?"var(--rise)":"var(--fall)";
-  svg.appendChild(svgEl("text",{x:cx,y:cy+15,"text-anchor":"middle",fill:chgColor,"font-size":18,"font-weight":800,"font-family":"'JetBrains Mono',monospace",style:shadow})).textContent=fmtPct(DATA.index.change);
+  svg.appendChild(svgEl("text",{x:cx,y:cy+15,"text-anchor":"middle",fill:chgColor,"font-size":18,"font-weight":800,"font-family":"'SF Mono',monospace",style:shadow})).textContent=fmtPct(DATA.index.change);
 
   container.appendChild(svg);
   const leg=document.getElementById("stockLegend");
@@ -987,8 +987,8 @@ function getMarketStatus(){
   const downSectors=data.filter(d=>d.change<0);
   const upAvg=upSectors.length?upSectors.reduce((a,b)=>a+b.change,0)/upSectors.length:0;
   const downAvg=downSectors.length?downSectors.reduce((a,b)=>a+b.change,0)/downSectors.length:0;
-  svg.appendChild(svgEl("text",{x:cx,y:cy+5,"text-anchor":"middle",fill:"var(--rise)","font-size":16,"font-weight":800,"font-family":"'JetBrains Mono',monospace",style:shadow})).textContent="▲ "+fmtPctRaw(upAvg);
-  svg.appendChild(svgEl("text",{x:cx,y:cy+25,"text-anchor":"middle",fill:"var(--fall)","font-size":14,"font-weight":700,"font-family":"'JetBrains Mono',monospace",style:shadow})).textContent="▼ "+fmtPctRaw(downAvg);
+  svg.appendChild(svgEl("text",{x:cx,y:cy+5,"text-anchor":"middle",fill:"var(--rise)","font-size":16,"font-weight":800,"font-family":"'SF Mono',monospace",style:shadow})).textContent="▲ "+fmtPctRaw(upAvg);
+  svg.appendChild(svgEl("text",{x:cx,y:cy+25,"text-anchor":"middle",fill:"var(--fall)","font-size":14,"font-weight":700,"font-family":"'SF Mono',monospace",style:shadow})).textContent="▼ "+fmtPctRaw(downAvg);
 
   container.appendChild(svg);
   const leg=document.getElementById("sectorLegend");
@@ -1189,8 +1189,8 @@ def generate_summary(data, summary_type):
     change = index.get("change", 0)
 
     sorted_by_change = sorted(stocks, key=lambda x: x["change"], reverse=True)
-    top5 = sorted_by_change[:5]
-    bottom5 = sorted_by_change[-5:]
+    top5 = sorted_by_change[:5] if len(sorted_by_change) >= 5 else sorted_by_change
+    bottom5 = sorted_by_change[-5:] if len(sorted_by_change) >= 5 else sorted_by_change
 
     def fmt_stock(s):
         return f"{s['name']}（{s['ticker']}）"
@@ -1201,39 +1201,128 @@ def generate_summary(data, summary_type):
     def pick(*args):
         return random.choice(args)
 
+    # 辅助：获取一些常用数据
+    top1 = top5[0] if top5 else None
+    bot1 = bottom5[-1] if bottom5 else None
+
+    # 判断涨跌氛围
+    up_ratio = up / total if total else 0
+    is_bullish = change > 0 and up_ratio > 0.55
+    is_bearish = change < 0 and up_ratio < 0.45
+    is_mixed = not is_bullish and not is_bearish
+
     if summary_type == "overview":
-        templates = []
         if change > 1.5:
             templates = [
-                f"纳斯达克100指数强势收涨{fmt_pct(change)}，{up}只成分股上涨，{down}只下跌，多头主导市场。",
-                f"今日NDX大涨{fmt_pct(change)}，{fmt_stock(top5[0])}领涨{fmt_pct(top5[0]['change'])}，科技龙头集体发力。",
-                f"大盘单边上行，纳指100收{fmt_pct(change)}，上涨家数达{up}只，市场情绪积极。",
-                f"强势格局延续，NDX今日{fmt_pct(change)}，前五大权重股贡献显著，{fmt_stock(top5[0])}、{fmt_stock(top5[1])}表现亮眼。",
+                f"今天纳指100直接起飞，收了{fmt_pct(change)}，{up}只涨{down}只跌，这行情看着就舒服。",
+                f"大盘硬得很，NDX大涨{fmt_pct(change)}，上涨家数冲到{up}只，空头今天估计很难受。",
+                f"今天这走势，说实话有点超预期。纳指100收{fmt_pct(change)}，{up}涨{down}跌，赚钱效应不错。",
+                f"{up}只成分股收红，NDX涨了{fmt_pct(change)}，科技龙头集体发力，这波有点猛。",
+                f"今天市场给面子，纳指100直接{fmt_pct(change)}，{down}只下跌几乎可以忽略不计。",
+                f"开盘就往上冲，收盘也没掉下来，NDX今天{fmt_pct(change)}，{up}只上涨，稳。",
+                f"难得一见的普涨行情，{up}只涨{down}只跌，NDX收{fmt_pct(change)}，持仓的朋友今晚可以加个鸡腿。",
+                f"今天这涨幅{fmt_pct(change)}，放在最近一个月都算大的。{up}只上涨，市场信心明显回来了。",
+                f"纳指100今天{fmt_pct(change)}，{up}只成分股飘红，感觉资金在回流科技股。",
+                f"大盘单边上行，NDX收{fmt_pct(change)}，{up}涨{down}跌，基本没什么悬念的一天。",
+                f"今天行情有点猛，{fmt_stock(top1)}涨了{fmt_pct(top1['change'])}，带动指数直接{fmt_pct(change)}。",
+                f"{up}只上涨、{down}只下跌，这比例看着就踏实。NDX今天{fmt_pct(change)}，多头完全控盘。",
+                f"今天纳指100的表现，可以说是近期最强之一。{fmt_pct(change)}的涨幅，{up}只上涨，服气。",
+                f"大盘给力，NDX{fmt_pct(change)}，上涨家数{up}只，今天基本就是捡钱行情。",
+                f"今天这行情，空头估计要怀疑人生了。NDX{fmt_pct(change)}，{up}涨{down}跌，一边倒。",
+                f"纳指100强势收涨{fmt_pct(change)}，{up}只成分股上涨，市场情绪明显偏暖。",
+                f"今天NDX大涨{fmt_pct(change)}，科技龙头集体爆发，{fmt_stock(top1)}领涨{fmt_pct(top1['change'])}。",
+                f"大盘单边上行，纳指100收{fmt_pct(change)}，{up}涨{down}跌，多头主导毫无悬念。",
+                f"强势格局延续，NDX今日{fmt_pct(change)}，前五大权重股贡献显著。",
                 f"多头攻势凌厉，纳指100大涨{fmt_pct(change)}，仅{down}只下跌，普涨特征明显。",
+                f"今天这盘面，说实话有点强得离谱。NDX{fmt_pct(change)}，{up}只涨，跌的{down}只几乎可以忽略。",
+                f"行情来了挡都挡不住，纳指100直接{fmt_pct(change)}，{up}只成分股收红，这势头可以。",
+                f"今天大盘给足面子，NDX{fmt_pct(change)}，上涨家数{up}只，持仓的朋友应该都笑了。",
+                f"纳指100今天这表现，{fmt_pct(change)}的涨幅，{up}只上涨，科技股的春天回来了？",
+                f"今天市场有点疯，NDX{fmt_pct(change)}，{up}涨{down}跌，感觉资金在抢筹。",
             ]
         elif change > 0:
             templates = [
-                f"纳斯达克100指数小幅收{fmt_pct(change)}，{up}涨{down}跌，市场温和向好。",
-                f"NDX今日微涨{fmt_pct(change)}，{fmt_stock(top5[0])}领涨，整体涨跌互现。",
+                f"今天纳指100小涨{fmt_pct(change)}，{up}涨{down}跌，市场温和向好，不算惊艳但也能接受。",
+                f"NDX今天微涨{fmt_pct(change)}，{up}只收红，整体涨跌互现，算是平稳的一天。",
+                f"大盘窄幅波动后收红，纳指100{fmt_pct(change)}，上涨家数略占优，但力度一般。",
+                f"市场小幅反弹，NDX收{fmt_pct(change)}，{up}只成分股收红，{down}只收绿，分化还在。",
+                f"温和上涨格局，纳斯达克100指数{fmt_pct(change)}，板块轮动有序，但没什么大动静。",
+                f"今天NDX涨了{fmt_pct(change)}，{up}只涨{down}只跌，怎么说呢，有涨就好，不挑。",
+                f"大盘小幅收红，纳指100{fmt_pct(change)}，{up}只上涨，但涨幅都不大，观望情绪还在。",
+                f"今天市场给了一颗小糖，NDX{fmt_pct(change)}，{up}涨{down}跌，聊胜于无吧。",
+                f"纳指100今天{fmt_pct(change)}，{up}只成分股上涨，整体偏暖但力度有限。",
+                f"今天这行情，说强不强说弱不弱，NDX{fmt_pct(change)}，{up}涨{down}跌，继续磨。",
+                f"小涨{fmt_pct(change)}，{up}只上涨，市场温和反弹，但感觉资金还在犹豫。",
+                f"NDX今日{fmt_pct(change)}，{up}涨{down}跌，大盘小幅走高，但热点不太集中。",
+                f"今天纳指100收了根小阳线，{fmt_pct(change)}，{up}只涨，算是给这周开了个好头。" if date_str.endswith("-01") or date_str.endswith("-02") or date_str.endswith("-03") else f"今天纳指100收了根小阳线，{fmt_pct(change)}，{up}只涨，继续稳步推进。",
+                f"大盘小幅收红，NDX{fmt_pct(change)}，{up}只成分股上涨，市场情绪偏谨慎乐观。",
+                f"今天这走势，不温不火，NDX{fmt_pct(change)}，{up}涨{down}跌，等待方向选择。",
+                f"纳指100小幅收涨{fmt_pct(change)}，{up}涨{down}跌，市场温和向好。",
+                f"NDX今日微涨{fmt_pct(change)}，{fmt_stock(top1)}领涨，整体涨跌互现。",
                 f"大盘窄幅波动后收红，纳指100{fmt_pct(change)}，上涨家数略占优。",
                 f"市场小幅反弹，NDX收{fmt_pct(change)}，{up}只成分股收红，{down}只收绿。",
                 f"温和上涨格局，纳斯达克100指数{fmt_pct(change)}，板块轮动有序。",
+                f"今天NDX涨了{fmt_pct(change)}，{up}只涨{down}只跌，有涨就好，知足常乐。",
+                f"大盘小幅收红，纳指100{fmt_pct(change)}，{up}只上涨，力度一般但方向对了。",
+                f"今天市场给了一颗小糖，NDX{fmt_pct(change)}，{up}涨{down}跌，继续观察。",
+                f"纳指100今天{fmt_pct(change)}，{up}只成分股上涨，偏暖但不够兴奋。",
+                f"今天这行情，说强不强说弱不弱，NDX{fmt_pct(change)}，{up}涨{down}跌，继续磨底。",
             ]
         elif change > -1:
             templates = [
+                f"今天纳指100微{fmt_pct(change)}，{up}涨{down}跌，市场观望情绪较浓， basically 原地踏步。",
+                f"NDX今天窄幅收{fmt_pct(change)}，多空力量相对均衡，{fmt_stock(top1)}与{fmt_stock(bot1)}分化明显。",
+                f"大盘平盘震荡，纳指100{fmt_pct(change)}，涨跌家数接近，方向感不强。",
+                f"市场小幅整理，NDX{fmt_pct(change)}，{up}只上涨，{down}只下跌，成交清淡的一天。",
+                f"指数微幅收绿，纳斯达克100{fmt_pct(change)}，板块表现参差不齐，没什么主线。",
+                f"今天NDX绿了{fmt_pct(change).replace('-', '')}，{up}涨{down}跌，幅度很小，基本可以忽略。",
+                f"大盘小幅收绿，纳指100{fmt_pct(change)}，{up}只上涨，多空博弈没什么结果。",
+                f"今天市场有点无聊，NDX{fmt_pct(change)}，{up}涨{down}跌，大家都在等消息。",
+                f"纳指100今天{fmt_pct(change)}，{up}只成分股上涨，整体偏弱但跌幅有限。",
+                f"今天这行情，食之无味弃之可惜，NDX{fmt_pct(change)}，{up}涨{down}跌，继续耗着。",
+                f"微跌{fmt_pct(change).replace('-', '')}，{up}只上涨，市场小幅调整，但没什么恐慌。",
+                f"NDX今日{fmt_pct(change)}，{up}涨{down}跌，大盘窄幅走低，情绪偏谨慎。",
+                f"今天纳指100收了个小阴线，{fmt_pct(change)}，{down}只跌，调整幅度很小。",
+                f"大盘微幅收绿，NDX{fmt_pct(change)}，{up}只成分股上涨，市场等待催化剂。",
+                f"今天这走势，平淡无奇，NDX{fmt_pct(change)}，{up}涨{down}跌，多看少动。",
                 f"纳斯达克100指数微{fmt_pct(change)}，{up}涨{down}跌，市场观望情绪较浓。",
-                f"NDX今日窄幅收{fmt_pct(change)}，多空力量相对均衡，{fmt_stock(top5[0])}与{fmt_stock(bottom5[-1])}分化明显。",
+                f"NDX今天窄幅收{fmt_pct(change)}，多空力量相对均衡，个股分化明显。",
                 f"大盘平盘震荡，纳指100{fmt_pct(change)}，涨跌家数接近，等待方向选择。",
                 f"市场小幅整理，NDX{fmt_pct(change)}，{up}只上涨，{down}只下跌，成交清淡。",
                 f"指数微幅收绿，纳斯达克100{fmt_pct(change)}，板块表现参差不齐。",
+                f"今天NDX绿了{fmt_pct(change).replace('-', '')}，{up}涨{down}跌，幅度很小，不用太担心。",
+                f"大盘小幅收绿，纳指100{fmt_pct(change)}，{up}只上涨，多空还在拉锯。",
+                f"今天市场有点无聊，NDX{fmt_pct(change)}，{up}涨{down}跌，大家都在等方向。",
+                f"纳指100今天{fmt_pct(change)}，{up}只成分股上涨，整体偏弱但可控。",
+                f"今天这行情，食之无味弃之可惜，NDX{fmt_pct(change)}，{up}涨{down}跌，继续观望。",
             ]
         else:
             templates = [
-                f"纳斯达克100指数收跌{fmt_pct(change)}，{down}只成分股下跌，市场承压调整。",
-                f"NDX今日大跌{fmt_pct(change)}，{fmt_stock(bottom5[-1])}领跌{fmt_pct(bottom5[-1]['change'])}，避险情绪升温。",
+                f"今天纳指100收跌{fmt_pct(change).replace('-', '')}，{down}只成分股下跌，市场承压调整，有点难受。",
+                f"NDX今天大跌{fmt_pct(change).replace('-', '')}，{fmt_stock(bot1)}领跌{fmt_pct(bot1['change'])}，避险情绪升温。",
                 f"大盘回调明显，纳指100{fmt_pct(change)}，仅{up}只上涨，空头占据主导。",
                 f"市场全线走弱，NDX收{fmt_pct(change)}，{down}只成分股收绿，权重股拖累显著。",
-                f"调整格局延续，纳斯达克100{fmt_pct(change)}，{fmt_stock(bottom5[-1])}、{fmt_stock(bottom5[-2])}跌幅居前。",
+                f"调整格局延续，纳斯达克100{fmt_pct(change)}，{fmt_stock(bot1)}、{fmt_stock(bottom5[-2] if len(bottom5) > 1 else bot1)}跌幅居前。",
+                f"今天大盘不给力，NDX跌了{fmt_pct(change).replace('-', '')}，{down}只下跌，赚钱效应很差。",
+                f"纳指100今天{fmt_pct(change)}，{up}只涨{down}只跌，绿盘家数有点多，注意风险。",
+                f"市场今天有点崩，NDX{fmt_pct(change)}，仅{up}只收红，空头肆虐。",
+                f"大盘单边下行，纳指100{fmt_pct(change)}，{down}只成分股下跌，信心受挫。",
+                f"今天这跌幅{fmt_pct(change)}，放在最近不算小。{down}只下跌，市场情绪偏冷。",
+                f"NDX今天{fmt_pct(change)}，{up}涨{down}跌，跌的家数远超涨的，谨慎为上。",
+                f"今天纳指100收了个中阴，{fmt_pct(change)}，{down}只跌，短期可能需要消化。",
+                f"大盘走弱，NDX{fmt_pct(change)}，{fmt_stock(bot1)}跌得最多，带崩了情绪。",
+                f"今天市场有点惨，NDX{fmt_pct(change)}，{down}只成分股收绿，持仓的朋友今晚可能睡不着。",
+                f"纳指100今天这表现，{fmt_pct(change)}，{down}只下跌，科技股集体回调。",
+                f"今天空头占了上风，NDX{fmt_pct(change)}，{up}涨{down}跌，短期偏空。",
+                f"大盘回调，纳指100{fmt_pct(change)}，{down}只下跌，市场进入调整模式。",
+                f"今天这行情，说实话有点伤人。NDX{fmt_pct(change)}，{down}只跌，赚钱效应极差。",
+                f"纳指100收跌{fmt_pct(change).replace('-', '')}，{down}只成分股下跌，市场承压调整。",
+                f"NDX今天大跌{fmt_pct(change).replace('-', '')}，{fmt_stock(bot1)}领跌，避险情绪升温。",
+                f"大盘回调明显，纳指100{fmt_pct(change)}，仅{up}只上涨，空头主导。",
+                f"市场全线走弱，NDX收{fmt_pct(change)}，{down}只成分股收绿，权重股拖累。",
+                f"调整格局延续，纳斯达克100{fmt_pct(change)}，头部科技股跌幅居前。",
+                f"今天大盘不给力，NDX跌了{fmt_pct(change).replace('-', '')}，{down}只下跌，注意防守。",
+                f"纳指100今天{fmt_pct(change)}，{up}只涨{down}只跌，绿盘家数偏多，短期偏谨慎。",
             ]
         return pick(*templates)
 
@@ -1243,62 +1332,158 @@ def generate_summary(data, summary_type):
         if heavy:
             names = "、".join([fmt_stock(s) for s in heavy])
             wsum = sum(s["weight"] for s in heavy)
-            return pick(
-                f"权重股方面，{names}合计权重达{wsum:.1f}%，对指数走向具有决定性影响。",
-                f"头部集中度高，{names}三家权重合计超{wsum:.1f}%，其波动直接左右NDX表现。",
-                f"前三大权重股{names}占据{wsum:.1f}%权重，今日{'集体走强' if all(s['change'] > 0 for s in heavy) else '表现分化'}。",
-            )
+            all_up = all(s['change'] > 0 for s in heavy)
+            all_down = all(s['change'] < 0 for s in heavy)
+            mixed = not all_up and not all_down
+
+            if all_up:
+                return pick(
+                    f"头部那几家今天集体走强，{names}合计权重{wsum:.1f}%，妥妥的定海神针。",
+                    f"权重股今天很给面子，{names}三家都红了，合计占{wsum:.1f}%，指数想不涨都难。",
+                    f"{names}这三家老大哥今天齐发力，权重加起来{wsum:.1f}%，带动效应明显。",
+                    f"头部集中度确实高，{names}三家就占了{wsum:.1f}%，今天还集体上涨，指数自然好看。",
+                    f"不得不说，{names}这几只权重股今天表现真不错，{wsum:.1f}%的权重全部收红。",
+                    f"权重股方面，{names}合计权重达{wsum:.1f}%，今天集体走强，对指数贡献很大。",
+                    f"头部科技龙头{names}今天齐涨，{wsum:.1f}%的权重集体发力，指数直接被带飞。",
+                    f"{names}这三家扛把子今天都红了，合计{wsum:.1f}%权重，是今天上涨的核心动力。",
+                )
+            elif all_down:
+                return pick(
+                    f"头部那几家今天集体扑街，{names}合计权重{wsum:.1f}%，指数被拖累了。",
+                    f"权重股今天集体走弱，{names}三家都绿了，合计占{wsum:.1f}%，指数自然好看不了。",
+                    f"{names}这三家老大哥今天齐跌，权重加起来{wsum:.1f}%，带崩效应明显。",
+                    f"头部集中度确实高，{names}三家就占了{wsum:.1f}%，今天还集体下跌，指数承压。",
+                    f"不得不说，{names}这几只权重股今天表现拉胯，{wsum:.1f}%的权重全部收绿。",
+                    f"权重股方面，{names}合计权重达{wsum:.1f}%，今天集体走弱，是下跌的主因。",
+                    f"头部科技龙头{names}今天齐跌，{wsum:.1f}%的权重集体扑街，指数直接被带下来。",
+                    f"{names}这三家扛把子今天都绿了，合计{wsum:.1f}%权重，是今天下跌的核心压力。",
+                )
+            else:
+                return pick(
+                    f"头部那几家今天分化明显，{names}合计权重{wsum:.1f}%，有涨有跌互相抵消。",
+                    f"权重股今天走势不一，{names}三家占了{wsum:.1f}%权重，表现分化。",
+                    f"{names}这三家老大哥今天有红有绿，权重加起来{wsum:.1f}%，对指数影响中性。",
+                    f"头部集中度确实高，{names}三家就占了{wsum:.1f}%，今天涨跌互现，指数波动不大。",
+                    f"不得不说，{names}这几只权重股今天表现分化，{wsum:.1f}%的权重有涨有跌。",
+                    f"权重股方面，{names}合计权重达{wsum:.1f}%，今天走势分化，对指数影响有限。",
+                    f"头部科技龙头{names}今天有强有弱，{wsum:.1f}%的权重涨跌互现。",
+                    f"{names}这三家扛把子今天表现不一，合计{wsum:.1f}%权重，互相拉扯。",
+                )
         return pick(
-            "权重股今日表现分化，头部科技龙头涨跌互现。",
-            "前十大权重股走势不一，市场缺乏明确主线。",
-            "权重股整体平稳，对指数贡献中性。",
+            "权重股今天表现分化，头部科技龙头涨跌互现，没什么特别突出的。",
+            "前十大权重股走势不一，市场缺乏明确主线，各自为战。",
+            "权重股整体平稳，对指数贡献中性，今天不是权重行情。",
+            "头部个股今天没什么大动静，权重分布稳定，指数走势比较真实。",
+            "权重股表现中规中矩，没有哪只特别出彩，也没有谁拖后腿。",
+            "今天权重股整体偏平淡，对指数的影响不大，主要看中小票。",
+            "头部那几个今天涨跌参半，权重效应不明显，市场比较分散。",
+            "权重股今天集体佛系，没什么大波动，指数走势比较温和。",
         )
 
     elif summary_type == "sectors":
         if not sectors:
-            return "行业数据暂缺，请关注后续更新。"
+            return "行业数据暂缺，不过不影响看大盘，等后续更新吧。"
         best = max(sectors, key=lambda x: x["change"])
         worst = min(sectors, key=lambda x: x["change"])
         return pick(
+            f"从赛道来看，{best['name']}今天一枝独秀，收了{fmt_pct(best['change'])}；{worst['name']}就差点意思，{fmt_pct(worst['change'])}。",
+            f"板块分化挺明显的，{best['name']}领涨{fmt_pct(best['change'])}，而{worst['name']}垫底{fmt_pct(worst['change'])}。",
+            f"{best['name']}今天强势，板块平均{fmt_pct(best['change'])}；{worst['name']}承压，{fmt_pct(worst['change'])}，差距不小。",
+            f"从行业看，{best['name']}与{worst['name']}形成鲜明对比，分别{fmt_pct(best['change'])}和{fmt_pct(worst['change'])}，冰火两重天。",
+            f"今天{best['name']}这个赛道最亮眼，{fmt_pct(best['change'])}；{worst['name']}就比较惨，{fmt_pct(worst['change'])}。",
+            f"板块方面，{best['name']}领跑全场{fmt_pct(best['change'])}，{worst['name']}拖后腿{fmt_pct(worst['change'])}。",
+            f"{best['name']}今天成了全场最靓的仔，{fmt_pct(best['change'])}；{worst['name']}就默默吃面，{fmt_pct(worst['change'])}。",
             f"行业层面，{best['name']}表现最佳{fmt_pct(best['change'])}，{worst['name']}相对落后{fmt_pct(worst['change'])}。",
-            f"板块分化显著，{best['name']}领涨{fmt_pct(best['change'])}，而{worst['name']}收跌{fmt_pct(worst['change'])}。",
-            f"{best['name']}今日强势，板块平均{fmt_pct(best['change'])}；{worst['name']}承压，{fmt_pct(worst['change'])}。",
-            f"从行业看，{best['name']}与{worst['name']}形成鲜明对比，分别{fmt_pct(best['change'])}和{fmt_pct(worst['change'])}。",
+            f"今天资金明显偏爱{best['name']}，板块{fmt_pct(best['change'])}；{worst['name']}被冷落，{fmt_pct(worst['change'])}。",
+            f"赛道分化严重，{best['name']}大涨{fmt_pct(best['change'])}，{worst['name']}大跌{fmt_pct(worst['change']).replace('-', '')}，选错赛道差别巨大。",
+            f"{best['name']}今天给板块长脸了，{fmt_pct(best['change'])}；{worst['name']}就比较尴尬，{fmt_pct(worst['change'])}。",
+            f"从行业表现看，{best['name']}和{worst['name']}是两个极端，一个{fmt_pct(best['change'])}一个{fmt_pct(worst['change'])}。",
+            f"今天{best['name']}这个方向最强，{fmt_pct(best['change'])}；{worst['name']}最弱，{fmt_pct(worst['change'])}，结构性行情明显。",
+            f"板块轮动到了{best['name']}，今天{fmt_pct(best['change'])}；{worst['name']}则被资金抛弃，{fmt_pct(worst['change'])}。",
+            f"{best['name']}今天扛起了大旗，{fmt_pct(best['change'])}；{worst['name']}则成了累赘，{fmt_pct(worst['change'])}。",
         )
 
     elif summary_type == "distribution":
         counts = bins.get("counts", [])
         labels = bins.get("labels", [])
         if not counts or total == 0:
-            return "涨跌分布数据暂缺。"
+            return "涨跌分布数据暂缺，不过看大盘走势也能猜个大概。"
         max_idx = counts.index(max(counts))
         max_label = labels[max_idx]
         max_count = counts[max_idx]
         up_count = sum(counts[4:])
         down_count = sum(counts[:4])
+
+        # 判断分布形状
+        if max_idx < 2:
+            shape_desc = "今天跌得多的票比较集中"
+        elif max_idx > 5:
+            shape_desc = "今天涨得多的票比较集中"
+        elif max_idx in [2, 3, 4, 5]:
+            shape_desc = "今天大部分票波动都不大，集中在中间区间"
+        else:
+            shape_desc = "涨跌分布比较分散"
+
         return pick(
+            f"{shape_desc}。{max_label}这个区间最多，有{max_count}只，占了{max_count/total*100:.0f}%。",
+            f"从分布看，{max_label}区间股票最多（{max_count}只），上涨{up_count}只、下跌{down_count}只，{'涨多跌少' if up_count > down_count else '跌多涨少'}。",
+            f"今天{max_label}为最大阵营（{max_count}只），市场整体{'偏向上涨' if up_count > down_count else '偏向调整'}，分布还算{'均衡' if abs(up_count - down_count) < 15 else '一边倒'}。",
+            f"分布图显示{max_label}集中了{max_count}只成分股，涨跌比约{up_count}:{down_count}，{'赚钱效应不错' if up_count > down_count else '亏钱效应明显'}。",
+            f"今天大部分票的涨跌幅落在{max_label}区间，共{max_count}只。整体{'涨多跌少' if up_count > down_count else '跌多涨少'}，{up_count}只涨{down_count}只跌。",
+            f"从涨跌分布来看，{max_label}是最拥挤的区间，有{max_count}只。{up_count}只上涨、{down_count}只下跌，{'多头占优' if up_count > down_count else '空头占优'}。",
+            f"{max_label}这个区间今天扎堆了{max_count}只票，占了近{max_count/total*100:.0f}%。整体{up_count}涨{down_count}跌，{'盘面偏暖' if up_count > down_count else '盘面偏冷'}。",
+            f"今天涨跌分布的峰值在{max_label}，{max_count}只。{up_count}只收红、{down_count}只收绿，{'普涨格局' if up_count > down_count + 20 else '普跌格局' if down_count > up_count + 20 else '涨跌参半'}。",
+            f"看分布图，{max_label}区间最密集（{max_count}只），{'上涨家数占优' if up_count > down_count else '下跌家数占优'}，{up_count}对{down_count}。",
+            f"今天{max_count}只票集中在{max_label}区间，整体{up_count}涨{down_count}跌，{'市场情绪偏乐观' if up_count > down_count else '市场情绪偏谨慎'}。",
             f"涨跌分布呈现{max_label}区间集中，共{max_count}只，占总数{max_count/total*100:.0f}%。",
             f"从分布看，{max_label}区间股票最多（{max_count}只），上涨{up_count}只、下跌{down_count}只。",
-            f"今日{max_label}为最大阵营（{max_count}只），市场整体{'偏向上涨' if up_count > down_count else '偏向调整'}。",
+            f"今天{max_label}为最大阵营（{max_count}只），市场整体{'偏向上涨' if up_count > down_count else '偏向调整'}。",
             f"分布图显示{max_label}集中了{max_count}只成分股，涨跌比约{up_count}:{down_count}。",
+            f"今天大部分票的涨跌幅落在{max_label}区间，共{max_count}只，整体{'涨多跌少' if up_count > down_count else '跌多涨少'}。",
         )
 
     elif summary_type == "industry":
         if not sectors:
-            return "行业数据暂缺。"
+            return "行业数据暂缺，等后续更新再看吧。"
         up_sectors = [s for s in sectors if s["change"] > 0]
         down_sectors = [s for s in sectors if s["change"] < 0]
-        if len(up_sectors) > len(down_sectors):
+        flat_sectors = [s for s in sectors if s["change"] == 0]
+
+        if len(up_sectors) > len(down_sectors) + 2:
             return pick(
-                f"{len(up_sectors)}个行业收红，{len(down_sectors)}个行业收绿，板块整体偏强。",
+                f"{len(up_sectors)}个赛道收红，{len(down_sectors)}个收绿，板块整体偏强，选对的概率大。",
+                f"多数板块上涨，{len(up_sectors)}个行业收涨，仅{len(down_sectors)}个收跌，赚钱效应不错。",
+                f"行业普涨格局，{len(up_sectors)}个板块飘红，{len(down_sectors)}个板块飘绿，整体偏暖。",
+                f"今天{len(up_sectors)}个赛道红了，{len(down_sectors)}个绿了，板块层面多头占优。",
+                f"从行业看，{len(up_sectors)}个上涨、{len(down_sectors)}个下跌，红盘板块明显更多。",
+                f"板块今天给面子，{len(up_sectors)}个收红，{len(down_sectors)}个收绿，整体氛围不错。",
+                f"{len(up_sectors)}个行业收红，{len(down_sectors)}个收绿，板块整体偏强。",
                 f"多数板块上涨，{len(up_sectors)}个行业收涨，仅{len(down_sectors)}个收跌。",
                 f"行业普涨格局，{len(up_sectors)}个板块飘红，{len(down_sectors)}个板块飘绿。",
             )
-        else:
+        elif len(down_sectors) > len(up_sectors) + 2:
             return pick(
+                f"{len(up_sectors)}个赛道收红，{len(down_sectors)}个收绿，板块整体偏弱，选错的概率大。",
+                f"多数板块调整，{len(down_sectors)}个行业收跌，仅{len(up_sectors)}个行业收涨，亏钱效应明显。",
+                f"行业跌多涨少，{len(down_sectors)}个板块飘绿，{len(up_sectors)}个板块飘红，整体偏冷。",
+                f"今天{len(down_sectors)}个赛道绿了，{len(up_sectors)}个红了，板块层面空头占优。",
+                f"从行业看，{len(up_sectors)}个上涨、{len(down_sectors)}个下跌，绿盘板块明显更多。",
+                f"板块今天不太给力，{len(down_sectors)}个收绿，{len(up_sectors)}个收红，整体氛围偏冷。",
                 f"{len(up_sectors)}个行业收红，{len(down_sectors)}个行业收绿，板块整体偏弱。",
                 f"多数板块调整，{len(down_sectors)}个行业收跌，仅{len(up_sectors)}个行业收涨。",
                 f"行业跌多涨少，{len(down_sectors)}个板块飘绿，{len(up_sectors)}个板块飘红。",
+            )
+        else:
+            return pick(
+                f"{len(up_sectors)}个赛道收红，{len(down_sectors)}个收绿，板块涨跌参半，结构性行情明显。",
+                f"板块涨跌各半，{len(up_sectors)}个行业收涨，{len(down_sectors)}个收跌，分化严重。",
+                f"行业层面基本平衡，{len(up_sectors)}个板块飘红，{len(down_sectors)}个板块飘绿，选赛道比看大盘重要。",
+                f"今天{len(up_sectors)}个赛道红了，{len(down_sectors)}个绿了，板块之间互相抵消。",
+                f"从行业看，{len(up_sectors)}个上涨、{len(down_sectors)}个下跌，基本五五开。",
+                f"板块今天涨跌参半，{len(up_sectors)}个收红，{len(down_sectors)}个收绿，结构性机会为主。",
+                f"{len(up_sectors)}个行业收红，{len(down_sectors)}个行业收绿，板块涨跌参半。",
+                f"板块涨跌各半，{len(up_sectors)}个行业收涨，{len(down_sectors)}个收跌。",
+                f"行业层面基本平衡，{len(up_sectors)}个板块飘红，{len(down_sectors)}个板块飘绿。",
             )
 
     elif summary_type == "trend":
@@ -1306,19 +1491,59 @@ def generate_summary(data, summary_type):
             trend_change = (history[-1] - history[0]) / history[0] * 100
             high = max(history)
             low = min(history)
-            return pick(
-                f"近30日NDX{'累计上涨' if trend_change > 0 else '累计下跌'}{fmt_pct(trend_change).replace('+', '').replace('-', '')}，区间高点{high:,.0f}、低点{low:,.0f}。",
-                f"30日趋势{'向上' if trend_change > 0 else '向下'}，累计{fmt_pct(trend_change)}，当前位于{history[-1]:,.0f}点附近。",
-                f"近一个月NDX{fmt_pct(trend_change)}，波动区间{low:,.0f}-{high:,.0f}，{'整体重心上移' if trend_change > 0 else '整体重心下移'}。",
-                f"30日走势显示指数{fmt_pct(trend_change)}，期间最高{high:,.0f}、最低{low:,.0f}。",
-            )
+
+            if trend_change > 5:
+                return pick(
+                    f"回头看这30天，NDX累计涨了{trend_change:.2f}%，从{history[0]:,.0f}点爬到{history[-1]:,.0f}点，走势相当稳健。区间高点{high:,.0f}、低点{low:,.0f}。",
+                    f"近一个月NDX涨了{trend_change:.2f}%，整体重心明显上移。最高冲到{high:,.0f}，最低探到{low:,.0f}，趋势不错。",
+                    f"30日趋势向上，累计+{trend_change:.2f}%，当前{history[-1]:,.0f}点。这期间最高{high:,.0f}、最低{low:,.0f}，稳步爬升。",
+                    f"近一个月回头看，NDX涨了{trend_change:.2f}%，走势挺健康的。区间{low:,.0f}-{high:,.0f}，重心不断上移。",
+                    f"30日走势显示指数累计上涨{trend_change:.2f}%，从{history[0]:,.0f}到{history[-1]:,.0f}，中间最高{high:,.0f}，趋势偏强。",
+                    f"这一个月NDX表现不错，涨了{trend_change:.2f}%，当前{history[-1]:,.0f}点。波动区间{low:,.0f}-{high:,.0f}，整体向上。",
+                    f"回头看30天，NDX累计上涨{trend_change:.2f}%，走势相当给力。高点{high:,.0f}，低点{low:,.0f}，趋势明确。",
+                    f"近30日NDX累计上涨{trend_change:.2f}%，区间高点{high:,.0f}、低点{low:,.0f}，整体重心上移。",
+                )
+            elif trend_change > 0:
+                return pick(
+                    f"回头看这30天，NDX累计微涨{trend_change:.2f}%，从{history[0]:,.0f}点到{history[-1]:,.0f}点，涨幅不大但方向对了。区间高点{high:,.0f}、低点{low:,.0f}。",
+                    f"近一个月NDX涨了{trend_change:.2f}%，整体重心小幅上移。最高{high:,.0f}，最低{low:,.0f}，走势温和。",
+                    f"30日趋势小幅向上，累计+{trend_change:.2f}%，当前{history[-1]:,.0f}点。这期间最高{high:,.0f}、最低{low:,.0f}，不温不火。",
+                    f"近一个月回头看，NDX涨了{trend_change:.2f}%，走势比较平淡。区间{low:,.0f}-{high:,.0f}，没什么大波动。",
+                    f"30日走势显示指数累计上涨{trend_change:.2f}%，从{history[0]:,.0f}到{history[-1]:,.0f}，中间最高{high:,.0f}，趋势偏暖但力度有限。",
+                    f"这一个月NDX表现一般，涨了{trend_change:.2f}%，当前{history[-1]:,.0f}点。波动区间{low:,.0f}-{high:,.0f}，继续磨。",
+                    f"回头看30天，NDX累计上涨{trend_change:.2f}%，走势比较纠结。高点{high:,.0f}，低点{low:,.0f}，方向不明。",
+                    f"近30日NDX累计上涨{trend_change:.2f}%，区间高点{high:,.0f}、低点{low:,.0f}，整体重心小幅上移。",
+                )
+            elif trend_change > -5:
+                return pick(
+                    f"回头看这30天，NDX累计跌了{abs(trend_change):.2f}%，从{history[0]:,.0f}点滑到{history[-1]:,.0f}点，调整幅度不大。区间高点{high:,.0f}、低点{low:,.0f}。",
+                    f"近一个月NDX跌了{abs(trend_change):.2f}%，整体重心小幅下移。最高{high:,.0f}，最低{low:,.0f}，温和调整。",
+                    f"30日趋势小幅向下，累计{trend_change:.2f}%，当前{history[-1]:,.0f}点。这期间最高{high:,.0f}、最低{low:,.0f}，偏弱震荡。",
+                    f"近一个月回头看，NDX跌了{abs(trend_change):.2f}%，走势比较平淡。区间{low:,.0f}-{high:,.0f}，没什么大波动。",
+                    f"30日走势显示指数累计下跌{abs(trend_change):.2f}%，从{history[0]:,.0f}到{history[-1]:,.0f}，中间最高{high:,.0f}，趋势偏冷但力度有限。",
+                    f"这一个月NDX表现一般，跌了{abs(trend_change):.2f}%，当前{history[-1]:,.0f}点。波动区间{low:,.0f}-{high:,.0f}，继续磨底。",
+                    f"回头看30天，NDX累计下跌{abs(trend_change):.2f}%，走势比较纠结。高点{high:,.0f}，低点{low:,.0f}，方向不明。",
+                    f"近30日NDX累计下跌{abs(trend_change):.2f}%，区间高点{high:,.0f}、低点{low:,.0f}，整体重心小幅下移。",
+                )
+            else:
+                return pick(
+                    f"回头看这30天，NDX累计跌了{abs(trend_change):.2f}%，从{history[0]:,.0f}点掉到{history[-1]:,.0f}点，调整幅度不小。区间高点{high:,.0f}、低点{low:,.0f}。",
+                    f"近一个月NDX跌了{abs(trend_change):.2f}%，整体重心明显下移。最高{high:,.0f}，最低{low:,.0f}，趋势偏弱。",
+                    f"30日趋势向下，累计{trend_change:.2f}%，当前{history[-1]:,.0f}点。这期间最高{high:,.0f}、最低{low:,.0f}，走势不太好看。",
+                    f"近一个月回头看，NDX跌了{abs(trend_change):.2f}%，走势比较弱。区间{low:,.0f}-{high:,.0f}，重心不断下移。",
+                    f"30日走势显示指数累计下跌{abs(trend_change):.2f}%，从{history[0]:,.0f}到{history[-1]:,.0f}，中间最高{high:,.0f}，趋势偏空。",
+                    f"这一个月NDX表现不佳，跌了{abs(trend_change):.2f}%，当前{history[-1]:,.0f}点。波动区间{low:,.0f}-{high:,.0f}，整体向下。",
+                    f"回头看30天，NDX累计下跌{abs(trend_change):.2f}%，走势比较弱。高点{high:,.0f}，低点{low:,.0f}，需要警惕。",
+                    f"近30日NDX累计下跌{abs(trend_change):.2f}%，区间高点{high:,.0f}、低点{low:,.0f}，整体重心下移。",
+                )
         return pick(
-            "30日趋势数据暂缺，建议关注后续走势变化。",
-            "历史数据不足，无法判断中期趋势。",
+            "30日趋势数据暂缺，建议关注后续走势变化，别急着下结论。",
+            "历史数据不足，无法判断中期趋势，等数据齐了再看。",
+            "30天走势数据缺失，短期先看日线级别的表现吧。",
+            "趋势数据暂缺，不过单日走势也能说明一些问题。",
         )
 
     return ""
-
 
 def get_existing_history_dates(output_dir="docs"):
     import glob
