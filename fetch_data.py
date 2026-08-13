@@ -745,6 +745,11 @@ section{padding:60px 0}
 <div class="tooltip" id="tooltip"></div>
 
 <script>
+// 先检测系统主题，再加类，最后定义颜色常量
+if(window.matchMedia&&window.matchMedia("(prefers-color-scheme: light)").matches){
+  document.documentElement.classList.add("light");
+}
+
 const DATA = __DATA_JSON__;
 const IS_LIGHT = document.documentElement.classList.contains('light');
 const RISE = IS_LIGHT ? "#16a34a" : "#39ff14";
@@ -1111,12 +1116,6 @@ function toggleTheme(){
   }
 }
 
-// 跟随系统主题
-if(window.matchMedia&&window.matchMedia("(prefers-color-scheme: light)").matches){
-  document.documentElement.classList.add("light");
-  const btn=document.getElementById("themeToggleBtn");
-  if(btn)btn.textContent="夜间模式";
-}
 
 // Odometer 数字滚动：从 fromValue 逐位翻滚到 toValue
 function rollNumber(el, fromValue, toValue, duration){
