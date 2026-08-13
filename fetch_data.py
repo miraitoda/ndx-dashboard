@@ -329,9 +329,8 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:
 .nav-btn{padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text2);font-weight:600;cursor:pointer;font-size:12px;transition:all 0.2s;font-family:inherit}
 .nav-btn:hover:not(:disabled){border-color:var(--border-strong);color:var(--text)}
 .nav-btn:disabled{opacity:0.35;cursor:not-allowed}
-.theme-btn{padding:6px 14px;border-radius:10px;border:1px solid var(--border);background:transparent;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center}
-.theme-btn:hover{border-color:var(--accent)}
-.theme-btn svg{width:20px;height:20px}
+.theme-btn{padding:6px 14px;border-radius:10px;border:1px solid var(--border);background:transparent;cursor:pointer;transition:all 0.2s;font-size:12px;font-weight:700;color:var(--text2);font-family:inherit;letter-spacing:0.5px}
+.theme-btn:hover{border-color:var(--accent);color:var(--text)}
 
 /* Container */
 .container{max-width:1200px;margin:0 auto;padding:0 24px;position:relative;z-index:1}
@@ -456,9 +455,7 @@ section{padding:60px 0}
       <button class="nav-btn" id="btnPrev" disabled>← 前一日</button>
       <button class="nav-btn" id="btnToday" style="display:none">今天</button>
       <button class="nav-btn" id="btnNext" disabled>后一日 →</button>
-      <button class="theme-btn" onclick="toggleTheme()" title="切换主题">
-        <svg viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="8" stroke="var(--text3)" stroke-width="1.5" opacity="0.3"/><path d="M11 3C6.03 3 2 7.03 2 12C2 16.97 6.03 21 11 21V3Z" fill="var(--text)" opacity="0.9"/><circle cx="11" cy="7" r="2" fill="var(--bg)"/><circle cx="11" cy="17" r="2" fill="var(--text3)"/></svg>
-      </button>
+      <button class="theme-btn" onclick="toggleTheme()" id="themeToggleBtn">日间模式</button>
     </div>
   </div>
 </div>
@@ -908,17 +905,21 @@ function getMarketStatus(){
 // 主题切换
 function toggleTheme(){
   const root=document.documentElement;
-  const icon=document.querySelector(".theme-btn svg");
+  const btn=document.getElementById("themeToggleBtn");
   if(root.classList.contains("light")){
     root.classList.remove("light");
+    if(btn)btn.textContent="日间模式";
   }else{
     root.classList.add("light");
+    if(btn)btn.textContent="夜间模式";
   }
 }
 
 // 跟随系统主题
 if(window.matchMedia&&window.matchMedia("(prefers-color-scheme: light)").matches){
   document.documentElement.classList.add("light");
+  const btn=document.getElementById("themeToggleBtn");
+  if(btn)btn.textContent="夜间模式";
 }
 
 // Tooltip
