@@ -789,6 +789,7 @@ function getMarketStatus(){
   document.getElementById("dateStr").textContent=DATA.date;
   document.getElementById("statusBadge").textContent=getMarketStatus();
   document.querySelector('.hero-accent').style.color = idx.change >= 0 ? 'var(--rise)' : 'var(--fall)';
+  document.querySelectorAll('.section-label').forEach(el=>{el.style.color=idx.change>=0?'var(--rise)':'var(--fall)';});
   document.querySelector('.hero-tag-dot').style.background=idx.change>=0?'var(--rise)':'var(--fall)';
   document.getElementById('siteLogo').style.color=idx.change>=0?'var(--rise)':'var(--fall)';
 
