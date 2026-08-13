@@ -354,7 +354,6 @@ section{padding:60px 0}
 .hero-tag-text{font-size:11px;font-weight:700;color:var(--text2);letter-spacing:1px}
 .hero-title{font-size:64px;font-weight:900;letter-spacing:-3px;margin:0;line-height:1;color:var(--text)}
 .hero-accent{color:var(--accent)}
-.hero-triangle{display:inline-block;margin-left:16px;font-size:1em;vertical-align:middle}
 .hero-desc{margin-top:20px;font-size:15px;color:var(--text2);line-height:1.6;max-width:400px}
 .hero-meta{margin-top:24px;display:flex;align-items:center;gap:12px}
 .hero-date{font-size:13px;color:var(--text3);font-weight:500}
@@ -523,7 +522,7 @@ section{padding:60px 0}
     <div class="hero-inner">
       <div class="hero-left">
         <div class="hero-tag"><span class="hero-tag-dot"></span><span class="hero-tag-text">NASDAQ-100</span></div>
-        <h1 class="hero-title">纳斯达克<br><span class="hero-accent">100</span><span class="hero-triangle" id="heroTriangle"></span></h1>
+        <h1 class="hero-title">纳斯达克<br><span class="hero-accent">100</span></h1>
         <p class="hero-desc">每日自动更新的纳斯达克100指数可视化仪表盘。基于 Yahoo Finance 实时数据。</p>
         <div class="hero-meta">
           <span class="hero-date" id="dateStr"></span>
@@ -739,9 +738,6 @@ function getMarketStatus(){
   const idx=DATA.index;
   document.getElementById("dateStr").textContent=DATA.date;
   document.getElementById("statusBadge").textContent=getMarketStatus();
-  document.querySelector('.hero-accent').style.color = idx.change >= 0 ? 'var(--rise)' : 'var(--fall)';
-  document.getElementById("heroTriangle").textContent=idx.change>=0?"▲":"▼";
-  document.getElementById("heroTriangle").style.color=idx.change>=0?"var(--rise)":"var(--fall)";
 
   const priceEl=document.getElementById("idxPrice");
   const chgEl=document.getElementById("idxChange");
@@ -903,16 +899,10 @@ function getMarketStatus(){
   const cx=200,cy=170,R=120,sw=44;
   const C=2*Math.PI*R;
 
-  // 背景光晕（图案的底，SVG 内部）
-  const glowColor=DATA.index.change>=0?RISE:FALL;
-  const defs=svgEl("defs",{});
-  const f=svgEl("filter",{id:"sglow",x:"-50%",y:"-50%",width:"200%",height:"200%"});
-  f.innerHTML='<feGaussianBlur in="SourceGraphic" stdDeviation="12" />';
-  defs.appendChild(f);
-  svg.appendChild(defs);
-  
-  const glowEllipse=svgEl("ellipse",{cx:cx,cy:cy+85,rx:130,ry:35,fill:glowColor,opacity:"0.22",filter:"url(#sglow)"});
-  svg.appendChild(glowEllipse);
+  // 底部光晕（涨跌变色）
+  const glow=document.createElement("div");
+  glow.className="pie-glow "+(DATA.index.change>=0?"up":"down");
+  container.appendChild(glow);
 
   let rot=-90;
   data.forEach((d,idx)=>{
@@ -963,16 +953,10 @@ function getMarketStatus(){
   const cx=200,cy=170,R=120,sw=44;
   const C=2*Math.PI*R;
 
-  // 背景光晕（图案的底，SVG 内部）
-  const glowColor=DATA.index.change>=0?RISE:FALL;
-  const defs=svgEl("defs",{});
-  const f=svgEl("filter",{id:"iglow",x:"-50%",y:"-50%",width:"200%",height:"200%"});
-  f.innerHTML='<feGaussianBlur in="SourceGraphic" stdDeviation="12" />';
-  defs.appendChild(f);
-  svg.appendChild(defs);
-  
-  const glowEllipse=svgEl("ellipse",{cx:cx,cy:cy+85,rx:130,ry:35,fill:glowColor,opacity:"0.22",filter:"url(#iglow)"});
-  svg.appendChild(glowEllipse);
+  // 底部光晕
+  const glow=document.createElement("div");
+  glow.className="pie-glow "+(DATA.index.change>=0?"up":"down");
+  container.appendChild(glow);
 
   let rot=-90;
   data.forEach((d,idx)=>{
