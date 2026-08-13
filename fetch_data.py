@@ -1191,6 +1191,41 @@ def generate_summary(data, summary_type):
     def pick(*args):
         return random.choice(args)
 
+def generate_summary(data, summary_type):
+    """本地生成AI总结，每个类型提供20~30+个叙事化模板，风格参考彭博/华尔街日报。"""
+    import random
+    from datetime import datetime, timedelta
+
+    seed = int(datetime.now().strftime("%Y%m%d")) + hash(summary_type) % 10000
+    random.seed(seed)
+
+    index = data.get("index", {})
+    stocks = data.get("stocks", [])
+    sectors = data.get("sectors", [])
+    bins = data.get("bins", {})
+    history = data.get("history", [])
+    date_str = data.get("date", "")
+
+    up = index.get("up", 0)
+    down = index.get("down", 0)
+    total = index.get("total", 0)
+    change = index.get("change", 0)
+    price = index.get("price", 0)
+    prev_close = index.get("prev_close", 0)
+
+    sorted_by_change = sorted(stocks, key=lambda x: x["change"], reverse=True)
+    top5 = sorted_by_change[:5]
+    bottom5 = sorted_by_change[-5:]
+
+    def fmt_stock(s):
+        return f"{s['name']}（{s['ticker']}）"
+
+    def fmt_pct(v):
+        return f"+{v:.2f}%" if v >= 0 else f"{v:.2f}%"
+
+    def pick(*args):
+        return random.choice(args)
+
     # ========== 1. 综述（overview）—— 30+ 模板 ==========
     if summary_type == "overview":
         if change > 1.5:
@@ -1375,7 +1410,6 @@ def generate_summary(data, summary_type):
 
     # fallback
     return "市场总结正在生成中，请稍后刷新页面查看完整分析。"
-
 
 def get_existing_history_dates(output_dir="docs"):
     import glob
