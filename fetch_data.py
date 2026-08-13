@@ -447,8 +447,9 @@ section{padding:60px 0}
 .pie-seg {
   opacity: 0;
   transform: scale(0);
+  /* 必须显式指定圆心，否则 SVG 元素默认 origin 是左上角 0 0 */
   transform-origin: 200px 170px;
-  transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: opacity 0.7s ease, transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 .pie-seg.animate {
   opacity: 1;
@@ -901,7 +902,7 @@ function getMarketStatus(){
   const cx=200,cy=170,R=120,sw=44;
   const C=2*Math.PI*R;
 
-  // 底部浅色光晕（跟随大盘涨跌变色）
+  // 底部光晕（涨跌变色）
   const glow=document.createElement("div");
   glow.className="pie-glow "+(DATA.index.change>=0?"up":"down");
   container.appendChild(glow);
@@ -911,20 +912,30 @@ function getMarketStatus(){
     const angle=(d.weight/total)*360;
     const arc=(angle/360)*C;
     const color=colorForChange(d.change);
-    const seg=svgEl("circle",{cx:cx,cy:cy,r:R,fill:"none",stroke:color,"stroke-width":sw,"stroke-dasharray":arc+" "+(C-arc),transform:"rotate("+rot+" "+cx+" "+cy+")",class:"pie-seg"});
-    seg.style.transitionDelay=(idx*0.05)+"s";
-    seg.style.cursor="pointer";
-    seg.addEventListener("mouseenter",e=>showTip(e,d.name+"（"+d.ticker+"）<br>权重 "+d.weight+"% · "+fmtPct(d.change)));
-    seg.addEventListener("mouseleave",hideTip);
-    svg.appendChild(seg);
+
+    // 关键：用 <g> 做 scale 生长动画
+    const gWrap=svgEl("g",{class:"pie-seg"});
+    gWrap.style.transitionDelay=(idx*0.05)+"s";
+    gWrap.style.transformOrigin="200px 170px";
+    gWrap.style.cursor="pointer";
+    gWrap.addEventListener("mouseenter",e=>showTip(e,d.name+"（"+d.ticker+"）<br>权重 "+d.weight+"% · "+fmtPct(d.change)));
+    gWrap.addEventListener("mouseleave",hideTip);
+
+    // <circle> 只管 rotate，不再加 class="pie-seg"
+    const seg=svgEl("circle",{cx:cx,cy:cy,r:R,fill:"none",stroke:color,"stroke-width":sw,"stroke-dasharray":arc+" "+(C-arc),transform:"rotate("+rot+" "+cx+" "+cy+")"});
+    gWrap.appendChild(seg);
+    svg.appendChild(gWrap);
     rot+=angle;
   });
 
-  // 文字盖在最上层，text-shadow 防止被扇形颜色干扰
-  const txtShadow="text-shadow:0 2px 10px rgba(0,0,0,0.7)";
-  svg.appendChild(svgEl("text",{x:200,y:158,"text-anchor":"middle",fill:"var(--text)","font-size":28,"font-weight":900,"letter-spacing":"-1",style:txtShadow})).textContent="NDX";
+  // Donut 中间挖空
+  svg.appendChild(svgEl("circle",{cx:cx,cy:cy,r:R-sw/2,fill:"var(--bg)"}));
+
+  // 文字盖在最上层，加阴影保证任何颜色扇形上都能看清
+  const shadow="text-shadow:0 2px 10px rgba(0,0,0,0.85)";
+  svg.appendChild(svgEl("text",{x:cx,y:cy-12,"text-anchor":"middle",fill:"var(--text)","font-size":28,"font-weight":900,"letter-spacing":"-1",style:shadow})).textContent="NDX";
   const chgColor=DATA.index.change>=0?"var(--rise)":"var(--fall)";
-  svg.appendChild(svgEl("text",{x:200,y:185,"text-anchor":"middle",fill:chgColor,"font-size":18,"font-weight":800,"font-family":"'SF Mono',monospace",style:txtShadow})).textContent=fmtPct(DATA.index.change);
+  svg.appendChild(svgEl("text",{x:cx,y:cy+15,"text-anchor":"middle",fill:chgColor,"font-size":18,"font-weight":800,"font-family":"'SF Mono',monospace",style:shadow})).textContent=fmtPct(DATA.index.change);
 
   container.appendChild(svg);
   const leg=document.getElementById("stockLegend");
@@ -933,7 +944,9 @@ function getMarketStatus(){
     item.innerHTML='<span class="pie-legend-dot" style="background:'+colorForChange(d.change)+'"></span>'+d.ticker+" "+fmtPct(d.change);
     leg.appendChild(item);
   });
-})();// 行业饼图
+})();
+
+// 行业饼图
 (function(){
   const container=document.getElementById("sectorPie");
   const data=DATA.sectors;
@@ -943,7 +956,7 @@ function getMarketStatus(){
   const cx=200,cy=170,R=120,sw=44;
   const C=2*Math.PI*R;
 
-  // 底部浅色光晕（跟随大盘涨跌变色）
+  // 底部光晕
   const glow=document.createElement("div");
   glow.className="pie-glow "+(DATA.index.change>=0?"up":"down");
   container.appendChild(glow);
@@ -953,24 +966,32 @@ function getMarketStatus(){
     const angle=(d.weight/total)*360;
     const arc=(angle/360)*C;
     const color=colorForChange(d.change);
-    const seg=svgEl("circle",{cx:cx,cy:cy,r:R,fill:"none",stroke:color,"stroke-width":sw,"stroke-dasharray":arc+" "+(C-arc),transform:"rotate("+rot+" "+cx+" "+cy+")",class:"pie-seg"});
-    seg.style.transitionDelay=(idx*0.05)+"s";
-    seg.style.cursor="pointer";
-    seg.addEventListener("mouseenter",e=>showTip(e,d.name+"<br>权重 "+d.weight+"% · "+fmtPct(d.change)));
-    seg.addEventListener("mouseleave",hideTip);
-    svg.appendChild(seg);
+
+    const gWrap=svgEl("g",{class:"pie-seg"});
+    gWrap.style.transitionDelay=(idx*0.05)+"s";
+    gWrap.style.transformOrigin="200px 170px";
+    gWrap.style.cursor="pointer";
+    gWrap.addEventListener("mouseenter",e=>showTip(e,d.name+"<br>权重 "+d.weight+"% · "+fmtPct(d.change)));
+    gWrap.addEventListener("mouseleave",hideTip);
+
+    const seg=svgEl("circle",{cx:cx,cy:cy,r:R,fill:"none",stroke:color,"stroke-width":sw,"stroke-dasharray":arc+" "+(C-arc),transform:"rotate("+rot+" "+cx+" "+cy+")"});
+    gWrap.appendChild(seg);
+    svg.appendChild(gWrap);
     rot+=angle;
   });
 
-  // 文字盖在最上层
-  const txtShadow="text-shadow:0 2px 10px rgba(0,0,0,0.7)";
-  svg.appendChild(svgEl("text",{x:200,y:148,"text-anchor":"middle",fill:"var(--text)","font-size":24,"font-weight":900,"letter-spacing":"-0.5",style:txtShadow})).textContent="SECTORS";
+  // Donut 中间挖空
+  svg.appendChild(svgEl("circle",{cx:cx,cy:cy,r:R-sw/2,fill:"var(--bg)"}));
+
+  const shadow="text-shadow:0 2px 10px rgba(0,0,0,0.85)";
+  svg.appendChild(svgEl("text",{x:cx,y:cy-22,"text-anchor":"middle",fill:"var(--text)","font-size":24,"font-weight":900,"letter-spacing":"-0.5",style:shadow})).textContent="SECTORS";
+
   const upSectors=data.filter(d=>d.change>=0);
   const downSectors=data.filter(d=>d.change<0);
   const upAvg=upSectors.length?upSectors.reduce((a,b)=>a+b.change,0)/upSectors.length:0;
   const downAvg=downSectors.length?downSectors.reduce((a,b)=>a+b.change,0)/downSectors.length:0;
-  svg.appendChild(svgEl("text",{x:200,y:175,"text-anchor":"middle",fill:"var(--rise)","font-size":16,"font-weight":800,"font-family":"'SF Mono',monospace",style:txtShadow})).textContent="▲ "+fmtPctRaw(upAvg);
-  svg.appendChild(svgEl("text",{x:200,y:195,"text-anchor":"middle",fill:"var(--fall)","font-size":14,"font-weight":700,"font-family":"'SF Mono',monospace",style:txtShadow})).textContent="▼ "+fmtPctRaw(downAvg);
+  svg.appendChild(svgEl("text",{x:cx,y:cy+5,"text-anchor":"middle",fill:"var(--rise)","font-size":16,"font-weight":800,"font-family":"'SF Mono',monospace",style:shadow})).textContent="▲ "+fmtPctRaw(upAvg);
+  svg.appendChild(svgEl("text",{x:cx,y:cy+25,"text-anchor":"middle",fill:"var(--fall)","font-size":14,"font-weight":700,"font-family":"'SF Mono',monospace",style:shadow})).textContent="▼ "+fmtPctRaw(downAvg);
 
   container.appendChild(svg);
   const leg=document.getElementById("sectorLegend");
