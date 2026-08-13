@@ -899,10 +899,16 @@ function getMarketStatus(){
   const cx=200,cy=170,R=120,sw=44;
   const C=2*Math.PI*R;
 
-  // 底部光晕（涨跌变色）
-  const glow=document.createElement("div");
-  glow.className="pie-glow "+(DATA.index.change>=0?"up":"down");
-  container.appendChild(glow);
+  // 背景光晕（图案的底，SVG 内部）
+  const glowColor=DATA.index.change>=0?RISE:FALL;
+  const defs=svgEl("defs",{});
+  const f=svgEl("filter",{id:"sglow",x:"-50%",y:"-50%",width:"200%",height:"200%"});
+  f.innerHTML='<feGaussianBlur in="SourceGraphic" stdDeviation="12" />';
+  defs.appendChild(f);
+  svg.appendChild(defs);
+  
+  const glowEllipse=svgEl("ellipse",{cx:cx,cy:cy+85,rx:130,ry:35,fill:glowColor,opacity:"0.22",filter:"url(#sglow)"});
+  svg.appendChild(glowEllipse);
 
   let rot=-90;
   data.forEach((d,idx)=>{
@@ -953,10 +959,16 @@ function getMarketStatus(){
   const cx=200,cy=170,R=120,sw=44;
   const C=2*Math.PI*R;
 
-  // 底部光晕
-  const glow=document.createElement("div");
-  glow.className="pie-glow "+(DATA.index.change>=0?"up":"down");
-  container.appendChild(glow);
+  // 背景光晕（图案的底，SVG 内部）
+  const glowColor=DATA.index.change>=0?RISE:FALL;
+  const defs=svgEl("defs",{});
+  const f=svgEl("filter",{id:"iglow",x:"-50%",y:"-50%",width:"200%",height:"200%"});
+  f.innerHTML='<feGaussianBlur in="SourceGraphic" stdDeviation="12" />';
+  defs.appendChild(f);
+  svg.appendChild(defs);
+  
+  const glowEllipse=svgEl("ellipse",{cx:cx,cy:cy+85,rx:130,ry:35,fill:glowColor,opacity:"0.22",filter:"url(#iglow)"});
+  svg.appendChild(glowEllipse);
 
   let rot=-90;
   data.forEach((d,idx)=>{
