@@ -306,7 +306,7 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:
 .hero-glow{position:fixed;top:0;left:0;right:0;height:500px;pointer-events:none;z-index:0;background:radial-gradient(ellipse at 50% 0%, var(--hero-glow) 0%, transparent 60%)}
 
 /* Ticker */
-.ticker-bar{position:sticky;z-index:100;background:var(--ticker-bg);overflow:hidden;backdrop-filter:blur(20px)}
+.ticker-bar{position:sticky;z-index:100;background:var(--ticker-bg);overflow:hidden;backdrop-filter:blur(20px);height:38px;box-sizing:border-box}
 .ticker-bar-top{top:0;border-bottom:1px solid var(--ticker-border)}
 .ticker-bar-bottom{position:fixed;bottom:0;left:0;right:0;z-index:100;border-top:1px solid var(--ticker-border)}
 .ticker-grid{position:absolute;inset:0;pointer-events:none;opacity:0.3}
@@ -738,6 +738,7 @@ function getMarketStatus(){
   const idx=DATA.index;
   document.getElementById("dateStr").textContent=DATA.date;
   document.getElementById("statusBadge").textContent=getMarketStatus();
+  document.querySelector('.hero-accent').style.color = idx.change >= 0 ? 'var(--rise)' : 'var(--fall)';
 
   const priceEl=document.getElementById("idxPrice");
   const chgEl=document.getElementById("idxChange");
