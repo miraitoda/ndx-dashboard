@@ -1598,6 +1598,7 @@ def generate_summary(data, summary_type):
         )
 
     return ""
+
 def get_existing_history_dates(output_dir="docs"):
     import glob
     import re
