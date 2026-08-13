@@ -913,14 +913,17 @@ function getMarketStatus(){
     const color=colorForChange(d.change);
     const seg=svgEl("circle",{cx:cx,cy:cy,r:R,fill:"none",stroke:color,"stroke-width":sw,"stroke-dasharray":arc+" "+(C-arc),transform:"rotate("+rot+" "+cx+" "+cy+")",class:"pie-seg"});
     seg.style.transitionDelay=(idx*0.05)+"s";
+    seg.style.cursor="pointer";
+    seg.addEventListener("mouseenter",e=>showTip(e,d.name+"（"+d.ticker+"）<br>权重 "+d.weight+"% · "+fmtPct(d.change)));
+    seg.addEventListener("mouseleave",hideTip);
     g.appendChild(seg);
     rot+=angle;
   });
   svg.appendChild(g);
   // 中间遮罩 → donut
   svg.appendChild(svgEl("circle",{cx:cx,cy:cy,r:R-sw/2,fill:"var(--bg)"}));
-  svg.appendChild(svgEl("text",{x:200,y:158,"text-anchor":"middle",fill:TEXT,"font-size":28,"font-weight":900,"letter-spacing":"-1"})).textContent="NDX";
-  svg.appendChild(svgEl("text",{x:200,y:185,"text-anchor":"middle",fill:RISE,"font-size":18,"font-weight":800,"font-family":"'SF Mono',monospace"})).textContent=fmtPct(DATA.index.change);
+  svg.appendChild(svgEl("text",{x:200,y:158,"text-anchor":"middle",fill:"var(--text)","font-size":28,"font-weight":900,"letter-spacing":"-1"})).textContent="NDX";
+  svg.appendChild(svgEl("text",{x:200,y:185,"text-anchor":"middle",fill:"var(--rise)","font-size":18,"font-weight":800,"font-family":"'SF Mono',monospace"})).textContent=fmtPct(DATA.index.change);
   container.appendChild(svg);
   const leg=document.getElementById("stockLegend");
   data.slice(0,6).forEach(d=>{
@@ -955,19 +958,22 @@ function getMarketStatus(){
     const color=colorForChange(d.change);
     const seg=svgEl("circle",{cx:cx,cy:cy,r:R,fill:"none",stroke:color,"stroke-width":sw,"stroke-dasharray":arc+" "+(C-arc),transform:"rotate("+rot+" "+cx+" "+cy+")",class:"pie-seg"});
     seg.style.transitionDelay=(idx*0.05)+"s";
+    seg.style.cursor="pointer";
+    seg.addEventListener("mouseenter",e=>showTip(e,d.name+"<br>权重 "+d.weight+"% · "+fmtPct(d.change)));
+    seg.addEventListener("mouseleave",hideTip);
     g.appendChild(seg);
     rot+=angle;
   });
   svg.appendChild(g);
   // 中间遮罩 → donut
   svg.appendChild(svgEl("circle",{cx:cx,cy:cy,r:R-sw/2,fill:"var(--bg)"}));
-  svg.appendChild(svgEl("text",{x:200,y:158,"text-anchor":"middle",fill:TEXT,"font-size":24,"font-weight":900,"letter-spacing":"-0.5"})).textContent="SECTORS";
+  svg.appendChild(svgEl("text",{x:200,y:158,"text-anchor":"middle",fill:"var(--text)","font-size":24,"font-weight":900,"letter-spacing":"-0.5"})).textContent="SECTORS";
   const upSectors=data.filter(d=>d.change>=0);
   const downSectors=data.filter(d=>d.change<0);
   const upAvg=upSectors.length?upSectors.reduce((a,b)=>a+b.change,0)/upSectors.length:0;
   const downAvg=downSectors.length?downSectors.reduce((a,b)=>a+b.change,0)/downSectors.length:0;
-  svg.appendChild(svgEl("text",{x:200,y:185,"text-anchor":"middle",fill:RISE,"font-size":16,"font-weight":800,"font-family":"'SF Mono',monospace"})).textContent="▲ "+fmtPctRaw(upAvg);
-  svg.appendChild(svgEl("text",{x:200,y:205,"text-anchor":"middle",fill:FALL,"font-size":14,"font-weight":700,"font-family":"'SF Mono',monospace"})).textContent="▼ "+fmtPctRaw(downAvg);
+  svg.appendChild(svgEl("text",{x:200,y:185,"text-anchor":"middle",fill:"var(--rise)","font-size":16,"font-weight":800,"font-family":"'SF Mono',monospace"})).textContent="▲ "+fmtPctRaw(upAvg);
+  svg.appendChild(svgEl("text",{x:200,y:205,"text-anchor":"middle",fill:"var(--fall)","font-size":14,"font-weight":700,"font-family":"'SF Mono',monospace"})).textContent="▼ "+fmtPctRaw(downAvg);
   container.appendChild(svg);
   const leg=document.getElementById("sectorLegend");
   data.forEach(d=>{
