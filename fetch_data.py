@@ -431,6 +431,59 @@ section{padding:60px 0}
   .hero-inner{flex-direction:column;align-items:flex-start}
   .hero-kpis{width:100%}
 }
+
+/* ===== Scroll-triggered Animations ===== */
+.dist-bar {
+  transform: scaleY(0);
+  transform-origin: bottom;
+  transition: transform 0.9s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.dist-bar.animate {
+  transform: scaleY(1);
+}
+
+.pie-animate {
+  transform: scale(0);
+  transform-origin: center;
+  transition: transform 1.1s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.pie-animate.animate {
+  transform: scale(1);
+}
+
+.sector-bar {
+  width: 0% !important;
+  transition: width 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.sector-bar.animate {
+  width: var(--final-width) !important;
+}
+
+.trend-area {
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 1.6s ease-out;
+}
+.trend-area.animate {
+  clip-path: inset(0 0% 0 0);
+}
+
+.trend-path {
+  stroke-dasharray: var(--path-length);
+  stroke-dashoffset: var(--path-length);
+  transition: stroke-dashoffset 1.6s ease-out;
+}
+.trend-path.animate {
+  stroke-dashoffset: 0;
+}
+
+.trend-point {
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+.trend-point.animate {
+  opacity: 1;
+}
+
 </style></head><body>
 
 <div id="app">
@@ -777,7 +830,7 @@ function getMarketStatus(){
     const track=document.createElement("div");track.className="sector-track";
     const bar=document.createElement("div");bar.className="sector-bar "+(isUp?"up":"down");
     const pct=Math.min(Math.abs(d.change)/maxC,1)*100;
-    bar.style.width=Math.max(pct,3)+"%";
+    bar.style.setProperty("--final-width", Math.max(pct,3)+"%");
     const label=document.createElement("span");label.className="sector-bar-label "+(isUp?"up":"down");label.textContent=fmtPct(d.change);
     bar.appendChild(label);
     track.appendChild(bar);
@@ -804,12 +857,12 @@ function getMarketStatus(){
   grad.appendChild(svgEl("stop",{offset:"0%","stop-color":RISE,"stop-opacity":"0.2"}));
   grad.appendChild(svgEl("stop",{offset:"100%","stop-color":RISE,"stop-opacity":"0"}));
   defs.appendChild(grad);svg.appendChild(defs);
-  svg.appendChild(svgEl("path",{d:areaD,fill:"url(#trendGrad)"}));
+  const areaPath=svgEl("path",{d:areaD,fill:"url(#trendGrad)",class:"trend-area"});svg.appendChild(areaPath);
   let lineD="M "+x(0)+" "+y(data[0]);
   data.forEach((v,i)=>lineD+=" L "+x(i)+" "+y(v));
-  svg.appendChild(svgEl("path",{d:lineD,fill:"none",stroke:RISE,"stroke-width":"2.5","stroke-linecap":"round","stroke-linejoin":"round"}));
+  const linePath=svgEl("path",{d:lineD,fill:"none",stroke:RISE,"stroke-width":"2.5","stroke-linecap":"round","stroke-linejoin":"round",class:"trend-path"});svg.appendChild(linePath);requestAnimationFrame(()=>{try{const len=linePath.getTotalLength();linePath.style.setProperty("--path-length",len)}catch(e){}});
   data.forEach((v,i)=>{
-    const c=svgEl("circle",{cx:x(i),cy:y(v),r:i===data.length-1?5:3.5,fill:i===data.length-1?RISE:BG,stroke:RISE,"stroke-width":i===data.length-1?2.5:1.5});
+    const c=svgEl("circle",{cx:x(i),cy:y(v),r:i===data.length-1?5:3.5,fill:i===data.length-1?RISE:BG,stroke:RISE,"stroke-width":i===data.length-1?2.5:1.5,class:"trend-point"});c.style.transitionDelay=(i*0.04)+"s";
     c.style.cursor="pointer";
     const daysAgo=data.length-i;
     const dayLabel=daysAgo===1?"今日":daysAgo+"天前";
@@ -840,7 +893,7 @@ function getMarketStatus(){
   const data=DATA.pie_stocks;
   const total=data.reduce((a,b)=>a+b.weight,0);
   const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");
-  svg.setAttribute("viewBox","0 0 400 340");svg.style.width="100%";svg.style.maxWidth="380px";svg.style.height="auto";
+  svg.setAttribute("viewBox","0 0 400 340");svg.style.width="100%";svg.style.maxWidth="380px";svg.style.height="auto";svg.classList.add("pie-animate");
   // 外圈光晕
   svg.appendChild(svgEl("circle",{cx:200,cy:170,r:155,fill:"none",stroke:RISE,"stroke-width":24,opacity:0.06}));
   svg.appendChild(svgEl("circle",{cx:200,cy:170,r:140,fill:"none",stroke:RISE,"stroke-width":18,opacity:0.1}));
@@ -868,7 +921,7 @@ function getMarketStatus(){
   const data=DATA.sectors;
   const total=data.reduce((a,b)=>a+b.weight,0);
   const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");
-  svg.setAttribute("viewBox","0 0 400 340");svg.style.width="100%";svg.style.maxWidth="380px";svg.style.height="auto";
+  svg.setAttribute("viewBox","0 0 400 340");svg.style.width="100%";svg.style.maxWidth="380px";svg.style.height="auto";svg.classList.add("pie-animate");
   // 外圈光晕
   svg.appendChild(svgEl("circle",{cx:200,cy:170,r:155,fill:"none",stroke:ACCENT,"stroke-width":24,opacity:0.06}));
   svg.appendChild(svgEl("circle",{cx:200,cy:170,r:140,fill:"none",stroke:ACCENT,"stroke-width":18,opacity:0.1}));
@@ -1026,6 +1079,45 @@ function showTip(e,html){
   tip.style.left=left+"px";tip.style.top=top+"px";
 }
 function hideTip(){tip.style.opacity="0"}
+
+// Scroll-triggered Animations
+(function(){
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const target = entry.target;
+
+      if (target.id === 'distChart') {
+        target.querySelectorAll('.dist-bar').forEach((bar, i) => {
+          setTimeout(() => bar.classList.add('animate'), i * 60);
+        });
+      }
+      else if (target.id === 'stockPie' || target.id === 'sectorPie') {
+        const svg = target.querySelector('svg');
+        if (svg) svg.classList.add('animate');
+      }
+      else if (target.id === 'sectorBar') {
+        target.querySelectorAll('.sector-bar').forEach((bar, i) => {
+          setTimeout(() => bar.classList.add('animate'), i * 80);
+        });
+      }
+      else if (target.id === 'trendLine') {
+        target.querySelector('.trend-path')?.classList.add('animate');
+        target.querySelector('.trend-area')?.classList.add('animate');
+        target.querySelectorAll('.trend-point').forEach((pt, i) => {
+          setTimeout(() => pt.classList.add('animate'), 600 + i * 40);
+        });
+      }
+      observer.unobserve(target);
+    });
+  }, { threshold: 0.12 });
+
+  ['distChart', 'stockPie', 'sectorPie', 'sectorBar', 'trendLine'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) observer.observe(el);
+  });
+})();
+
 </script>
 </body></html>"""
 
