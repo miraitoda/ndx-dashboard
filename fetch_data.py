@@ -887,6 +887,18 @@ function getMarketStatus(){
   });
 })();
 
+function polarToCartesian(cx,cy,r,angleDeg){
+  const rad=(angleDeg-90)*Math.PI/180.0;
+  return{x:cx+r*Math.cos(rad),y:cy+r*Math.sin(rad)};
+}
+function pieSlice(cx,cy,r,startAngle,endAngle,color,opacity){
+  const start=polarToCartesian(cx,cy,r,endAngle);
+  const end=polarToCartesian(cx,cy,r,startAngle);
+  const largeArcFlag=endAngle-startAngle<=180?"0":"1";
+  const d=["M",cx,cy,"L",start.x,start.y,"A",r,r,0,largeArcFlag,0,end.x,end.y,"Z"].join(" ");
+  return svgEl("path",{d:d,fill:color,opacity:opacity,stroke:"var(--bg)","stroke-width":"2"});
+}
+
 // 个股饼图
 (function(){
   const container=document.getElementById("stockPie");
@@ -895,13 +907,18 @@ function getMarketStatus(){
   const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");
   svg.setAttribute("viewBox","0 0 400 340");svg.style.width="100%";svg.style.maxWidth="380px";svg.style.height="auto";svg.classList.add("pie-animate");
   // 外圈光晕
-  svg.appendChild(svgEl("circle",{cx:200,cy:170,r:155,fill:"none",stroke:RISE,"stroke-width":24,opacity:0.06}));
-  svg.appendChild(svgEl("circle",{cx:200,cy:170,r:140,fill:"none",stroke:RISE,"stroke-width":18,opacity:0.1}));
-  // 主环
-  svg.appendChild(svgEl("circle",{cx:200,cy:170,r:125,fill:"none",stroke:RISE,"stroke-width":14,opacity:0.18}));
-  svg.appendChild(svgEl("circle",{cx:200,cy:170,r:108,fill:"none",stroke:RISE,"stroke-width":10,opacity:0.28,"stroke-dasharray":"280 680",transform:"rotate(-90 200 170)"}));
-  svg.appendChild(svgEl("circle",{cx:200,cy:170,r:93,fill:"none",stroke:FALL,"stroke-width":10,opacity:0.22,"stroke-dasharray":"120 680","stroke-dashoffset":"-280",transform:"rotate(-90 200 170)"}));
-  svg.appendChild(svgEl("circle",{cx:200,cy:170,r:78,fill:"none",stroke:ACCENT,"stroke-width":8,opacity:0.15,"stroke-dasharray":"80 680","stroke-dashoffset":"-400",transform:"rotate(-90 200 170)"}));
+  svg.appendChild(svgEl("circle",{cx:200,cy:170,r:145,fill:"none",stroke:RISE,"stroke-width":20,opacity:0.06}));
+  svg.appendChild(svgEl("circle",{cx:200,cy:170,r:132,fill:"none",stroke:RISE,"stroke-width":14,opacity:0.1}));
+  // 真正的数据扇形
+  const cx=200,cy=170,r=120;
+  let startAngle=0;
+  data.forEach(d=>{
+    const angle=(d.weight/total)*360;
+    const endAngle=startAngle+angle;
+    const color=colorForChange(d.change);
+    svg.appendChild(pieSlice(cx,cy,r,startAngle,endAngle,color,d.ticker==="其他"?0.35:0.85));
+    startAngle=endAngle;
+  });
   // 中心文字
   svg.appendChild(svgEl("text",{x:200,y:158,"text-anchor":"middle",fill:TEXT,"font-size":28,"font-weight":900,"letter-spacing":"-1"})).textContent="NDX";
   svg.appendChild(svgEl("text",{x:200,y:185,"text-anchor":"middle",fill:RISE,"font-size":18,"font-weight":800,"font-family":"'SF Mono',monospace"})).textContent=fmtPct(DATA.index.change);
@@ -913,9 +930,7 @@ function getMarketStatus(){
     item.innerHTML='<span class="pie-legend-dot" style="background:'+colorForChange(d.change)+'"></span>'+d.ticker+" "+fmtPct(d.change);
     leg.appendChild(item);
   });
-})();
-
-// 行业饼图
+})();// 行业饼图
 (function(){
   const container=document.getElementById("sectorPie");
   const data=DATA.sectors;
@@ -923,13 +938,18 @@ function getMarketStatus(){
   const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");
   svg.setAttribute("viewBox","0 0 400 340");svg.style.width="100%";svg.style.maxWidth="380px";svg.style.height="auto";svg.classList.add("pie-animate");
   // 外圈光晕
-  svg.appendChild(svgEl("circle",{cx:200,cy:170,r:155,fill:"none",stroke:ACCENT,"stroke-width":24,opacity:0.06}));
-  svg.appendChild(svgEl("circle",{cx:200,cy:170,r:140,fill:"none",stroke:ACCENT,"stroke-width":18,opacity:0.1}));
-  // 主环
-  svg.appendChild(svgEl("circle",{cx:200,cy:170,r:125,fill:"none",stroke:ACCENT,"stroke-width":14,opacity:0.15}));
-  svg.appendChild(svgEl("circle",{cx:200,cy:170,r:108,fill:"none",stroke:RISE,"stroke-width":10,opacity:0.25,"stroke-dasharray":"240 680",transform:"rotate(-90 200 170)"}));
-  svg.appendChild(svgEl("circle",{cx:200,cy:170,r:93,fill:"none",stroke:FALL,"stroke-width":10,opacity:0.2,"stroke-dasharray":"140 680","stroke-dashoffset":"-240",transform:"rotate(-90 200 170)"}));
-  svg.appendChild(svgEl("circle",{cx:200,cy:170,r:78,fill:"none",stroke:ACCENT,"stroke-width":8,opacity:0.15,"stroke-dasharray":"60 680","stroke-dashoffset":"-380",transform:"rotate(-90 200 170)"}));
+  svg.appendChild(svgEl("circle",{cx:200,cy:170,r:145,fill:"none",stroke:ACCENT,"stroke-width":20,opacity:0.06}));
+  svg.appendChild(svgEl("circle",{cx:200,cy:170,r:132,fill:"none",stroke:ACCENT,"stroke-width":14,opacity:0.1}));
+  // 真正的数据扇形
+  const cx=200,cy=170,r=120;
+  let startAngle=0;
+  data.forEach(d=>{
+    const angle=(d.weight/total)*360;
+    const endAngle=startAngle+angle;
+    const color=colorForChange(d.change);
+    svg.appendChild(pieSlice(cx,cy,r,startAngle,endAngle,color,0.85));
+    startAngle=endAngle;
+  });
   // 中心文字
   svg.appendChild(svgEl("text",{x:200,y:158,"text-anchor":"middle",fill:TEXT,"font-size":24,"font-weight":900,"letter-spacing":"-0.5"})).textContent="SECTORS";
   // 计算涨跌sector平均
@@ -947,9 +967,7 @@ function getMarketStatus(){
     item.innerHTML='<span class="pie-legend-dot" style="background:'+colorForChange(d.change)+'"></span>'+d.name+" "+d.weight+"%";
     leg.appendChild(item);
   });
-})();
-
-// 行情条
+})();// 行情条
 (function(){
   const topStocks=DATA.stocks.slice().sort((a,b)=>Math.abs(b.change)-Math.abs(a.change));
   const bottomStocks=DATA.stocks.slice().sort(()=>Math.random()-0.5);
