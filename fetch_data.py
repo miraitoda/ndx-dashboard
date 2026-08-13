@@ -442,13 +442,12 @@ section{padding:60px 0}
   transform: scaleY(1);
 }
 
-.pie-animate {
-  transform: scale(0);
-  transform-origin: center;
-  transition: transform 1.1s cubic-bezier(0.34, 1.56, 0.64, 1);
+.pie-ring-segment {
+  stroke-dashoffset: var(--arc-len);
+  transition: stroke-dashoffset 1.2s cubic-bezier(0.25, 1, 0.5, 1);
 }
-.pie-animate.animate {
-  transform: scale(1);
+.pie-ring-segment.animate {
+  stroke-dashoffset: 0;
 }
 
 .sector-bar {
@@ -887,38 +886,36 @@ function getMarketStatus(){
   });
 })();
 
-function polarToCartesian(cx,cy,r,angleDeg){
-  const rad=(angleDeg-90)*Math.PI/180.0;
-  return{x:cx+r*Math.cos(rad),y:cy+r*Math.sin(rad)};
-}
-function pieSlice(cx,cy,r,startAngle,endAngle,color,opacity){
-  const start=polarToCartesian(cx,cy,r,endAngle);
-  const end=polarToCartesian(cx,cy,r,startAngle);
-  const largeArcFlag=endAngle-startAngle<=180?"0":"1";
-  const d=["M",cx,cy,"L",start.x,start.y,"A",r,r,0,largeArcFlag,0,end.x,end.y,"Z"].join(" ");
-  return svgEl("path",{d:d,fill:color,opacity:opacity,stroke:"var(--bg)","stroke-width":"2"});
-}
-
 // 个股饼图
 (function(){
   const container=document.getElementById("stockPie");
   const data=DATA.pie_stocks;
   const total=data.reduce((a,b)=>a+b.weight,0);
   const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");
-  svg.setAttribute("viewBox","0 0 400 340");svg.style.width="100%";svg.style.maxWidth="380px";svg.style.height="auto";svg.classList.add("pie-animate");
+  svg.setAttribute("viewBox","0 0 400 340");svg.style.width="100%";svg.style.maxWidth="380px";svg.style.height="auto";
+  const cx=200,cy=170,r=110,strokeW=50;
+  const C=2*Math.PI*r;
   // 外圈光晕
-  svg.appendChild(svgEl("circle",{cx:200,cy:170,r:145,fill:"none",stroke:RISE,"stroke-width":20,opacity:0.06}));
-  svg.appendChild(svgEl("circle",{cx:200,cy:170,r:132,fill:"none",stroke:RISE,"stroke-width":14,opacity:0.1}));
-  // 真正的数据扇形
-  const cx=200,cy=170,r=120;
-  let startAngle=0;
-  data.forEach(d=>{
+  svg.appendChild(svgEl("circle",{cx:cx,cy:cy,r:r+strokeW/2+10,fill:"none",stroke:RISE,"stroke-width":20,opacity:0.06}));
+  svg.appendChild(svgEl("circle",{cx:cx,cy:cy,r:r+strokeW/2+4,fill:"none",stroke:RISE,"stroke-width":14,opacity:0.1}));
+  const defs=svgEl("defs",{});
+  let accAngle=0;
+  data.forEach((d,idx)=>{
     const angle=(d.weight/total)*360;
-    const endAngle=startAngle+angle;
+    const arcLen=(angle/360)*C;
     const color=colorForChange(d.change);
-    svg.appendChild(pieSlice(cx,cy,r,startAngle,endAngle,color,d.ticker==="其他"?0.35:0.85));
-    startAngle=endAngle;
+    const gradId="sg-"+idx;
+    const grad=svgEl("radialGradient",{id:gradId,cx:"50%",cy:"50%",r:"50%"});
+    grad.appendChild(svgEl("stop",{offset:"70%","stop-color":color,"stop-opacity":"0.25"}));
+    grad.appendChild(svgEl("stop",{offset:"100%","stop-color":color,"stop-opacity":"1"}));
+    defs.appendChild(grad);
+    const seg=svgEl("circle",{cx:cx,cy:cy,r:r,fill:"none",stroke:"url(#"+gradId+")","stroke-width":strokeW,"stroke-dasharray":arcLen+" "+C,transform:"rotate(-90 "+cx+" "+cy+")",class:"pie-ring-segment"});
+    seg.style.setProperty("--arc-len",arcLen);
+    seg.style.transitionDelay=(idx*0.06)+"s";
+    svg.appendChild(seg);
+    accAngle+=angle;
   });
+  svg.appendChild(defs);
   // 中心文字
   svg.appendChild(svgEl("text",{x:200,y:158,"text-anchor":"middle",fill:TEXT,"font-size":28,"font-weight":900,"letter-spacing":"-1"})).textContent="NDX";
   svg.appendChild(svgEl("text",{x:200,y:185,"text-anchor":"middle",fill:RISE,"font-size":18,"font-weight":800,"font-family":"'SF Mono',monospace"})).textContent=fmtPct(DATA.index.change);
@@ -936,23 +933,32 @@ function pieSlice(cx,cy,r,startAngle,endAngle,color,opacity){
   const data=DATA.sectors;
   const total=data.reduce((a,b)=>a+b.weight,0);
   const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");
-  svg.setAttribute("viewBox","0 0 400 340");svg.style.width="100%";svg.style.maxWidth="380px";svg.style.height="auto";svg.classList.add("pie-animate");
+  svg.setAttribute("viewBox","0 0 400 340");svg.style.width="100%";svg.style.maxWidth="380px";svg.style.height="auto";
+  const cx=200,cy=170,r=110,strokeW=50;
+  const C=2*Math.PI*r;
   // 外圈光晕
-  svg.appendChild(svgEl("circle",{cx:200,cy:170,r:145,fill:"none",stroke:ACCENT,"stroke-width":20,opacity:0.06}));
-  svg.appendChild(svgEl("circle",{cx:200,cy:170,r:132,fill:"none",stroke:ACCENT,"stroke-width":14,opacity:0.1}));
-  // 真正的数据扇形
-  const cx=200,cy=170,r=120;
-  let startAngle=0;
-  data.forEach(d=>{
+  svg.appendChild(svgEl("circle",{cx:cx,cy:cy,r:r+strokeW/2+10,fill:"none",stroke:ACCENT,"stroke-width":20,opacity:0.06}));
+  svg.appendChild(svgEl("circle",{cx:cx,cy:cy,r:r+strokeW/2+4,fill:"none",stroke:ACCENT,"stroke-width":14,opacity:0.1}));
+  const defs=svgEl("defs",{});
+  let accAngle=0;
+  data.forEach((d,idx)=>{
     const angle=(d.weight/total)*360;
-    const endAngle=startAngle+angle;
+    const arcLen=(angle/360)*C;
     const color=colorForChange(d.change);
-    svg.appendChild(pieSlice(cx,cy,r,startAngle,endAngle,color,0.85));
-    startAngle=endAngle;
+    const gradId="ig-"+idx;
+    const grad=svgEl("radialGradient",{id:gradId,cx:"50%",cy:"50%",r:"50%"});
+    grad.appendChild(svgEl("stop",{offset:"70%","stop-color":color,"stop-opacity":"0.25"}));
+    grad.appendChild(svgEl("stop",{offset:"100%","stop-color":color,"stop-opacity":"1"}));
+    defs.appendChild(grad);
+    const seg=svgEl("circle",{cx:cx,cy:cy,r:r,fill:"none",stroke:"url(#"+gradId+")","stroke-width":strokeW,"stroke-dasharray":arcLen+" "+C,transform:"rotate(-90 "+cx+" "+cy+")",class:"pie-ring-segment"});
+    seg.style.setProperty("--arc-len",arcLen);
+    seg.style.transitionDelay=(idx*0.06)+"s";
+    svg.appendChild(seg);
+    accAngle+=angle;
   });
+  svg.appendChild(defs);
   // 中心文字
   svg.appendChild(svgEl("text",{x:200,y:158,"text-anchor":"middle",fill:TEXT,"font-size":24,"font-weight":900,"letter-spacing":"-0.5"})).textContent="SECTORS";
-  // 计算涨跌sector平均
   const upSectors=data.filter(d=>d.change>=0);
   const downSectors=data.filter(d=>d.change<0);
   const upAvg=upSectors.length?upSectors.reduce((a,b)=>a+b.change,0)/upSectors.length:0;
@@ -1111,8 +1117,7 @@ function hideTip(){tip.style.opacity="0"}
         });
       }
       else if (target.id === 'stockPie' || target.id === 'sectorPie') {
-        const svg = target.querySelector('svg');
-        if (svg) svg.classList.add('animate');
+        target.querySelectorAll('.pie-ring-segment').forEach(seg => seg.classList.add('animate'));
       }
       else if (target.id === 'sectorBar') {
         target.querySelectorAll('.sector-bar').forEach((bar, i) => {
