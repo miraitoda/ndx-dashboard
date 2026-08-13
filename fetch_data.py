@@ -746,7 +746,10 @@ section{padding:60px 0}
 
 <script>
 const DATA = __DATA_JSON__;
-const RISE = "#39ff14", FALL = "#bf00ff", ACCENT = "#bf00ff";
+const IS_LIGHT = document.documentElement.classList.contains('light');
+const RISE = IS_LIGHT ? "#16a34a" : "#39ff14";
+const FALL = IS_LIGHT ? "#9333ea" : "#bf00ff";
+const ACCENT = IS_LIGHT ? "#9333ea" : "#bf00ff";
 const TEXT = "#f5f5f5", TEXT2 = "#a1a1aa", TEXT3 = "#52525b", BG = "#0a0a0a";
 
 function colorForChange(c){return c>=0?RISE:FALL}
