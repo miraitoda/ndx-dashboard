@@ -934,3 +934,268 @@ function showTip(e,html){
 function hideTip(){tip.style.opacity="0"}
 </script>
 </body></html>"""
+
+
+def generate_summary(data, summary_type):
+    """本地生成AI总结，使用丰富的随机话术模板，每天固定组合保证一致性。"""
+    import random
+    from datetime import datetime
+
+    # 每天固定种子，保证同一天每次运行结果一致
+    seed = int(datetime.now().strftime("%Y%m%d")) + hash(summary_type) % 10000
+    random.seed(seed)
+
+    index = data.get("index", {})
+    stocks = data.get("stocks", [])
+    sectors = data.get("sectors", [])
+    bins = data.get("bins", {})
+    history = data.get("history", [])
+    date_str = data.get("date", "")
+
+    up = index.get("up", 0)
+    down = index.get("down", 0)
+    total = index.get("total", 0)
+    change = index.get("change", 0)
+    flat = index.get("flat", 0)
+
+    sorted_by_change = sorted(stocks, key=lambda x: x["change"], reverse=True)
+    top5 = sorted_by_change[:5]
+    bottom5 = sorted_by_change[-5:]
+
+    # 格式：公司名（股票代码）
+    def fmt_stock(s):
+        return f"{s['name']}（{s['ticker']}）"
+
+    def fmt_pct(v):
+        return f"+{v:.2f}%" if v >= 0 else f"{v:.2f}%"
+
+    def pick(*args):
+        return random.choice(args)
+
+    # ========== Overview ==========
+    if summary_type == "overview":
+        templates = []
+        if change > 1.5:
+            templates = [
+                f"纳斯达克100指数强势收涨{fmt_pct(change)}，{up}只成分股上涨，{down}只下跌，多头主导市场。",
+                f"今日NDX大涨{fmt_pct(change)}，{fmt_stock(top5[0])}领涨{fmt_pct(top5[0]['change'])}，科技龙头集体发力。",
+                f"大盘单边上行，纳指100收{fmt_pct(change)}，上涨家数达{up}只，市场情绪积极。",
+                f"强势格局延续，NDX今日{fmt_pct(change)}，前五大权重股贡献显著，{fmt_stock(top5[0])}、{fmt_stock(top5[1])}表现亮眼。",
+                f"多头攻势凌厉，纳指100大涨{fmt_pct(change)}，仅{down}只下跌，普涨特征明显。",
+            ]
+        elif change > 0:
+            templates = [
+                f"纳斯达克100指数小幅收{fmt_pct(change)}，{up}涨{down}跌，市场温和向好。",
+                f"NDX今日微涨{fmt_pct(change)}，{fmt_stock(top5[0])}领涨，整体涨跌互现。",
+                f"大盘窄幅波动后收红，纳指100{fmt_pct(change)}，上涨家数略占优。",
+                f"市场小幅反弹，NDX收{fmt_pct(change)}，{up}只成分股收红，{down}只收绿。",
+                f"温和上涨格局，纳斯达克100指数{fmt_pct(change)}，板块轮动有序。",
+            ]
+        elif change > -1:
+            templates = [
+                f"纳斯达克100指数微{fmt_pct(change)}，{up}涨{down}跌，市场观望情绪较浓。",
+                f"NDX今日窄幅收{fmt_pct(change)}，多空力量相对均衡，{fmt_stock(top5[0])}与{fmt_stock(bottom5[-1])}分化明显。",
+                f"大盘平盘震荡，纳指100{fmt_pct(change)}，涨跌家数接近，等待方向选择。",
+                f"市场小幅整理，NDX{fmt_pct(change)}，{up}只上涨，{down}只下跌，成交清淡。",
+                f"指数微幅收绿，纳斯达克100{fmt_pct(change)}，板块表现参差不齐。",
+            ]
+        else:
+            templates = [
+                f"纳斯达克100指数收跌{fmt_pct(change)}，{down}只成分股下跌，市场承压调整。",
+                f"NDX今日大跌{fmt_pct(change)}，{fmt_stock(bottom5[-1])}领跌{fmt_pct(bottom5[-1]['change'])}，避险情绪升温。",
+                f"大盘回调明显，纳指100{fmt_pct(change)}，仅{up}只上涨，空头占据主导。",
+                f"市场全线走弱，NDX收{fmt_pct(change)}，{down}只成分股收绿，权重股拖累显著。",
+                f"调整格局延续，纳斯达克100{fmt_pct(change)}，{fmt_stock(bottom5[-1])}、{fmt_stock(bottom5[-2])}跌幅居前。",
+            ]
+        return pick(*templates)
+
+    # ========== Stocks (个股权重饼图下方) ==========
+    elif summary_type == "stocks":
+        pie = data.get("pie_stocks", [])
+        heavy = [s for s in pie if s.get("weight", 0) > 3 and s.get("ticker") != "其他"][:3]
+        if heavy:
+            names = "、".join([fmt_stock(s) for s in heavy])
+            wsum = sum(s["weight"] for s in heavy)
+            return pick(
+                f"权重股方面，{names}合计权重达{wsum:.1f}%，对指数走向具有决定性影响。",
+                f"头部集中度高，{names}三家权重合计超{wsum:.1f}%，其波动直接左右NDX表现。",
+                f"前三大权重股{names}占据{wsum:.1f}%权重，今日{'集体走强' if all(s['change'] > 0 for s in heavy) else '表现分化'}。",
+            )
+        return pick(
+            "权重股今日表现分化，头部科技龙头涨跌互现。",
+            "前十大权重股走势不一，市场缺乏明确主线。",
+            "权重股整体平稳，对指数贡献中性。",
+        )
+
+    # ========== Sectors (行业饼图下方) ==========
+    elif summary_type == "sectors":
+        if not sectors:
+            return "行业数据暂缺，请关注后续更新。"
+        best = max(sectors, key=lambda x: x["change"])
+        worst = min(sectors, key=lambda x: x["change"])
+        return pick(
+            f"行业层面，{best['name']}表现最佳{fmt_pct(best['change'])}，{worst['name']}相对落后{fmt_pct(worst['change'])}。",
+            f"板块分化显著，{best['name']}领涨{fmt_pct(best['change'])}，而{worst['name']}收跌{fmt_pct(worst['change'])}。",
+            f"{best['name']}今日强势，板块平均{fmt_pct(best['change'])}；{worst['name']}承压，{fmt_pct(worst['change'])}。",
+            f"从行业看，{best['name']}与{worst['name']}形成鲜明对比，分别{fmt_pct(best['change'])}和{fmt_pct(worst['change'])}。",
+        )
+
+    # ========== Distribution (涨跌分布下方) ==========
+    elif summary_type == "distribution":
+        counts = bins.get("counts", [])
+        labels = bins.get("labels", [])
+        if not counts or total == 0:
+            return "涨跌分布数据暂缺。"
+        max_idx = counts.index(max(counts))
+        max_label = labels[max_idx]
+        max_count = counts[max_idx]
+        up_count = sum(counts[4:])  # 0~1%, 1~2%, 2~3%, >3%
+        down_count = sum(counts[:4])  # <-3%, -3~-2%, -2~-1%, -1~0%
+        return pick(
+            f"涨跌分布呈现{max_label}区间集中，共{max_count}只，占总数{max_count/total*100:.0f}%。",
+            f"从分布看，{max_label}区间股票最多（{max_count}只），上涨{up_count}只、下跌{down_count}只。",
+            f"今日{max_label}为最大阵营（{max_count}只），市场整体{'偏向上涨' if up_count > down_count else '偏向调整'}。",
+            f"分布图显示{max_label}集中了{max_count}只成分股，涨跌比约{up_count}:{down_count}。",
+        )
+
+    # ========== Industry (行业柱图下方) ==========
+    elif summary_type == "industry":
+        if not sectors:
+            return "行业数据暂缺。"
+        up_sectors = [s for s in sectors if s["change"] > 0]
+        down_sectors = [s for s in sectors if s["change"] < 0]
+        flat_sectors = [s for s in sectors if s["change"] == 0]
+        if len(up_sectors) > len(down_sectors):
+            return pick(
+                f"{len(up_sectors)}个行业收红，{len(down_sectors)}个行业收绿，板块整体偏强。",
+                f"多数板块上涨，{len(up_sectors)}个行业收涨，仅{len(down_sectors)}个收跌。",
+                f"行业普涨格局，{len(up_sectors)}个板块飘红，{len(down_sectors)}个板块飘绿。",
+            )
+        else:
+            return pick(
+                f"{len(up_sectors)}个行业收红，{len(down_sectors)}个行业收绿，板块整体偏弱。",
+                f"多数板块调整，{len(down_sectors)}个行业收跌，仅{len(up_sectors)}个行业收涨。",
+                f"行业跌多涨少，{len(down_sectors)}个板块飘绿，{len(up_sectors)}个板块飘红。",
+            )
+
+    # ========== Trend (30日走势下方) ==========
+    elif summary_type == "trend":
+        if len(history) >= 2:
+            trend_change = (history[-1] - history[0]) / history[0] * 100
+            high = max(history)
+            low = min(history)
+            return pick(
+                f"近30日NDX{'累计上涨' if trend_change > 0 else '累计下跌'}{fmt_pct(trend_change).replace('+', '').replace('-', '')}，区间高点{high:,.0f}、低点{low:,.0f}。",
+                f"30日趋势{'向上' if trend_change > 0 else '向下'}，累计{fmt_pct(trend_change)}，当前位于{history[-1]:,.0f}点附近。",
+                f"近一个月NDX{fmt_pct(trend_change)}，波动区间{low:,.0f}-{high:,.0f}，{'整体重心上移' if trend_change > 0 else '整体重心下移'}。",
+                f"30日走势显示指数{fmt_pct(trend_change)}，期间最高{high:,.0f}、最低{low:,.0f}。",
+            )
+        return pick(
+            "30日趋势数据暂缺，建议关注后续走势变化。",
+            "历史数据不足，无法判断中期趋势。",
+        )
+
+    return ""
+
+
+def get_existing_history_dates(output_dir="docs"):
+    """扫描已有历史文件，返回排序后的日期列表。"""
+    import glob
+    import re
+    history_dir = os.path.join(output_dir, "history")
+    if not os.path.exists(history_dir):
+        return []
+    dates = []
+    for path in glob.glob(os.path.join(history_dir, "*.html")):
+        name = os.path.basename(path)
+        m = re.match(r"(\d{4}-\d{2}-\d{2})\.html", name)
+        if m:
+            dates.append(m.group(1))
+    dates.sort()
+    return dates
+
+
+def manage_history(data, output_dir="docs", keep_days=5):
+    """保存当日历史快照，并清理过期历史文件。"""
+    import glob
+    import shutil
+
+    history_dir = os.path.join(output_dir, "history")
+    os.makedirs(history_dir, exist_ok=True)
+
+    date_str = data["date"]
+    history_file = os.path.join(history_dir, f"{date_str}.html")
+
+    # 生成历史页面HTML（IS_HISTORY=true）
+    history_dates = get_existing_history_dates(output_dir)
+    if date_str not in history_dates:
+        history_dates.append(date_str)
+    history_dates.sort()
+
+    html = generate_html(data, history_dates, is_history=True)
+
+    # 写入历史文件
+    with open(history_file, "w", encoding="utf-8") as f:
+        f.write(html)
+    print(f"  历史快照已保存: {history_file}")
+
+    # 清理旧文件，只保留最近 keep_days 个
+    all_files = sorted(glob.glob(os.path.join(history_dir, "*.html")))
+    if len(all_files) > keep_days:
+        for old_file in all_files[:-keep_days]:
+            os.remove(old_file)
+            print(f"  清理旧历史: {os.path.basename(old_file)}")
+
+    return history_dates
+
+
+def generate_html(data, history_dates, is_history=False):
+    """将数据注入HTML模板，生成最终页面。"""
+    import json
+
+    # 安全地将数据转为JSON字符串
+    data_json = json.dumps(data, ensure_ascii=False, separators=(",", ":"))
+    history_dates_json = json.dumps(history_dates, ensure_ascii=False)
+    is_history_str = "true" if is_history else "false"
+
+    html = HTML_TEMPLATE
+    html = html.replace("__DATA_JSON__", data_json)
+    html = html.replace("__HISTORY_DATES__", history_dates_json)
+    html = html.replace("__IS_HISTORY__", is_history_str)
+
+    return html
+
+
+def main():
+    print("=" * 50)
+    print("NDX Dashboard 数据抓取")
+    print(f"开始时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print("=" * 50)
+
+    ensure_dir()
+
+    # 1. 构建数据
+    data = build_data()
+    print(f"\n数据日期: {data['date']}")
+    print(f"指数涨跌: {data['index']['change']}%")
+    print(f"成分股数: {data['index']['total']}")
+
+    # 2. 管理历史快照
+    print("\n[历史快照管理]")
+    history_dates = manage_history(data, OUTPUT_DIR, keep_days=5)
+    print(f"  历史日期: {history_dates}")
+
+    # 3. 生成主页面
+    print("\n[生成主页面]")
+    html = generate_html(data, history_dates, is_history=False)
+    with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
+        f.write(html)
+    print(f"  已写入: {OUTPUT_FILE}")
+
+    print("\n" + "=" * 50)
+    print("完成!")
+    print("=" * 50)
+
+
+if __name__ == "__main__":
+    main()
