@@ -683,10 +683,30 @@ function getMarketStatus(){
   const idx=DATA.index;
   document.getElementById("dateStr").textContent=DATA.date;
   document.getElementById("statusBadge").textContent=getMarketStatus();
-  document.getElementById("idxPrice").textContent=idx.price?idx.price.toLocaleString():"估算中";
+
+  // INDEX 价格滚动动画
+  const priceEl=document.getElementById("idxPrice");
   const chgEl=document.getElementById("idxChange");
-  chgEl.textContent=fmtPct(idx.change)+(idx.price?(" ("+(idx.price-idx.prev_close).toFixed(2)+")"):"");
-  chgEl.className="kpi-change "+(idx.change>=0?"up":"down");
+  if(idx.price&&idx.prev_close){
+    const fromPrice=idx.prev_close;
+    const toPrice=idx.price;
+    const fromDiff=0;
+    const toDiff=idx.price-idx.prev_close;
+    const isUp=idx.change>=0;
+    chgEl.className="kpi-change "+(isUp?"up":"down");
+    animateNumber(priceEl, fromPrice, toPrice, 5000, function(v){
+      return v.toLocaleString("en-US",{minimumFractionDigits:1,maximumFractionDigits:1});
+    });
+    // 涨跌金额同步动画
+    animateNumber({textContent:fromDiff, set textContent(v){
+      chgEl.textContent=(v>=0?"▲ +":"▼ ")+idx.change.toFixed(2)+"% ("+(v>=0?"+":"")+v.toFixed(2)+")";
+    }}, fromDiff, toDiff, 5000, null);
+  }else{
+    priceEl.textContent=idx.price?idx.price.toLocaleString():"估算中";
+    chgEl.textContent=fmtPct(idx.change)+(idx.price?(" ("+(idx.price-idx.prev_close).toFixed(2)+")"):"");
+    chgEl.className="kpi-change "+(idx.change>=0?"up":"down");
+  }
+
   document.getElementById("idxUp").textContent=idx.up;
   document.getElementById("idxDown").textContent=idx.down;
   document.getElementById("stockCount").textContent=idx.total;
@@ -920,6 +940,22 @@ if(window.matchMedia&&window.matchMedia("(prefers-color-scheme: light)").matches
   document.documentElement.classList.add("light");
   const btn=document.getElementById("themeToggleBtn");
   if(btn)btn.textContent="夜间模式";
+}
+
+// 数字滚动动画
+function animateNumber(el, fromVal, toVal, duration, formatter){
+  const start=performance.now();
+  const diff=toVal-fromVal;
+  function easeOutQuart(t){return 1-Math.pow(1-t,4)}
+  function tick(now){
+    const elapsed=now-start;
+    const progress=Math.min(elapsed/duration,1);
+    const eased=easeOutQuart(progress);
+    const current=fromVal+diff*eased;
+    el.textContent=formatter?formatter(current):current.toFixed(2);
+    if(progress<1)requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
 }
 
 // Tooltip
