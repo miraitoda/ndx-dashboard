@@ -889,7 +889,7 @@ function getMarketStatus(){
     if(!bar)return;
     const track=document.createElement("div");
     track.className="ticker-track"+(reverse?" ticker-track-reverse":"");
-    track.style.animation=reverse?"ticker-scroll-reverse 40s linear infinite":"ticker-scroll 40s linear infinite";
+    track.style.animation=reverse?"ticker-scroll-reverse 100s linear infinite":"ticker-scroll 100s linear infinite";
     let html="";
     stocks.forEach(s=>{
       const c=colorForChange(s.change);
@@ -1107,7 +1107,7 @@ def get_existing_history_dates(output_dir="docs"):
     return dates
 
 
-def manage_history(data, output_dir="docs", keep_days=5):
+def manage_history(data, output_dir="docs", keep_days=30):
     import glob
     import os
     history_dir = os.path.join(output_dir, "history")
@@ -1163,7 +1163,7 @@ def main():
     print(f"成分股数: {data['index']['total']}")
 
     print("\n[历史快照管理]")
-    history_dates = manage_history(data, OUTPUT_DIR, keep_days=5)
+    history_dates = manage_history(data, OUTPUT_DIR, keep_days=30)
     print(f"  历史日期: {history_dates}")
 
     print("\n[生成主页面]")
