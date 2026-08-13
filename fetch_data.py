@@ -504,7 +504,7 @@ function getMarketStatus() {
     const openTime = isDST ? 21.5 : 22.5;   // 21:30 / 22:30
     const closeTime = isDST ? 28 : 29;       // 次日04:00 / 05:00
 
-    if (timeVal >= openTime && timeVal < closeTime) return "开盘中";
+    if (timeVal >= openTime && timeVal < closeTime) return "开盘中，收盘后更新";
     return "已收盘";
 }
 
@@ -1044,8 +1044,8 @@ def generate_summary(data, summary_type="overview"):
         if lead['name'] != lag['name']:
             sector_text += "，" + lag['name'] + "领跌(" + f"{lag['change']:+.2f}%" + ")"
 
-        leaders = top3_up[0]['ticker'] + "(" + f"{top3_up[0]['change']:+.2f}%" + ")"
-        laggards = top3_down[0]['ticker'] + "(" + f"{top3_down[0]['change']:+.2f}%" + ")"
+        leaders = top3_up[0]['name'] + "（" + top3_up[0]['ticker'] + "）(" + f"{top3_up[0]['change']:+.2f}%" + ")"
+        laggards = top3_down[0]['name'] + "（" + top3_down[0]['ticker'] + "）(" + f"{top3_down[0]['change']:+.2f}%" + ")"
 
         lines = [
             random.choice(OVERVIEW_OPENINGS).format(trend=trend, pct=pct, up_str=up_str, mood=mood),
@@ -1063,12 +1063,12 @@ def generate_summary(data, summary_type="overview"):
         summary = "".join(lines)
 
     elif summary_type == "stocks":
-        leaders = top3_up[0]['ticker'] + "(" + f"{top3_up[0]['change']:+.2f}%" + ")"
+        leaders = top3_up[0]['name'] + "（" + top3_up[0]['ticker'] + "）(" + f"{top3_up[0]['change']:+.2f}%" + ")"
         if len(top3_up) > 1:
-            leaders += "、" + top3_up[1]['ticker'] + "(" + f"{top3_up[1]['change']:+.2f}%" + ")"
-        laggards = top3_down[0]['ticker'] + "(" + f"{top3_down[0]['change']:+.2f}%" + ")"
+            leaders += "、" + top3_up[1]['name'] + "（" + top3_up[1]['ticker'] + "）(" + f"{top3_up[1]['change']:+.2f}%" + ")"
+        laggards = top3_down[0]['name'] + "（" + top3_down[0]['ticker'] + "）(" + f"{top3_down[0]['change']:+.2f}%" + ")"
         if len(top3_down) > 1:
-            laggards += "、" + top3_down[1]['ticker'] + "(" + f"{top3_down[1]['change']:+.2f}%" + ")"
+            laggards += "、" + top3_down[1]['name'] + "（" + top3_down[1]['ticker'] + "）(" + f"{top3_down[1]['change']:+.2f}%" + ")"
         trend_text = "受权重股支撑" if idx['change'] >= 0 else "受权重股拖累"
         summary = random.choice(STOCKS_TEMPLATES).format(leaders=leaders, laggards=laggards, trend_text=trend_text)
 
