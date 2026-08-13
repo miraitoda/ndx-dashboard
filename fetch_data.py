@@ -298,7 +298,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
 
-#app{background:var(--bg);color:var(--text);padding-bottom:50px}
+#app{background:var(--bg);color:var(--text);padding-bottom:50px;padding-top:82px}
 
 /* 全局背景网格 */
 .global-grid{position:fixed;inset:0;pointer-events:none;z-index:-1}
@@ -307,7 +307,7 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:
 
 /* Ticker */
 .ticker-bar{position:sticky;z-index:100;background:var(--ticker-bg);overflow:hidden;backdrop-filter:blur(20px);height:36px;box-sizing:border-box}
-.ticker-bar-top{top:0;border-bottom:1px solid var(--ticker-border)}
+.ticker-bar-top{position:fixed;top:0;left:0;right:0;border-bottom:1px solid var(--ticker-border)}
 .ticker-bar-bottom{position:fixed;bottom:0;left:0;right:0;z-index:100;border-top:1px solid var(--ticker-border)}
 .ticker-grid{position:absolute;inset:0;pointer-events:none;opacity:0.3}
 .ticker-grid svg{width:100%;height:100%}
@@ -321,7 +321,7 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:
 @keyframes ticker-scroll-reverse{0%{transform:translateX(-50%)}100%{transform:translateX(0)}}
 
 /* Header */
-.header{position:sticky;top:36px;z-index:99;backdrop-filter:blur(20px);background:var(--header-bg);border-bottom:1px solid var(--border)}
+.header{position:fixed;top:36px;left:0;right:0;z-index:99;backdrop-filter:blur(20px);background:var(--header-bg);border-bottom:1px solid var(--border)}
 .header-inner{max-width:1200px;margin:0 auto;padding:16px 24px;display:flex;justify-content:space-between;align-items:center}
 .logo{font-size:14px;font-weight:800;letter-spacing:2px;color:var(--text)}
 .logo-accent{color:var(--accent)}
@@ -578,7 +578,7 @@ section{padding:60px 0}
 <!-- Header -->
 <div class="header">
   <div class="header-inner">
-    <div class="logo" id="siteLogo">NDX100 DASHBOARD</div>
+    <div class="logo" id="siteLogo">NDX DASHBOARD</div>
     <div class="nav-btns">
       <button class="nav-btn" id="btnPrev" disabled>← 前一日</button>
       <button class="nav-btn" id="btnToday" style="display:none">今天</button>
@@ -745,17 +745,19 @@ section{padding:60px 0}
 <div class="tooltip" id="tooltip"></div>
 
 <script>
-// 先检测系统主题，再加类，最后定义颜色常量
+// 先检测系统主题
 if(window.matchMedia&&window.matchMedia("(prefers-color-scheme: light)").matches){
   document.documentElement.classList.add("light");
 }
 
-const DATA = __DATA_JSON__;
-const IS_LIGHT = document.documentElement.classList.contains('light');
-const RISE = IS_LIGHT ? "#16a34a" : "#39ff14";
-const FALL = IS_LIGHT ? "#9333ea" : "#bf00ff";
-const ACCENT = IS_LIGHT ? "#9333ea" : "#bf00ff";
+// 直接从生效的 CSS 变量读取颜色，保证和主题完全一致
+const STYLE = getComputedStyle(document.documentElement);
+const RISE = STYLE.getPropertyValue('--rise').trim();
+const FALL = STYLE.getPropertyValue('--fall').trim();
+const ACCENT = FALL;
 const TEXT = "#f5f5f5", TEXT2 = "#a1a1aa", TEXT3 = "#52525b", BG = "#0a0a0a";
+
+const DATA = __DATA_JSON__;
 
 function colorForChange(c){return c>=0?RISE:FALL}
 function fmtPct(c){return(c>=0?"▲ +":"▼ ")+c.toFixed(2)+"%"}
