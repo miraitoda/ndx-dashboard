@@ -440,25 +440,47 @@ section{padding:60px 0}
 .dist-bar.animate {
   transform: scaleY(1);
 }
+.dist-bar.animate:hover {
+  transform: translateY(-4px) scaleY(1.06);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+  position: relative;
+  z-index: 2;
+}
 
 .pie-seg {
   opacity: 0;
   transform: scale(0);
-  /* 必须显式指定圆心，否则 SVG 元素默认 origin 是左上角 0 0 */
   transform-origin: 200px 170px;
   transition: opacity 0.7s ease, transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+  cursor: pointer;
 }
 .pie-seg.animate {
   opacity: 1;
   transform: scale(1);
 }
+.pie-seg.animate:hover {
+  transform: scale(1.04);
+  transition: opacity 0.7s ease, transform 0.15s ease;
+  filter: brightness(1.15);
+}
 
 .sector-bar {
   width: 0% !important;
-  transition: width 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+  transition: width 1.2s cubic-bezier(0.25, 1, 0.5, 1), transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
 }
 .sector-bar.animate {
   width: var(--final-width) !important;
+}
+.sector-bar.animate.up:hover {
+  transform: translateX(3px);
+  filter: brightness(1.15);
+  box-shadow: 4px 0 16px var(--rise-border);
+}
+.sector-bar.animate.down:hover {
+  transform: translateX(-3px);
+  filter: brightness(1.15);
+  box-shadow: -4px 0 16px var(--fall-border);
 }
 
 .trend-area {
