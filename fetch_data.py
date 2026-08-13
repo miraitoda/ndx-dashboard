@@ -392,11 +392,12 @@ section{padding:60px 0}
 
 /* Sector bars */
 .sector-row{display:flex;align-items:center;gap:16px}
-.sector-name{width:80px;text-align:right;font-size:13px;font-weight:700;color:var(--text2)}
-.sector-bar{flex:1;height:28px;border-radius:0 4px 4px 0;position:relative}
-.sector-bar.up{background:var(--rise)}
+.sector-name{width:80px;text-align:right;font-size:13px;font-weight:700;color:var(--text2);flex-shrink:0}
+.sector-track{flex:1;height:28px;display:flex;align-items:center;position:relative}
+.sector-bar{height:100%;position:relative}
+.sector-bar.up{background:var(--rise);border-radius:0 4px 4px 0}
 .sector-bar.down{background:var(--fall);border-radius:4px 0 0 4px;margin-left:auto}
-.sector-bar-label{position:absolute;top:50%;transform:translateY(-50%);font-size:12px;font-weight:800;font-family:'SF Mono',monospace}
+.sector-bar-label{position:absolute;top:50%;transform:translateY(-50%);font-size:12px;font-weight:800;font-family:'SF Mono',monospace;white-space:nowrap}
 .sector-bar-label.up{right:12px;color:rgba(0,0,0,0.6)}
 .sector-bar-label.down{left:12px;color:rgba(255,255,255,0.9)}
 
@@ -517,58 +518,8 @@ section{padding:60px 0}
     </div>
     <div class="dist-chart" id="distChart"></div>
     <div class="card" id="aiDistBox" style="display:none;margin-top:20px;padding:20px 24px;">
-      <p style="margin:0;font-size:13px;line-height:1.6;color:var(--text2);font-weight:500;"></p>
+      <p style="margin:0;font-size:20px;line-height:1.5;color:var(--text);font-weight:700;letter-spacing:-0.3px;"></p>
     </div>
-  </section>
-
-  <div class="divider"></div>
-
-  <!-- SECTORS -->
-  <section>
-    <div class="section-header">
-      <div>
-        <div class="section-label">Sectors</div>
-        <div class="section-title">行业表现</div>
-      </div>
-      <div class="section-sub">Weighted average by sector</div>
-    </div>
-    <div id="sectorBar"></div>
-    <div class="card" id="aiIndustryBox" style="display:none;margin-top:20px;padding:20px 24px;">
-      <p style="margin:0;font-size:13px;line-height:1.6;color:var(--text2);font-weight:500;"></p>
-    </div>
-  </section>
-
-  <div class="divider"></div>
-
-  <!-- TREND -->
-  <section>
-    <div class="section-header">
-      <div>
-        <div class="section-label">Trend</div>
-        <div class="section-title">30日走势</div>
-      </div>
-      <div class="section-sub">30-day closing price</div>
-    </div>
-    <div style="padding:20px 0">
-      <svg class="trend-svg" id="trendLine" viewBox="0 0 900 200"></svg>
-    </div>
-    <div class="card" id="aiTrendBox" style="display:none;margin-top:20px;padding:20px 24px;">
-      <p style="margin:0;font-size:13px;line-height:1.6;color:var(--text2);font-weight:500;"></p>
-    </div>
-  </section>
-
-  <div class="divider"></div>
-
-  <!-- STOCK GRID -->
-  <section>
-    <div class="section-header">
-      <div>
-        <div class="section-label">Components</div>
-        <div class="section-title">成分股一览</div>
-      </div>
-      <div class="section-sub">100 stocks</div>
-    </div>
-    <div class="stock-grid" id="stockGrid"></div>
   </section>
 
   <div class="divider"></div>
@@ -588,7 +539,7 @@ section{padding:60px 0}
         <div class="pie-container" id="stockPie"></div>
         <div class="pie-legend" id="stockLegend"></div>
         <div class="card" id="aiStocksBox" style="display:none;margin-top:20px;padding:16px 20px;">
-          <p style="margin:0;font-size:13px;line-height:1.6;color:var(--text2);font-weight:500;"></p>
+          <p style="margin:0;font-size:20px;line-height:1.5;color:var(--text);font-weight:700;letter-spacing:-0.3px;"></p>
         </div>
       </div>
       <div class="card" style="padding:48px">
@@ -597,11 +548,61 @@ section{padding:60px 0}
         <div class="pie-container" id="sectorPie"></div>
         <div class="pie-legend" id="sectorLegend"></div>
         <div class="card" id="aiSectorsBox" style="display:none;margin-top:20px;padding:16px 20px;">
-          <p style="margin:0;font-size:13px;line-height:1.6;color:var(--text2);font-weight:500;"></p>
+          <p style="margin:0;font-size:20px;line-height:1.5;color:var(--text);font-weight:700;letter-spacing:-0.3px;"></p>
         </div>
       </div>
     </div>
   </section>
+
+  <!-- SECTORS -->
+  <section>
+    <div class="section-header">
+      <div>
+        <div class="section-label">Sectors</div>
+        <div class="section-title">行业表现</div>
+      </div>
+      <div class="section-sub">Weighted average by sector</div>
+    </div>
+    <div id="sectorBar"></div>
+    <div class="card" id="aiIndustryBox" style="display:none;margin-top:20px;padding:20px 24px;">
+      <p style="margin:0;font-size:20px;line-height:1.5;color:var(--text);font-weight:700;letter-spacing:-0.3px;"></p>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- TREND -->
+  <section>
+    <div class="section-header">
+      <div>
+        <div class="section-label">Trend</div>
+        <div class="section-title">30日走势</div>
+      </div>
+      <div class="section-sub">30-day closing price</div>
+    </div>
+    <div style="padding:20px 0">
+      <svg class="trend-svg" id="trendLine" viewBox="0 0 900 200"></svg>
+    </div>
+    <div class="card" id="aiTrendBox" style="display:none;margin-top:20px;padding:20px 24px;">
+      <p style="margin:0;font-size:20px;line-height:1.5;color:var(--text);font-weight:700;letter-spacing:-0.3px;"></p>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- STOCK GRID -->
+  <section>
+    <div class="section-header">
+      <div>
+        <div class="section-label">Components</div>
+        <div class="section-title">成分股一览</div>
+      </div>
+      <div class="section-sub">100 stocks</div>
+    </div>
+    <div class="stock-grid" id="stockGrid"></div>
+  </section>
+
+  <div class="divider"></div>
 
   <!-- FOOTER -->
   <div class="footer">
@@ -760,12 +761,14 @@ function getMarketStatus(){
     const isUp=d.change>=0;
     const row=document.createElement("div");row.className="sector-row";
     const name=document.createElement("span");name.className="sector-name";name.textContent=d.name;
+    const track=document.createElement("div");track.className="sector-track";
     const bar=document.createElement("div");bar.className="sector-bar "+(isUp?"up":"down");
     const pct=Math.min(Math.abs(d.change)/maxC,1)*100;
-    bar.style.width=pct+"%";bar.style.flex="none";bar.style.flexBasis=pct+"%";
+    bar.style.width=Math.max(pct,3)+"%";
     const label=document.createElement("span");label.className="sector-bar-label "+(isUp?"up":"down");label.textContent=fmtPct(d.change);
     bar.appendChild(label);
-    row.appendChild(name);row.appendChild(bar);
+    track.appendChild(bar);
+    row.appendChild(name);row.appendChild(track);
     container.appendChild(row);
   });
 })();
@@ -935,13 +938,11 @@ function hideTip(){tip.style.opacity="0"}
 </script>
 </body></html>"""
 
-
 def generate_summary(data, summary_type):
     """本地生成AI总结，使用丰富的随机话术模板，每天固定组合保证一致性。"""
     import random
     from datetime import datetime
 
-    # 每天固定种子，保证同一天每次运行结果一致
     seed = int(datetime.now().strftime("%Y%m%d")) + hash(summary_type) % 10000
     random.seed(seed)
 
@@ -956,13 +957,11 @@ def generate_summary(data, summary_type):
     down = index.get("down", 0)
     total = index.get("total", 0)
     change = index.get("change", 0)
-    flat = index.get("flat", 0)
 
     sorted_by_change = sorted(stocks, key=lambda x: x["change"], reverse=True)
     top5 = sorted_by_change[:5]
     bottom5 = sorted_by_change[-5:]
 
-    # 格式：公司名（股票代码）
     def fmt_stock(s):
         return f"{s['name']}（{s['ticker']}）"
 
@@ -972,7 +971,6 @@ def generate_summary(data, summary_type):
     def pick(*args):
         return random.choice(args)
 
-    # ========== Overview ==========
     if summary_type == "overview":
         templates = []
         if change > 1.5:
@@ -1009,7 +1007,6 @@ def generate_summary(data, summary_type):
             ]
         return pick(*templates)
 
-    # ========== Stocks (个股权重饼图下方) ==========
     elif summary_type == "stocks":
         pie = data.get("pie_stocks", [])
         heavy = [s for s in pie if s.get("weight", 0) > 3 and s.get("ticker") != "其他"][:3]
@@ -1027,7 +1024,6 @@ def generate_summary(data, summary_type):
             "权重股整体平稳，对指数贡献中性。",
         )
 
-    # ========== Sectors (行业饼图下方) ==========
     elif summary_type == "sectors":
         if not sectors:
             return "行业数据暂缺，请关注后续更新。"
@@ -1040,7 +1036,6 @@ def generate_summary(data, summary_type):
             f"从行业看，{best['name']}与{worst['name']}形成鲜明对比，分别{fmt_pct(best['change'])}和{fmt_pct(worst['change'])}。",
         )
 
-    # ========== Distribution (涨跌分布下方) ==========
     elif summary_type == "distribution":
         counts = bins.get("counts", [])
         labels = bins.get("labels", [])
@@ -1049,8 +1044,8 @@ def generate_summary(data, summary_type):
         max_idx = counts.index(max(counts))
         max_label = labels[max_idx]
         max_count = counts[max_idx]
-        up_count = sum(counts[4:])  # 0~1%, 1~2%, 2~3%, >3%
-        down_count = sum(counts[:4])  # <-3%, -3~-2%, -2~-1%, -1~0%
+        up_count = sum(counts[4:])
+        down_count = sum(counts[:4])
         return pick(
             f"涨跌分布呈现{max_label}区间集中，共{max_count}只，占总数{max_count/total*100:.0f}%。",
             f"从分布看，{max_label}区间股票最多（{max_count}只），上涨{up_count}只、下跌{down_count}只。",
@@ -1058,13 +1053,11 @@ def generate_summary(data, summary_type):
             f"分布图显示{max_label}集中了{max_count}只成分股，涨跌比约{up_count}:{down_count}。",
         )
 
-    # ========== Industry (行业柱图下方) ==========
     elif summary_type == "industry":
         if not sectors:
             return "行业数据暂缺。"
         up_sectors = [s for s in sectors if s["change"] > 0]
         down_sectors = [s for s in sectors if s["change"] < 0]
-        flat_sectors = [s for s in sectors if s["change"] == 0]
         if len(up_sectors) > len(down_sectors):
             return pick(
                 f"{len(up_sectors)}个行业收红，{len(down_sectors)}个行业收绿，板块整体偏强。",
@@ -1078,7 +1071,6 @@ def generate_summary(data, summary_type):
                 f"行业跌多涨少，{len(down_sectors)}个板块飘绿，{len(up_sectors)}个板块飘红。",
             )
 
-    # ========== Trend (30日走势下方) ==========
     elif summary_type == "trend":
         if len(history) >= 2:
             trend_change = (history[-1] - history[0]) / history[0] * 100
@@ -1099,7 +1091,6 @@ def generate_summary(data, summary_type):
 
 
 def get_existing_history_dates(output_dir="docs"):
-    """扫描已有历史文件，返回排序后的日期列表。"""
     import glob
     import re
     history_dir = os.path.join(output_dir, "history")
@@ -1116,17 +1107,14 @@ def get_existing_history_dates(output_dir="docs"):
 
 
 def manage_history(data, output_dir="docs", keep_days=5):
-    """保存当日历史快照，并清理过期历史文件。"""
     import glob
-    import shutil
-
+    import os
     history_dir = os.path.join(output_dir, "history")
     os.makedirs(history_dir, exist_ok=True)
 
     date_str = data["date"]
     history_file = os.path.join(history_dir, f"{date_str}.html")
 
-    # 生成历史页面HTML（IS_HISTORY=true）
     history_dates = get_existing_history_dates(output_dir)
     if date_str not in history_dates:
         history_dates.append(date_str)
@@ -1134,12 +1122,10 @@ def manage_history(data, output_dir="docs", keep_days=5):
 
     html = generate_html(data, history_dates, is_history=True)
 
-    # 写入历史文件
     with open(history_file, "w", encoding="utf-8") as f:
         f.write(html)
     print(f"  历史快照已保存: {history_file}")
 
-    # 清理旧文件，只保留最近 keep_days 个
     all_files = sorted(glob.glob(os.path.join(history_dir, "*.html")))
     if len(all_files) > keep_days:
         for old_file in all_files[:-keep_days]:
@@ -1150,10 +1136,7 @@ def manage_history(data, output_dir="docs", keep_days=5):
 
 
 def generate_html(data, history_dates, is_history=False):
-    """将数据注入HTML模板，生成最终页面。"""
     import json
-
-    # 安全地将数据转为JSON字符串
     data_json = json.dumps(data, ensure_ascii=False, separators=(",", ":"))
     history_dates_json = json.dumps(history_dates, ensure_ascii=False)
     is_history_str = "true" if is_history else "false"
@@ -1162,7 +1145,6 @@ def generate_html(data, history_dates, is_history=False):
     html = html.replace("__DATA_JSON__", data_json)
     html = html.replace("__HISTORY_DATES__", history_dates_json)
     html = html.replace("__IS_HISTORY__", is_history_str)
-
     return html
 
 
@@ -1174,18 +1156,15 @@ def main():
 
     ensure_dir()
 
-    # 1. 构建数据
     data = build_data()
     print(f"\n数据日期: {data['date']}")
     print(f"指数涨跌: {data['index']['change']}%")
     print(f"成分股数: {data['index']['total']}")
 
-    # 2. 管理历史快照
     print("\n[历史快照管理]")
     history_dates = manage_history(data, OUTPUT_DIR, keep_days=5)
     print(f"  历史日期: {history_dates}")
 
-    # 3. 生成主页面
     print("\n[生成主页面]")
     html = generate_html(data, history_dates, is_history=False)
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
