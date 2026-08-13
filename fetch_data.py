@@ -604,7 +604,7 @@ section{padding:60px 0}
 
   <!-- AI SUMMARY -->
   <section class="ai-summary" id="aiSummaryBox" style="display:none">
-    <div class="section-label">NDX Daily Recap</div>
+    <div class="section-label">Markets in Focus</div>
     <p id="aiSummaryText"></p>
   </section>
   <div class="divider" id="aiSummaryDivider" style="display:none"></div>
