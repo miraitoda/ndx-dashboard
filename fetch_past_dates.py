@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-临时脚本：补录前4个交易日历史数据（修复版）
+手动补录脚本：抓取过去30个自然日的历史数据
 ============================================
-修复：
-- 下载 40 天数据，确保能提取完整 30 天走势
-- 修复 save_history 漏调用问题
+- 自动计算过去30个自然日（含今天）
+- 不开盘的日期自动跳过
+- 每个成功日期保留30日走势历史
 """
 
 import os
@@ -21,8 +21,18 @@ import yfinance as yf
 from ndx_components import STOCKS
 from fetch_data import generate_html, generate_summary, ensure_dir
 
-TARGET_DATES = ['2026-08-12', '2026-08-11', '2026-08-010', '2026-08-07']
 OUTPUT_DIR = "docs"
+DAYS_BACK = 30  # 过去30个自然日
+
+
+def get_target_dates():
+    """生成过去30个自然日的日期列表（从今天往前推）。"""
+    today = datetime.now().date()
+    dates = []
+    for i in range(DAYS_BACK):
+        d = today - timedelta(days=i)
+        dates.append(d.strftime("%Y-%m-%d"))
+    return dates
 
 
 def fetch_history_data(start_date, end_date):
@@ -92,12 +102,12 @@ def build_data_for_date(date_str, raw_data, ndx_hist):
     ))
 
     if date not in all_dates:
-        print(f"  {date_str} 不在数据中（可用: {all_dates[0]} ~ {all_dates[-1]}）")
+        print(f"  {date_str} 无数据（跳过，可用: {all_dates[0]} ~ {all_dates[-1]}）")
         return None
 
     idx = all_dates.index(date)
     if idx == 0:
-        print(f"  {date_str} 是第一个数据点")
+        print(f"  {date_str} 是第一个数据点，无前一日对比，跳过")
         return None
 
     prev_date = all_dates[idx - 1]
@@ -187,7 +197,7 @@ def build_data_for_date(date_str, raw_data, ndx_hist):
                 counts[i] += 1
                 break
 
-    # 关键修复：从 40 天数据中提取 30 天历史
+    # 30日走势历史：从该日期往前推最多30个交易日
     history = []
     if ndx_hist is not None and not ndx_hist.empty:
         ndx_dates = [
@@ -236,7 +246,8 @@ def save_history(data, all_dates):
     with open(json_file, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False)
 
-    html = generate_html(data, is_history=True, history_dates=all_dates)
+    # 与 fetch_data.py 的 generate_html 签名保持一致
+    html = generate_html(data, all_dates, is_history=True)
     html_file = os.path.join(history_dir, f"{date_str}.html")
     with open(html_file, "w", encoding="utf-8") as f:
         f.write(html)
@@ -245,16 +256,18 @@ def save_history(data, all_dates):
 
 
 def main():
+    target_dates = get_target_dates()
     print("=" * 50)
-    print("补录历史数据（修复版）")
+    print(f"手动补录：过去 {DAYS_BACK} 个自然日")
+    print(f"目标日期: {target_dates[0]} ~ {target_dates[-1]}")
     print("=" * 50)
 
     ensure_dir()
 
-    # 关键修复：下载 40 天数据，确保每个日期都有 30 天历史
-    dates = [datetime.strptime(d, "%Y-%m-%d") for d in TARGET_DATES]
-    start = (min(dates) - timedelta(days=40)).strftime("%Y-%m-%d")
-    end = (max(dates) + timedelta(days=1)).strftime("%Y-%m-%d")
+    # 计算下载范围：最早日期往前推40天，确保30日历史数据完整
+    dates_dt = [datetime.strptime(d, "%Y-%m-%d") for d in target_dates]
+    start = (min(dates_dt) - timedelta(days=40)).strftime("%Y-%m-%d")
+    end = (max(dates_dt) + timedelta(days=1)).strftime("%Y-%m-%d")
 
     raw_data = fetch_history_data(start, end)
     if not raw_data:
@@ -264,12 +277,14 @@ def main():
     ndx_hist = fetch_index_history_range(start, end)
 
     all_dates = []
-    for date_str in TARGET_DATES:
+    for date_str in target_dates:
         print(f"\n处理 {date_str}...")
         data = build_data_for_date(date_str, raw_data, ndx_hist)
         if data:
             all_dates.append(date_str)
-            save_history(data, all_dates)  # 关键：保存文件！
+            save_history(data, all_dates)
+        else:
+            print(f"  → 跳过 {date_str}（不开盘或无数据）")
 
     if not all_dates:
         print("\n没有成功生成任何快照")
@@ -286,15 +301,14 @@ def main():
             continue
         with open(json_file, "r", encoding="utf-8") as f:
             old_data = json.load(f)
-        html = generate_html(old_data, is_history=True, history_dates=all_dates)
+        html = generate_html(old_data, all_dates, is_history=True)
         with open(os.path.join(history_dir, f"{date_str}.html"), "w", encoding="utf-8") as f:
             f.write(html)
 
     print(f"\n{'=' * 50}")
-    print(f"完成！共生成 {len(all_dates)} 个历史快照")
+    print(f"完成！成功 {len(all_dates)} 天，跳过 {DAYS_BACK - len(all_dates)} 天")
     print(f"位置: {history_dir}")
-    print("跑完后可删除本文件")
-    print('=' * 50)
+    print("=" * 50)
     return 0
 
 
