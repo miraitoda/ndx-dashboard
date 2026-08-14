@@ -1006,7 +1006,7 @@ function renderSummary(containerId, textId, footerId, text, isApi) {
   
   if (footerEl) {
     if (isApi) {
-      footerEl.textContent = 'Brief powered by QWEN';
+      footerEl.textContent = 'BRIEF POWERED BY QWEN';
     } else {
       footerEl.textContent = '';
     }
@@ -1695,19 +1695,19 @@ def call_qwen_summary(summary_type, data):
     total = index.get("total", 0)
 
     if summary_type == "overview":
-        prompt = f"请用一句话（不少于50字）概括今日纳斯达克100指数表现，类似彭博社标题。今日日期：{date_str}，涨跌幅{change:.2f}%，上涨{up}家，下跌{down}家。只输出一句话。"
+        prompt = f"请用一句话（不少于80字）概括今日纳斯达克100指数表现，类似彭博社标题。今日日期：{date_str}，涨跌幅{change:.2f}%，上涨{up}家，下跌{down}家。只输出一句话。"
     elif summary_type == "stocks":
         stocks = data.get("stocks", [])
         top5 = sorted(stocks, key=lambda x: x.get("weight", 0), reverse=True)[:5]
         desc = "，".join([f"{s['name']}({s['ticker']})权重{s['weight']}%涨{s['change']:.2f}%" for s in top5])
-        prompt = f"请用一句话（不少于50字）评价今日纳斯达克100指数权重股表现。权重股表现：{desc}。只输出一句话。"
+        prompt = f"请用一句话（不少于80字）评价今日纳斯达克100指数权重股表现。权重股表现：{desc}。只输出一句话。"
     elif summary_type == "sectors":
         sectors = data.get("sectors", [])
         if not sectors:
             return None
         best = max(sectors, key=lambda x: x["change"])
         worst = min(sectors, key=lambda x: x["change"])
-        prompt = f"请用一句话（不少于50字）概括今日纳斯达克100指数行业板块表现。领涨：{best['name']}涨{best['change']:.2f}%，领跌：{worst['name']}跌{worst['change']:.2f}%。只输出一句话。"
+        prompt = f"请用一句话（不少于80字）概括今日纳斯达克100指数行业板块表现。领涨：{best['name']}涨{best['change']:.2f}%，领跌：{worst['name']}跌{worst['change']:.2f}%。只输出一句话。"
     elif summary_type == "distribution":
         bins = data.get("bins", {})
         counts = bins.get("counts", [])
@@ -1718,20 +1718,20 @@ def call_qwen_summary(summary_type, data):
         max_idx = counts.index(max(counts))
         labels = bins.get("labels", [])
         max_label = labels[max_idx] if max_idx < len(labels) else ""
-        prompt = f"请用一句话（不少于50字）描述今日纳斯达克100指数涨跌分布。上涨{up_count}只，下跌{down_count}只，最密集区间{max_label}有{counts[max_idx]}只。只输出一句话。"
+        prompt = f"请用一句话（不少于80字）描述今日纳斯达克100指数涨跌分布。上涨{up_count}只，下跌{down_count}只，最密集区间{max_label}有{counts[max_idx]}只。只输出一句话。"
     elif summary_type == "industry":
         sectors = data.get("sectors", [])
         if not sectors:
             return None
         up_sectors = [s for s in sectors if s["change"] > 0]
         down_sectors = [s for s in sectors if s["change"] < 0]
-        prompt = f"请用一句话（不少于50字）总结今日纳斯达克100指数整体情况。上涨行业{len(up_sectors)}个，下跌行业{len(down_sectors)}个。只输出一句话。"
+        prompt = f"请用一句话（不少于80字）总结今日纳斯达克100指数整体情况。上涨行业{len(up_sectors)}个，下跌行业{len(down_sectors)}个。只输出一句话。"
     elif summary_type == "trend":
         history = data.get("history", [])
         if len(history) < 2:
             return None
         change_30d = (history[-1] - history[0]) / history[0] * 100
-        prompt = f"请用一句话（不少于50字）概括近30日纳斯达克100指数趋势。30日涨跌幅{change_30d:.2f}%，最新价{history[-1]:.2f}。只输出一句话。"
+        prompt = f"请用一句话（不少于80字）概括近30日纳斯达克100指数趋势。30日涨跌幅{change_30d:.2f}%，最新价{history[-1]:.2f}。只输出一句话。"
     else:
         return None
 
@@ -1743,7 +1743,7 @@ def call_qwen_summary(summary_type, data):
         "model": SILICONFLOW_MODEL,
         "messages": [{"role": "user", "content": prompt}],
         "temperature": 0.3,
-        "max_tokens": 200
+        "max_tokens": 300
     }
 
     try:
