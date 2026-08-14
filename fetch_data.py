@@ -759,7 +759,7 @@ const TEXT = "#f5f5f5", TEXT2 = "#a1a1aa", TEXT3 = "#52525b", BG = "#0a0a0a";
 
 const DATA = __DATA_JSON__;
 
-function colorForChange(c){return c>=0?RISE:FALL}
+function colorForChange(c){ return c >= 0 ? 'var(--rise)' : 'var(--fall)'; }
 function fmtPct(c){return(c>=0?"▲ +":"▼ ")+c.toFixed(2)+"%"}
 function fmtPctRaw(c){return(c>=0?"+":"")+c.toFixed(2)+"%"}
 function svgEl(tag,attrs){const el=document.createElementNS("http://www.w3.org/2000/svg",tag);for(let k in attrs)el.setAttribute(k,attrs[k]);return el}
@@ -942,13 +942,13 @@ function getMarketStatus(){
   areaD+=" L "+x(data.length-1)+" "+(H-padB)+" L "+x(0)+" "+(H-padB)+" Z";
   const defs=svgEl("defs",{});
   const grad=svgEl("linearGradient",{id:"trendGrad",x1:"0",y1:"0",x2:"0",y2:"1"});
-  grad.appendChild(svgEl("stop",{offset:"0%","stop-color":RISE,"stop-opacity":"0.2"}));
-  grad.appendChild(svgEl("stop",{offset:"100%","stop-color":RISE,"stop-opacity":"0"}));
+  grad.appendChild(svgEl("stop",{offset:"0%","stop-color":"var(--rise)","stop-opacity":"0.2"}));
+  grad.appendChild(svgEl("stop",{offset:"100%","stop-color":"var(--rise)","stop-opacity":"0"}));
   defs.appendChild(grad);svg.appendChild(defs);
   const areaPath=svgEl("path",{d:areaD,fill:"url(#trendGrad)",class:"trend-area"});svg.appendChild(areaPath);
   let lineD="M "+x(0)+" "+y(data[0]);
   data.forEach((v,i)=>lineD+=" L "+x(i)+" "+y(v));
-  const linePath=svgEl("path",{d:lineD,fill:"none",stroke:RISE,"stroke-width":"2.5","stroke-linecap":"round","stroke-linejoin":"round",class:"trend-path"});svg.appendChild(linePath);requestAnimationFrame(()=>{try{const len=linePath.getTotalLength();linePath.style.setProperty("--path-length",len)}catch(e){}});
+  const linePath=svgEl("path",{d:lineD,fill:"none",stroke:"var(--rise)","stroke-width":"2.5","stroke-linecap":"round","stroke-linejoin":"round",class:"trend-path"});svg.appendChild(linePath);requestAnimationFrame(()=>{try{const len=linePath.getTotalLength();linePath.style.setProperty("--path-length",len)}catch(e){}});
   data.forEach((v,i)=>{
     const c=svgEl("circle",{cx:x(i),cy:y(v),r:i===data.length-1?5:3.5,fill:i===data.length-1?RISE:BG,stroke:RISE,"stroke-width":i===data.length-1?2.5:1.5,class:"trend-point"});c.style.transitionDelay=(i*0.04)+"s";
     c.style.cursor="pointer";
