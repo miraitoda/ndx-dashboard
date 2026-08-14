@@ -604,7 +604,7 @@ section{padding:60px 0}
   100% { transform: translate(-1%,-1%) scale(1); }
 }
 
-/* ===== Glitch 文字切换效果（抖动时闪绿/紫，跟随涨跌） ===== */
+/* ===== Glitch 文字切换效果（抖动时闪绿/紫，颜色与数字相反） ===== */
 .glitch-word {
   display: inline-block;
   position: relative;
@@ -743,7 +743,7 @@ section{padding:60px 0}
         </div>
         <div>
           <div class="kpi-label">UP/DOWN</div>
-          <div class="kpi-value" id="upDownContainer"><span style="color:var(--rise)" id="idxUp">--</span><span style="color:var(--text3);font-size:28px">/</span><span style="color:var(--fall)" id="idxDown">--</span></div>
+          <div class="kpi-value" id="upDownContainer"><span id="idxUp">--</span><span style="color:var(--text3);font-size:28px">/</span><span id="idxDown">--</span></div>
           <div class="kpi-sub"><span id="stockCount">--</span> components</div>
         </div>
       </div>
@@ -1084,9 +1084,13 @@ function renderSummary(containerId, textId, footerId, text, isApi) {
     document.getElementById("trendRange").textContent = "数据暂缺";
   }
 
-  // UP/DOWN 滚动（从0滚动到实际值）
-  rollNumber(document.getElementById("idxUp"), 0, idx.up, 2000);
-  rollNumber(document.getElementById("idxDown"), 0, idx.down, 2000);
+  // UP/DOWN 滚动（从0滚动到实际值），并设置颜色
+  const upEl = document.getElementById("idxUp");
+  const downEl = document.getElementById("idxDown");
+  upEl.style.color = 'var(--rise)';
+  downEl.style.color = 'var(--fall)';
+  rollNumber(upEl, 0, idx.up, 2000);
+  rollNumber(downEl, 0, idx.down, 2000);
   document.getElementById("stockCount").textContent = idx.total;
 })();
 
@@ -1353,7 +1357,7 @@ function toggleTheme(){
   }
 }
 
-// ===== Glitch 标题切换（抖动时闪绿/紫，跟随涨跌，支持主题切换） =====
+// ===== Glitch 标题切换（颜色与数字相反） =====
 (function() {
   const el = document.getElementById('glitchTitle');
   if (!el) return;
@@ -1365,17 +1369,19 @@ function toggleTheme(){
   const change = DATA.index.change || 0;
   const isUp = change >= 0;
   
-  // 设置伪元素的颜色（跟随涨跌）
+  // 设置伪元素的颜色（与数字相反）
   function setGlitchColors() {
     const computed = getComputedStyle(document.documentElement);
     const riseColor = computed.getPropertyValue('--rise').trim();
     const fallColor = computed.getPropertyValue('--fall').trim();
     if (isUp) {
-      el.style.setProperty('--glitch-color1', riseColor + 'cc');
-      el.style.setProperty('--glitch-color2', riseColor + '99');
-    } else {
+      // 涨 -> Glitch 闪紫色
       el.style.setProperty('--glitch-color1', fallColor + 'cc');
       el.style.setProperty('--glitch-color2', fallColor + '99');
+    } else {
+      // 跌 -> Glitch 闪绿色
+      el.style.setProperty('--glitch-color1', riseColor + 'cc');
+      el.style.setProperty('--glitch-color2', riseColor + '99');
     }
   }
   setGlitchColors();
@@ -1419,72 +1425,75 @@ function toggleTheme(){
 
 // Odometer 数字滚动：从 fromValue 逐位翻滚到 toValue
 function rollNumber(el, fromValue, toValue, duration){
-  const toStr=toValue.toLocaleString("en-US",{minimumFractionDigits:1,maximumFractionDigits:1});
-  const fromStr=fromValue.toLocaleString("en-US",{minimumFractionDigits:1,maximumFractionDigits:1});
+  // 将数字转为字符串，统一用 0 补齐位数（修复 UP 滚动问题）
+  const toStr = toValue.toLocaleString("en-US", {minimumFractionDigits: 1, maximumFractionDigits: 1});
+  const fromStr = fromValue.toLocaleString("en-US", {minimumFractionDigits: 1, maximumFractionDigits: 1});
+  const maxLen = Math.max(toStr.length, fromStr.length);
+  // 关键修改：用 '0' 填充，保证所有位都是数字，都会滚动
+  const toPadded = toStr.padStart(maxLen, '0');
+  const fromPadded = fromStr.padStart(maxLen, '0');
 
-  const maxLen=Math.max(toStr.length,fromStr.length);
-  const toPadded=toStr.padStart(maxLen,' ');
-  const fromPadded=fromStr.padStart(maxLen,' ');
+  el.innerHTML = "";
+  el.style.display = "inline-flex";
+  el.style.alignItems = "flex-end";
 
-  el.innerHTML="";
-  el.style.display="inline-flex";
-  el.style.alignItems="flex-end";
+  const digits = [];
 
-  const digits=[];
+  for (let i = 0; i < maxLen; i++) {
+    const fromCh = fromPadded[i];
+    const toCh = toPadded[i];
 
-  for(let i=0;i<maxLen;i++){
-    const fromCh=fromPadded[i];
-    const toCh=toPadded[i];
-
-    if(fromCh===","||fromCh==="."||fromCh===" "){
-      const span=document.createElement("span");
-      span.textContent=toCh;
-      span.style.display="inline-block";
+    if (fromCh === "," || fromCh === ".") {
+      // 逗号和点保持不变
+      const span = document.createElement("span");
+      span.textContent = toCh;
+      span.style.display = "inline-block";
       el.appendChild(span);
-    }else{
-      const fromNum=parseInt(fromCh);
-      const toNum=parseInt(toCh);
+    } else {
+      const fromNum = parseInt(fromCh);
+      const toNum = parseInt(toCh);
 
-      const wrap=document.createElement("span");
-      wrap.style.display="inline-block";
-      wrap.style.overflow="hidden";
-      wrap.style.height="1em";
-      wrap.style.lineHeight="1em";
-      wrap.style.verticalAlign="bottom";
+      const wrap = document.createElement("span");
+      wrap.style.display = "inline-block";
+      wrap.style.overflow = "hidden";
+      wrap.style.height = "1em";
+      wrap.style.lineHeight = "1em";
+      wrap.style.verticalAlign = "bottom";
 
-      const strip=document.createElement("span");
-      strip.style.display="flex";
-      strip.style.flexDirection="column";
+      const strip = document.createElement("span");
+      strip.style.display = "flex";
+      strip.style.flexDirection = "column";
 
-      let seq=[];
-      let n=fromNum;
-      while(true){
+      // 构建滚动序列：从 fromNum 到 toNum（包括所有中间值）
+      let seq = [];
+      let n = fromNum;
+      while (true) {
         seq.push(n);
-        if(n===toNum) break;
-        n=(n+1)%10;
+        if (n === toNum) break;
+        n = (n + 1) % 10;
       }
 
-      seq.forEach(num=>{
-        const d=document.createElement("span");
-        d.textContent=num;
-        d.style.display="block";
-        d.style.height="1em";
-        d.style.lineHeight="1em";
+      seq.forEach(num => {
+        const d = document.createElement("span");
+        d.textContent = num;
+        d.style.display = "block";
+        d.style.height = "1em";
+        d.style.lineHeight = "1em";
         strip.appendChild(d);
       });
 
       wrap.appendChild(strip);
       el.appendChild(wrap);
-      digits.push({strip,count:seq.length,delay:i*70,duration:duration});
+      digits.push({ strip, count: seq.length, delay: i * 70, duration: duration });
     }
   }
 
-  requestAnimationFrame(()=>{
-    digits.forEach(({strip,count,delay,duration})=>{
-      strip.style.transition=`transform ${duration}ms cubic-bezier(0.25,1,0.5,1)`;
-      setTimeout(()=>{
-        strip.style.transform=`translateY(-${count-1}em)`;
-      },delay);
+  requestAnimationFrame(() => {
+    digits.forEach(({ strip, count, delay, duration }) => {
+      strip.style.transition = `transform ${duration}ms cubic-bezier(0.25, 1, 0.5, 1)`;
+      setTimeout(() => {
+        strip.style.transform = `translateY(-${count - 1}em)`;
+      }, delay);
     });
   });
 }
