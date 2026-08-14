@@ -1509,8 +1509,8 @@ if (heroTitle) {
       // 添加 immersive 类，隐藏 container 中除 .hero 外的其他内容
       if (container) container.classList.add('immersive');
       
-      // 标题放大至 240px，并轻微缩放
-      heroTitle.style.fontSize = '240px';
+      // 标题放大至 160px，并轻微缩放
+      heroTitle.style.fontSize = '160px';
       heroTitle.style.transform = 'scale(1.05)';
       heroTitle.classList.add('giant-mode');
       
