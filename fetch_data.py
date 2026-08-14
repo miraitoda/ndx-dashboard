@@ -641,16 +641,25 @@ section{padding:60px 0}
         </div>
       </div>
       <div class="hero-kpis">
+        <!-- 盘前 -->
+        <div id="preMarketBlock">
+          <div class="kpi-label">盘前</div>
+          <div class="kpi-value" id="prePrice">--</div>
+          <div class="kpi-change" id="preChange">--</div>
+        </div>
+        <!-- INDEX -->
         <div>
           <div class="kpi-label">INDEX</div>
           <div class="kpi-value" id="idxPrice">--</div>
           <div class="kpi-change up" id="idxChange">--</div>
         </div>
+        <!-- 30D -->
         <div>
           <div class="kpi-label">30D</div>
           <div class="kpi-change up" id="trend30d">--</div>
           <div class="kpi-sub" id="trendRange">--</div>
         </div>
+        <!-- UP/DOWN -->
         <div>
           <div class="kpi-label">UP/DOWN</div>
           <div class="kpi-value"><span style="color:var(--rise)" id="idxUp">--</span><span style="color:var(--text3);font-size:28px">/</span><span style="color:var(--fall)" id="idxDown">--</span></div>
@@ -1121,7 +1130,9 @@ function getMarketStatus(){
     item.innerHTML='<span class="pie-legend-dot" style="background:'+colorForChange(d.change)+'"></span>'+d.name+" "+d.weight+"%";
     leg.appendChild(item);
   });
-})();// 行情条
+})();
+
+// 行情条
 (function(){
   const topStocks=DATA.stocks.slice().sort((a,b)=>Math.abs(b.change)-Math.abs(a.change));
   const bottomStocks=DATA.stocks.slice().sort(()=>Math.random()-0.5);
@@ -1281,6 +1292,72 @@ function hideTip(){tip.style.opacity="0"}
     const el = document.getElementById(id);
     if (el) observer.observe(el);
   });
+})();
+
+// 获取纳指100盘前指数 (^QMI) —— 非盘前时段显示 "----"
+(function fetchPreMarket() {
+  const prePriceEl = document.getElementById('prePrice');
+  const preChangeEl = document.getElementById('preChange');
+
+  if (!prePriceEl || !preChangeEl) return;
+
+  prePriceEl.textContent = '...';
+  preChangeEl.textContent = '加载中';
+
+  function isPreMarket() {
+    const now = new Date();
+    const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+    const beijing = new Date(utc + 8 * 3600000);
+    const day = beijing.getDay();
+    if (day === 0 || day === 6) return false;
+    const year = beijing.getFullYear();
+    const dstStart = new Date(year, 2, 14 - new Date(year, 2, 1).getDay());
+    const dstEnd = new Date(year, 10, 7 - new Date(year, 10, 1).getDay());
+    const isDST = beijing >= dstStart && beijing < dstEnd;
+    const hour = beijing.getHours(), minute = beijing.getMinutes();
+    const timeVal = hour + minute / 60;
+    const offset = isDST ? 12 : 13;
+    const usTime = timeVal - offset;
+    return usTime >= 4 && usTime < 9.5;
+  }
+
+  if (!isPreMarket()) {
+    prePriceEl.textContent = '----';
+    preChangeEl.textContent = '----';
+    preChangeEl.className = 'kpi-change';
+    return;
+  }
+
+  fetch('https://query1.finance.yahoo.com/v8/finance/chart/%5EQMI?interval=1d&range=1d')
+    .then(res => {
+      if (!res.ok) throw new Error('网络错误');
+      return res.json();
+    })
+    .then(data => {
+      const result = data.chart.result[0];
+      const meta = result.meta;
+      const price = meta.regularMarketPrice;
+      const prevClose = meta.previousClose;
+
+      if (price && prevClose && price !== prevClose) {
+        const change = ((price - prevClose) / prevClose * 100);
+        const diff = price - prevClose;
+        prePriceEl.textContent = price.toFixed(2);
+        const sign = change >= 0 ? '▲ +' : '▼ ';
+        preChangeEl.textContent = sign + change.toFixed(2) + '% (' + (diff >= 0 ? '+' : '') + diff.toFixed(2) + ')';
+        preChangeEl.className = 'kpi-change ' + (change >= 0 ? 'up' : 'down');
+      } else {
+        prePriceEl.textContent = '----';
+        preChangeEl.textContent = '无数据';
+        preChangeEl.className = 'kpi-change';
+      }
+    })
+    .catch(err => {
+      console.warn('获取盘前指数失败:', err);
+      prePriceEl.textContent = '----';
+      preChangeEl.textContent = '加载失败';
+      preChangeEl.className = 'kpi-change';
+    });
 })();
 
 </script>
