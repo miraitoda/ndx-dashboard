@@ -27,7 +27,7 @@ def ensure_dir():
 SILICONFLOW_API_KEY = os.environ.get("SILICONFLOW_API_KEY", "your-api-key-here")
 SILICONFLOW_BASE_URL = os.environ.get("SILICONFLOW_BASE_URL", "https://api.siliconflow.cn/v1/chat/completions")
 SILICONFLOW_MODEL = os.environ.get("SILICONFLOW_MODEL", "Qwen/Qwen3-8B")
-SILICONFLOW_TIMEOUT = 10  # 超时秒数，给免费GPU充分的排队时间
+SILICONFLOW_TIMEOUT = 180  # 超时秒数，给免费GPU充分的排队时间
 
 
 def fetch_stock_data(tickers, max_batch=25):
@@ -610,6 +610,90 @@ section{padding:60px 0}
   100% { transform: translate(-1%,-1%) scale(1); }
 }
 
+/* ===== Glitch 文字切换效果 ===== */
+.glitch-word {
+  display: inline-block;
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+@keyframes glitch-skew {
+  0% { transform: skew(0deg); opacity: 1; }
+  10% { transform: skew(2deg); opacity: 0.8; }
+  20% { transform: skew(-3deg); opacity: 1; }
+  30% { transform: skew(1deg); opacity: 0.9; }
+  40% { transform: skew(-1deg); opacity: 1; }
+  50% { transform: skew(0deg); opacity: 1; }
+  100% { transform: skew(0deg); opacity: 1; }
+}
+
+@keyframes glitch-rgb {
+  0% { text-shadow: 2px 0 rgba(255,0,0,0.4), -2px 0 rgba(0,255,255,0.4); }
+  20% { text-shadow: -3px 0 rgba(255,0,0,0.6), 3px 0 rgba(0,255,255,0.6); }
+  40% { text-shadow: 2px 0 rgba(255,255,0,0.5), -2px 0 rgba(0,0,255,0.5); }
+  60% { text-shadow: -2px 0 rgba(255,0,255,0.5), 2px 0 rgba(0,255,0,0.5); }
+  80% { text-shadow: 3px 0 rgba(255,0,0,0.4), -3px 0 rgba(0,255,255,0.4); }
+  100% { text-shadow: 0 0 rgba(255,0,0,0), 0 0 rgba(0,255,255,0); }
+}
+
+@keyframes glitch-flicker {
+  0%, 100% { opacity: 1; }
+  15% { opacity: 0.1; }
+  30% { opacity: 1; }
+  45% { opacity: 0.3; }
+  60% { opacity: 1; }
+  75% { opacity: 0.1; }
+  90% { opacity: 1; }
+}
+
+.glitch-word.switching {
+  animation: glitch-skew 0.6s ease-in-out,
+             glitch-rgb 0.6s ease-in-out,
+             glitch-flicker 0.6s ease-in-out;
+}
+
+.glitch-word::before,
+.glitch-word::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.glitch-word.switching::before {
+  opacity: 1;
+  animation: glitch-offset1 0.4s ease-in-out;
+  color: rgba(255,0,0,0.7);
+  clip-path: inset(20% 0 60% 0);
+}
+
+.glitch-word.switching::after {
+  opacity: 1;
+  animation: glitch-offset2 0.5s ease-in-out;
+  color: rgba(0,255,255,0.7);
+  clip-path: inset(60% 0 10% 0);
+}
+
+@keyframes glitch-offset1 {
+  0% { transform: translate(0); }
+  20% { transform: translate(-4px, 2px); }
+  40% { transform: translate(3px, -3px); }
+  60% { transform: translate(-2px, 1px); }
+  80% { transform: translate(2px, -1px); }
+  100% { transform: translate(0); opacity: 0; }
+}
+
+@keyframes glitch-offset2 {
+  0% { transform: translate(0); }
+  25% { transform: translate(3px, -2px); }
+  50% { transform: translate(-5px, 3px); }
+  75% { transform: translate(2px, -2px); }
+  100% { transform: translate(0); opacity: 0; }
+}
 </style></head><body>
 
 <div id="app">
@@ -652,7 +736,11 @@ section{padding:60px 0}
     <div class="hero-inner">
       <div class="hero-left">
         <div class="hero-tag"><span class="hero-tag-dot"></span><span class="hero-tag-text">NASDAQ-100</span></div>
-        <h1 class="hero-title">纳斯达克<br><span class="hero-accent">100</span></h1>
+        <h1 class="hero-title">
+          <span class="glitch-word" id="glitchTitle" data-text="纳斯达克100">纳斯达克100</span>
+          <br>
+          <span class="hero-accent" style="font-size:0.6em;">NASDAQ-100</span>
+        </h1>
         <div class="hero-meta">
           <span class="hero-date" id="dateStr"></span>
           <span class="hero-dot"></span>
@@ -852,14 +940,12 @@ function getMarketStatus(){
 
 // 带颜色的数字高亮
 function highlightNumbers(text) {
-  // 匹配带正负号的百分数，如 +1.15%、-0.60%
   text = text.replace(/([+-]?\d+\.?\d*%)/g, function(match) {
     var num = parseFloat(match);
     if (num > 0) return '<span class="up">' + match + '</span>';
     else if (num < 0) return '<span class="down">' + match + '</span>';
     return match;
   });
-  // 匹配带正负号的纯数字（不带%），如 +8.36、-0.80，但排除已经在%里的
   text = text.replace(/([+-]?\d+\.?\d*)(?![%\d])/g, function(match) {
     var num = parseFloat(match);
     if (num > 0) return '<span class="up">' + match + '</span>';
@@ -900,14 +986,13 @@ function renderSummary(containerId, textId, footerId, text, isApi) {
   
   if (footerEl) {
     if (isApi) {
-      footerEl.textContent = 'BRIEF POWERED BY QWEN';
+      footerEl.textContent = 'Brief powered by QWEN';
     } else {
       footerEl.textContent = '';
     }
   }
   
   if (textEl) {
-    // 先高亮数字，再打字机输出
     var highlighted = highlightNumbers(text);
     textEl._fullHtml = highlighted;
     typeWriter(textEl, highlighted, null, 20);
@@ -1139,7 +1224,6 @@ function rollKPI(elementId, target, duration) {
     cells.push(cell);
   });
   
-  // 使用 IntersectionObserver 触发逐个出现
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -1284,6 +1368,46 @@ function toggleTheme(){
     if(btn)btn.textContent="夜间模式";
   }
 }
+
+// ===== Glitch 标题切换 =====
+(function() {
+  const el = document.getElementById('glitchTitle');
+  if (!el) return;
+  
+  const words = ['纳斯达克100', 'NDX'];
+  let currentIndex = 0;
+  let isSwitching = false;
+  
+  const change = DATA.index.change || 0;
+  const ndxColor = change >= 0 ? 'var(--rise)' : 'var(--fall)';
+  
+  function switchWord() {
+    if (isSwitching) return;
+    isSwitching = true;
+    
+    el.classList.add('switching');
+    
+    setTimeout(() => {
+      currentIndex = (currentIndex + 1) % words.length;
+      const newText = words[currentIndex];
+      el.textContent = newText;
+      el.setAttribute('data-text', newText);
+      
+      if (newText === 'NDX') {
+        el.style.color = ndxColor;
+      } else {
+        el.style.color = '';
+      }
+    }, 300);
+    
+    setTimeout(() => {
+      el.classList.remove('switching');
+      isSwitching = false;
+    }, 700);
+  }
+  
+  setInterval(switchWord, 3000);
+})();
 
 
 // Odometer 数字滚动：从 fromValue 逐位翻滚到 toValue
