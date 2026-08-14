@@ -27,7 +27,7 @@ def ensure_dir():
 SILICONFLOW_API_KEY = os.environ.get("SILICONFLOW_API_KEY", "your-api-key-here")
 SILICONFLOW_BASE_URL = os.environ.get("SILICONFLOW_BASE_URL", "https://api.siliconflow.cn/v1/chat/completions")
 SILICONFLOW_MODEL = os.environ.get("SILICONFLOW_MODEL", "Qwen/Qwen3-8B")
-SILICONFLOW_TIMEOUT = 180
+SILICONFLOW_TIMEOUT = 5
 
 
 def fetch_stock_data(tickers, max_batch=25):
@@ -891,6 +891,15 @@ section{padding:60px 0}
 
 </div>
 
+<!-- IDLE OVERLAY -->
+<div id="idleOverlay" style="position:fixed; inset:0; z-index:50; display:none; background:transparent; justify-content:center; align-items:center; flex-direction:column; pointer-events:none;">
+  <h1 class="hero-title" style="font-size:80px; text-align:center; line-height:1.2; margin:0;" id="idleGlitchTitle">
+    <span class="glitch-word" data-text="纳斯达克100">纳斯达克100</span>
+    <br>
+    <span class="hero-accent" style="font-size:0.6em;">NASDAQ-100</span>
+  </h1>
+</div>
+
 <!-- BOTTOM TICKER -->
 <div class="ticker-bar ticker-bar-bottom">
   <div class="ticker-grid"><svg><rect width="100%" height="100%" fill="url(#dotGrid)"/></svg></div>
@@ -918,7 +927,7 @@ const IS_API = __IS_API__;
 function colorForChange(c){ return c >= 0 ? 'var(--rise)' : 'var(--fall)'; }
 function fmtPct(c){return(c>=0?"▲ +":"▼ ")+c.toFixed(2)+"%"}
 function fmtPctRaw(c){return(c>=0?"+":"")+c.toFixed(2)+"%"}
-function svgEl(tag,attrs){const el=document.createElementNS("http://www.w3.org/2000/svg",tag);for(let k in attrs)el.setAttribute(k,attrs[k]);return el}
+function svgEl(tag,attrs){const el=document.createElementNS("http://www.w3.org/2000/svg","svg");for(let k in attrs)el.setAttribute(k,attrs[k]);return el}
 
 const HISTORY_DATES = __HISTORY_DATES__;
 const IS_HISTORY = __IS_HISTORY__;
@@ -1006,7 +1015,7 @@ function renderSummary(containerId, textId, footerId, text, isApi) {
   
   if (footerEl) {
     if (isApi) {
-      footerEl.textContent = 'EDITED BY QWEN';
+      footerEl.textContent = 'BRIEF POWERED BY QWEN';
     } else {
       footerEl.textContent = '';
     }
@@ -1029,7 +1038,7 @@ function renderSummary(containerId, textId, footerId, text, isApi) {
   const isHistory = path.includes("/history/");
   let currentDate;
   if (isHistory) {
-    const m = path.match(/history\/(\d{4}-\d{2}-\d{2})/);
+    const m = path.match(/history\/(\\d{4}-\\d{2}-\\d{2})/);
     currentDate = m ? m[1] : DATA.date;
     if (btnToday) {
       btnToday.style.display = "inline-block";
@@ -1394,50 +1403,61 @@ function toggleTheme(){
   }
 }
 
-// ===== Glitch 标题切换（颜色与数字相反） =====
-(function() {
-  const el = document.getElementById('glitchTitle');
-  if (!el) return;
-  
+// ===== Glitch 引擎（可复用） =====
+window.glitchElements = [];
+let glitchIntervals = {};
+
+function updateGlitchColors() {
+  const computed = getComputedStyle(document.documentElement);
+  const riseColor = computed.getPropertyValue('--rise').trim();
+  const fallColor = computed.getPropertyValue('--fall').trim();
+  const change = DATA.index.change || 0;
+  const isUp = change >= 0;
+  window.glitchElements.forEach(el => {
+    el.style.setProperty('--glitch-color1', isUp ? (fallColor + 'cc') : (riseColor + 'cc'));
+    el.style.setProperty('--glitch-color2', isUp ? (fallColor + '99') : (riseColor + '99'));
+  });
+}
+
+function startGlitch(el) {
+  if (!el) return null;
+  // 若已存在则先停止
+  if (el._glitchInterval) {
+    clearInterval(el._glitchInterval);
+    delete el._glitchInterval;
+  }
+  // 加入全局列表（去重）
+  if (!window.glitchElements.includes(el)) {
+    window.glitchElements.push(el);
+  }
+
   const words = ['纳斯达克100', 'NDX'];
   let currentIndex = 0;
   let isSwitching = false;
-  
   const change = DATA.index.change || 0;
   const isUp = change >= 0;
-  
-  // 设置伪元素的颜色（与数字相反）
-  function setGlitchColors() {
-    const computed = getComputedStyle(document.documentElement);
-    const riseColor = computed.getPropertyValue('--rise').trim();
-    const fallColor = computed.getPropertyValue('--fall').trim();
-    if (isUp) {
-      // 涨 -> Glitch 闪紫色
-      el.style.setProperty('--glitch-color1', fallColor + 'cc');
-      el.style.setProperty('--glitch-color2', fallColor + '99');
-    } else {
-      // 跌 -> Glitch 闪绿色
-      el.style.setProperty('--glitch-color1', riseColor + 'cc');
-      el.style.setProperty('--glitch-color2', riseColor + '99');
-    }
-  }
-  setGlitchColors();
-  
-  // 暴露给全局，供主题切换调用
-  window.updateGlitchColors = setGlitchColors;
-  
   const ndxColor = isUp ? 'var(--rise)' : 'var(--fall)';
-  
+
+  function setInitialContent() {
+    const first = words[0];
+    if (first === 'NDX') {
+      el.innerHTML = 'ND<span style="color:' + ndxColor + '">X</span>';
+    } else if (first === '纳斯达克100') {
+      el.innerHTML = '纳斯达克<span style="color:' + ndxColor + '">100</span>';
+    } else {
+      el.textContent = first;
+    }
+    el.setAttribute('data-text', first);
+    el.style.color = '';
+  }
+
   function switchWord() {
     if (isSwitching) return;
     isSwitching = true;
-    
     el.classList.add('switching');
-    
     setTimeout(() => {
       currentIndex = (currentIndex + 1) % words.length;
       const newText = words[currentIndex];
-      
       if (newText === 'NDX') {
         el.innerHTML = 'ND<span style="color:' + ndxColor + '">X</span>';
       } else if (newText === '纳斯达克100') {
@@ -1445,22 +1465,97 @@ function toggleTheme(){
       } else {
         el.textContent = newText;
       }
-      
       el.setAttribute('data-text', newText);
       el.style.color = '';
     }, 300);
-    
     setTimeout(() => {
       el.classList.remove('switching');
       isSwitching = false;
     }, 700);
   }
-  
-  setInterval(switchWord, 3000);
-})();
 
+  setInitialContent();
+  updateGlitchColors();
+  const intervalId = setInterval(switchWord, 3000);
+  el._glitchInterval = intervalId;
+  return intervalId;
+}
 
-// Odometer 数字滚动：从 fromValue 逐位翻滚到 toValue
+function stopGlitch(el) {
+  if (el && el._glitchInterval) {
+    clearInterval(el._glitchInterval);
+    delete el._glitchInterval;
+    const idx = window.glitchElements.indexOf(el);
+    if (idx > -1) window.glitchElements.splice(idx, 1);
+  }
+}
+
+// 启动主标题 glitch
+const mainTitleEl = document.getElementById('glitchTitle');
+if (mainTitleEl) startGlitch(mainTitleEl);
+
+// 主题切换时更新 glitch 颜色（原有 toggleTheme 中已调用 updateGlitchColors）
+window.updateGlitchColors = updateGlitchColors;
+
+// ===== 空闲超时（60秒无滚动） =====
+let idleTimer = null;
+let idleGlitchInterval = null;
+const idleOverlay = document.getElementById('idleOverlay');
+const container = document.querySelector('.container');
+const idleTitleEl = document.getElementById('idleGlitchTitle');
+
+function showIdleOverlay() {
+  if (!container || !idleOverlay) return;
+  container.style.display = 'none';
+  idleOverlay.style.display = 'flex';
+  // 启动 overlay 的 glitch
+  if (idleTitleEl) {
+    idleGlitchInterval = startGlitch(idleTitleEl);
+  }
+}
+
+function hideIdleOverlay() {
+  if (!container || !idleOverlay) return;
+  idleOverlay.style.display = 'none';
+  container.style.display = 'block';
+  if (idleTitleEl) {
+    stopGlitch(idleTitleEl);
+    idleGlitchInterval = null;
+  }
+  // 重置计时器
+  resetIdleTimer();
+}
+
+function resetIdleTimer() {
+  // 如果 overlay 正显示，立即隐藏
+  if (idleOverlay && idleOverlay.style.display === 'flex') {
+    hideIdleOverlay();
+  }
+  if (idleTimer) clearTimeout(idleTimer);
+  idleTimer = setTimeout(showIdleOverlay, 60000);
+}
+
+// 监听滚动事件（重置计时器）
+let scrollListenerActive = false;
+window.addEventListener('scroll', function() {
+  if (!scrollListenerActive) {
+    scrollListenerActive = true;
+    requestAnimationFrame(() => {
+      resetIdleTimer();
+      scrollListenerActive = false;
+    });
+  }
+});
+
+// 页面加载时启动计时器
+resetIdleTimer();
+
+// 页面可见性变化时重新计时（避免切后台导致误触发）
+document.addEventListener('visibilitychange', function() {
+  if (!document.hidden) resetIdleTimer();
+});
+
+// 原有的 rollNumber 函数（保留）
 function rollNumber(el, fromValue, toValue, duration){
   // 将数字转为字符串，统一用 0 补齐位数（修复 UP 滚动问题）
   const toStr = toValue.toLocaleString("en-US", {minimumFractionDigits: 1, maximumFractionDigits: 1});
