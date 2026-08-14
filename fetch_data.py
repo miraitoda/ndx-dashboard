@@ -891,12 +891,12 @@ section{padding:60px 0}
 
 </div>
 
-<!-- IDLE OVERLAY -->
+<!-- ===== IDLE OVERLAY（修正版） ===== -->
 <div id="idleOverlay" style="position:fixed; inset:0; z-index:50; display:none; background:transparent; justify-content:center; align-items:center; flex-direction:column; pointer-events:none;">
-  <h1 class="hero-title" style="font-size:80px; text-align:center; line-height:1.2; margin:0;" id="idleGlitchTitle">
-    <span class="glitch-word" data-text="纳斯达克100">纳斯达克100</span>
+  <h1 style="font-size:150px; text-align:center; line-height:1.2; margin:0; font-weight:900; letter-spacing:-6px; color:var(--text);">
+    <span class="glitch-word" id="idleGlitchWord" data-text="纳斯达克100">纳斯达克100</span>
     <br>
-    <span class="hero-accent" style="font-size:0.6em;">NASDAQ-100</span>
+    <span style="font-size:0.6em; color:var(--accent);">NASDAQ-100</span>
   </h1>
 </div>
 
@@ -1494,23 +1494,21 @@ function stopGlitch(el) {
 const mainTitleEl = document.getElementById('glitchTitle');
 if (mainTitleEl) startGlitch(mainTitleEl);
 
-// 主题切换时更新 glitch 颜色（原有 toggleTheme 中已调用 updateGlitchColors）
 window.updateGlitchColors = updateGlitchColors;
 
-// ===== 空闲超时（60秒无滚动） =====
+// ===== 空闲超时（60秒无滚动） - 修正版 =====
 let idleTimer = null;
-let idleGlitchInterval = null;
 const idleOverlay = document.getElementById('idleOverlay');
 const container = document.querySelector('.container');
-const idleTitleEl = document.getElementById('idleGlitchTitle');
+const idleGlitchWord = document.getElementById('idleGlitchWord');
 
 function showIdleOverlay() {
   if (!container || !idleOverlay) return;
   container.style.display = 'none';
   idleOverlay.style.display = 'flex';
-  // 启动 overlay 的 glitch
-  if (idleTitleEl) {
-    idleGlitchInterval = startGlitch(idleTitleEl);
+  // 启动 idle 的 glitch
+  if (idleGlitchWord) {
+    startGlitch(idleGlitchWord);
   }
 }
 
@@ -1518,21 +1516,21 @@ function hideIdleOverlay() {
   if (!container || !idleOverlay) return;
   idleOverlay.style.display = 'none';
   container.style.display = 'block';
-  if (idleTitleEl) {
-    stopGlitch(idleTitleEl);
-    idleGlitchInterval = null;
+  // 停止 idle 的 glitch
+  if (idleGlitchWord) {
+    stopGlitch(idleGlitchWord);
   }
-  // 重置计时器
-  resetIdleTimer();
+  // 注意：不再调用 resetIdleTimer，由调用方决定是否重置
 }
 
 function resetIdleTimer() {
-  // 如果 overlay 正显示，立即隐藏
+  // 如果 overlay 正在显示，先隐藏（用户有动作）
   if (idleOverlay && idleOverlay.style.display === 'flex') {
     hideIdleOverlay();
   }
+  // 清除旧定时器，创建新定时器
   if (idleTimer) clearTimeout(idleTimer);
-  idleTimer = setTimeout(showIdleOverlay, 60000);
+  idleTimer = setTimeout(showIdleOverlay, 10000);
 }
 
 // 监听滚动事件（重置计时器）
@@ -1555,13 +1553,11 @@ document.addEventListener('visibilitychange', function() {
   if (!document.hidden) resetIdleTimer();
 });
 
-// 原有的 rollNumber 函数（保留）
+// 原有的 rollNumber 函数
 function rollNumber(el, fromValue, toValue, duration){
-  // 将数字转为字符串，统一用 0 补齐位数（修复 UP 滚动问题）
   const toStr = toValue.toLocaleString("en-US", {minimumFractionDigits: 1, maximumFractionDigits: 1});
   const fromStr = fromValue.toLocaleString("en-US", {minimumFractionDigits: 1, maximumFractionDigits: 1});
   const maxLen = Math.max(toStr.length, fromStr.length);
-  // 关键修改：用 '0' 填充，保证所有位都是数字，都会滚动
   const toPadded = toStr.padStart(maxLen, '0');
   const fromPadded = fromStr.padStart(maxLen, '0');
 
@@ -1576,7 +1572,6 @@ function rollNumber(el, fromValue, toValue, duration){
     const toCh = toPadded[i];
 
     if (fromCh === "," || fromCh === ".") {
-      // 逗号和点保持不变
       const span = document.createElement("span");
       span.textContent = toCh;
       span.style.display = "inline-block";
@@ -1596,7 +1591,6 @@ function rollNumber(el, fromValue, toValue, duration){
       strip.style.display = "flex";
       strip.style.flexDirection = "column";
 
-      // 构建滚动序列：从 fromNum 到 toNum（包括所有中间值）
       let seq = [];
       let n = fromNum;
       while (true) {
