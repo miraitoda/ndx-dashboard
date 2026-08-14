@@ -641,25 +641,16 @@ section{padding:60px 0}
         </div>
       </div>
       <div class="hero-kpis">
-        <!-- 盘前 -->
-        <div id="preMarketBlock">
-          <div class="kpi-label">盘前</div>
-          <div class="kpi-value" id="prePrice">--</div>
-          <div class="kpi-change" id="preChange">--</div>
-        </div>
-        <!-- INDEX -->
         <div>
           <div class="kpi-label">INDEX</div>
           <div class="kpi-value" id="idxPrice">--</div>
           <div class="kpi-change up" id="idxChange">--</div>
         </div>
-        <!-- 30D -->
         <div>
           <div class="kpi-label">30D</div>
           <div class="kpi-change up" id="trend30d">--</div>
           <div class="kpi-sub" id="trendRange">--</div>
         </div>
-        <!-- UP/DOWN -->
         <div>
           <div class="kpi-label">UP/DOWN</div>
           <div class="kpi-value"><span style="color:var(--rise)" id="idxUp">--</span><span style="color:var(--text3);font-size:28px">/</span><span style="color:var(--fall)" id="idxDown">--</span></div>
@@ -1130,9 +1121,7 @@ function getMarketStatus(){
     item.innerHTML='<span class="pie-legend-dot" style="background:'+colorForChange(d.change)+'"></span>'+d.name+" "+d.weight+"%";
     leg.appendChild(item);
   });
-})();
-
-// 行情条
+})();// 行情条
 (function(){
   const topStocks=DATA.stocks.slice().sort((a,b)=>Math.abs(b.change)-Math.abs(a.change));
   const bottomStocks=DATA.stocks.slice().sort(()=>Math.random()-0.5);
@@ -1292,93 +1281,6 @@ function hideTip(){tip.style.opacity="0"}
     const el = document.getElementById(id);
     if (el) observer.observe(el);
   });
-})();
-
-// 获取纳指100盘前指数 (^QMI) —— 优化版
-(function fetchPreMarket() {
-  const prePriceEl = document.getElementById('prePrice');
-  const preChangeEl = document.getElementById('preChange');
-
-  if (!prePriceEl || !preChangeEl) return;
-
-  // 更友好的加载状态
-  prePriceEl.textContent = '--';
-  preChangeEl.textContent = '加载...';
-  preChangeEl.className = 'kpi-change';
-
-  // 1. 判断是否在盘前时段（美东时间 4:00-9:30，仅交易日）
-  function isPreMarket() {
-    const now = new Date();
-    // 获取美东时间（UTC-4 夏令时，UTC-5 冬令时）
-    // 简单方式：直接获取 UTC 小时，然后根据美国夏令时规则调整
-    const utcHours = now.getUTCHours();
-    const utcMinutes = now.getUTCMinutes();
-    const utcDay = now.getUTCDay(); // 0=周日
-
-    // 周末不显示
-    if (utcDay === 0 || utcDay === 6) return false;
-
-    // 判断是否夏令时（美国夏令时：3月第二个周日到11月第一个周日）
-    const year = now.getUTCFullYear();
-    const dstStart = new Date(Date.UTC(year, 2, 14 - new Date(Date.UTC(year, 2, 1)).getUTCDay() + 7));
-    const dstEnd = new Date(Date.UTC(year, 10, 7 - new Date(Date.UTC(year, 10, 1)).getUTCDay() + 7));
-    const isDST = now >= dstStart && now < dstEnd;
-    const offset = isDST ? 4 : 5; // 夏令时 UTC-4，冬令时 UTC-5
-
-    // 美东时间（小时+分钟）
-    let usHours = utcHours - offset;
-    if (usHours < 0) usHours += 24;
-    const usMinutes = utcMinutes;
-    const usTime = usHours + usMinutes / 60;
-
-    // 盘前：4:00 - 9:30
-    return usTime >= 4 && usTime < 9.5;
-  }
-
-  // 2. 如果不在盘前时段，直接显示“盘前休市”
-  if (!isPreMarket()) {
-    prePriceEl.textContent = '--';
-    preChangeEl.textContent = '盘前休市';
-    preChangeEl.className = 'kpi-change'; // 灰色
-    return;
-  }
-
-  // 3. 请求数据
-  fetch('https://query1.finance.yahoo.com/v8/finance/chart/%5EQMI?interval=1d&range=1d')
-    .then(res => {
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      return res.json();
-    })
-    .then(data => {
-      // 检查返回数据结构
-      if (!data.chart || !data.chart.result || data.chart.result.length === 0) {
-        throw new Error('空数据');
-      }
-      const result = data.chart.result[0];
-      const meta = result.meta;
-      const price = meta.regularMarketPrice;
-      const prevClose = meta.previousClose;
-
-      if (price && prevClose && price !== prevClose) {
-        const change = ((price - prevClose) / prevClose * 100);
-        const diff = price - prevClose;
-        prePriceEl.textContent = price.toFixed(2);
-        const sign = change >= 0 ? '▲ +' : '▼ ';
-        preChangeEl.textContent = sign + change.toFixed(2) + '% (' + (diff >= 0 ? '+' : '') + diff.toFixed(2) + ')';
-        preChangeEl.className = 'kpi-change ' + (change >= 0 ? 'up' : 'down');
-      } else {
-        // 数据无效（可能价格等于昨收，或无盘前交易）
-        prePriceEl.textContent = '--';
-        preChangeEl.textContent = '无盘前交易';
-        preChangeEl.className = 'kpi-change';
-      }
-    })
-    .catch(err => {
-      console.warn('盘前数据获取失败:', err);
-      prePriceEl.textContent = '--';
-      preChangeEl.textContent = '盘前暂不可用';
-      preChangeEl.className = 'kpi-change';
-    });
 })();
 
 </script>
