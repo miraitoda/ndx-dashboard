@@ -610,7 +610,7 @@ section{padding:60px 0}
   100% { transform: translate(-1%,-1%) scale(1); }
 }
 
-/* ===== Glitch 文字切换效果 ===== */
+/* ===== Glitch 文字切换效果（抖动时闪绿/紫，跟随涨跌） ===== */
 .glitch-word {
   display: inline-block;
   position: relative;
@@ -627,7 +627,6 @@ section{padding:60px 0}
   100% { transform: skew(0deg); opacity: 1; }
 }
 
-
 @keyframes glitch-flicker {
   0%, 100% { opacity: 1; }
   15% { opacity: 0.1; }
@@ -641,7 +640,6 @@ section{padding:60px 0}
 .glitch-word.switching {
   animation: glitch-skew 0.6s ease-in-out,
              glitch-flicker 0.6s ease-in-out;
-             
 }
 
 .glitch-word::before,
@@ -659,14 +657,14 @@ section{padding:60px 0}
 .glitch-word.switching::before {
   opacity: 1;
   animation: glitch-offset1 0.4s ease-in-out;
-  color: rgba(255,0,0,0.7);
+  color: var(--glitch-color1, rgba(57,255,20,0.7));
   clip-path: inset(20% 0 60% 0);
 }
 
 .glitch-word.switching::after {
   opacity: 1;
   animation: glitch-offset2 0.5s ease-in-out;
-  color: rgba(0,255,255,0.7);
+  color: var(--glitch-color2, rgba(191,0,255,0.7));
   clip-path: inset(60% 0 10% 0);
 }
 
@@ -1361,7 +1359,7 @@ function toggleTheme(){
   }
 }
 
-// ===== Glitch 标题切换 =====
+// ===== Glitch 标题切换（抖动时闪绿/紫，跟随涨跌） =====
 (function() {
   const el = document.getElementById('glitchTitle');
   if (!el) return;
@@ -1371,7 +1369,25 @@ function toggleTheme(){
   let isSwitching = false;
   
   const change = DATA.index.change || 0;
-  const ndxColor = change >= 0 ? 'var(--rise)' : 'var(--fall)';
+  const isUp = change >= 0;
+  
+  // 获取当前主题下的绿/紫（从 CSS 变量读取）
+  const riseColor = getComputedStyle(document.documentElement).getPropertyValue('--rise').trim();
+  const fallColor = getComputedStyle(document.documentElement).getPropertyValue('--fall').trim();
+  
+  // 设置伪元素的颜色（跟随涨跌）
+  function setGlitchColors() {
+    if (isUp) {
+      el.style.setProperty('--glitch-color1', riseColor + 'cc');
+      el.style.setProperty('--glitch-color2', riseColor + '99');
+    } else {
+      el.style.setProperty('--glitch-color1', fallColor + 'cc');
+      el.style.setProperty('--glitch-color2', fallColor + '99');
+    }
+  }
+  setGlitchColors();
+  
+  const ndxColor = isUp ? 'var(--rise)' : 'var(--fall)';
   
   function switchWord() {
     if (isSwitching) return;
@@ -1390,7 +1406,7 @@ function toggleTheme(){
       }
       
       el.setAttribute('data-text', newText);
-      el.style.color = '';  // ← 修复：删掉了前面多余的 }
+      el.style.color = '';
     }, 300);
     
     setTimeout(() => {
