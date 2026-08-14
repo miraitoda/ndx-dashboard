@@ -627,14 +627,6 @@ section{padding:60px 0}
   100% { transform: skew(0deg); opacity: 1; }
 }
 
-@keyframes glitch-rgb {
-  0% { text-shadow: 2px 0 rgba(255,0,0,0.4), -2px 0 rgba(0,255,255,0.4); }
-  20% { text-shadow: -3px 0 rgba(255,0,0,0.6), 3px 0 rgba(0,255,255,0.6); }
-  40% { text-shadow: 2px 0 rgba(255,255,0,0.5), -2px 0 rgba(0,0,255,0.5); }
-  60% { text-shadow: -2px 0 rgba(255,0,255,0.5), 2px 0 rgba(0,255,0,0.5); }
-  80% { text-shadow: 3px 0 rgba(255,0,0,0.4), -3px 0 rgba(0,255,255,0.4); }
-  100% { text-shadow: 0 0 rgba(255,0,0,0), 0 0 rgba(0,255,255,0); }
-}
 
 @keyframes glitch-flicker {
   0%, 100% { opacity: 1; }
@@ -648,8 +640,8 @@ section{padding:60px 0}
 
 .glitch-word.switching {
   animation: glitch-skew 0.6s ease-in-out,
-             glitch-rgb 0.6s ease-in-out,
              glitch-flicker 0.6s ease-in-out;
+             
 }
 
 .glitch-word::before,
@@ -1390,14 +1382,15 @@ function toggleTheme(){
     setTimeout(() => {
       currentIndex = (currentIndex + 1) % words.length;
       const newText = words[currentIndex];
-      el.textContent = newText;
-      el.setAttribute('data-text', newText);
       
       if (newText === 'NDX') {
-        el.style.color = ndxColor;
+        el.innerHTML = 'ND<span style="color:' + ndxColor + '">X</span>';
       } else {
-        el.style.color = '';
+        el.textContent = newText;
       }
+      
+      el.setAttribute('data-text', newText);
+      el.style.color = '';  // ← 修复：删掉了前面多余的 }
     }, 300);
     
     setTimeout(() => {
