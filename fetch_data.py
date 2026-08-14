@@ -27,7 +27,7 @@ def ensure_dir():
 SILICONFLOW_API_KEY = os.environ.get("SILICONFLOW_API_KEY", "your-api-key-here")
 SILICONFLOW_BASE_URL = os.environ.get("SILICONFLOW_BASE_URL", "https://api.siliconflow.cn/v1/chat/completions")
 SILICONFLOW_MODEL = os.environ.get("SILICONFLOW_MODEL", "Qwen/Qwen3-8B")
-SILICONFLOW_TIMEOUT = 5
+SILICONFLOW_TIMEOUT = 180
 
 
 def fetch_stock_data(tickers, max_batch=25):
@@ -380,11 +380,6 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:
 /* Container */
 .container{max-width:1200px;margin:0 auto;padding:0 24px;position:relative;z-index:1}
 
-/* 沉浸模式：隐藏容器内除 hero 外的所有直接子元素 */
-.container.immersive > *:not(.hero) {
-  visibility: hidden;
-}
-
 /* Sections */
 section{padding:60px 0}
 .section-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:32px}
@@ -399,7 +394,7 @@ section{padding:60px 0}
 .hero{padding:80px 0 60px}
 .hero-inner{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:40px}
 .hero-left{flex:1;min-width:300px}
-.hero-title{font-size:64px;font-weight:900;letter-spacing:-3px;margin:0;line-height:1;color:var(--text);opacity:0;transform:translateY(-6px);animation:hero-in 0.6s cubic-bezier(0.16,1,0.3,1) 0.2s forwards;cursor:pointer;transition:font-size 0.4s ease, transform 0.4s ease;}
+.hero-title{font-size:64px;font-weight:900;letter-spacing:-3px;margin:0;line-height:1;color:var(--text);opacity:0;transform:translateY(-6px);animation:hero-in 0.6s cubic-bezier(0.16,1,0.3,1) 0.2s forwards}
 @keyframes hero-in {
   to { opacity:1; transform:translateY(0); }
 }
@@ -745,7 +740,7 @@ section{padding:60px 0}
   <section class="hero">
     <div class="hero-inner">
       <div class="hero-left">
-        <h1 class="hero-title" id="heroTitle">
+        <h1 class="hero-title">
           <span class="glitch-word" id="glitchTitle" data-text="纳斯达克100">纳斯达克100</span>
           <br>
           <span class="hero-accent" style="font-size:0.6em;">NASDAQ-100</span>
@@ -894,7 +889,7 @@ section{padding:60px 0}
     <div class="footer-text">数据来自 Yahoo Finance · 每日自动更新 · 仅供参考不构成投资建议</div>
   </div>
 
-</div> <!-- .container -->
+</div>
 
 <!-- BOTTOM TICKER -->
 <div class="ticker-bar ticker-bar-bottom">
@@ -923,7 +918,7 @@ const IS_API = __IS_API__;
 function colorForChange(c){ return c >= 0 ? 'var(--rise)' : 'var(--fall)'; }
 function fmtPct(c){return(c>=0?"▲ +":"▼ ")+c.toFixed(2)+"%"}
 function fmtPctRaw(c){return(c>=0?"+":"")+c.toFixed(2)+"%"}
-function svgEl(tag,attrs){const el=document.createElementNS("http://www.w3.org/2000/svg","svg");for(let k in attrs)el.setAttribute(k,attrs[k]);return el}
+function svgEl(tag,attrs){const el=document.createElementNS("http://www.w3.org/2000/svg",tag);for(let k in attrs)el.setAttribute(k,attrs[k]);return el}
 
 const HISTORY_DATES = __HISTORY_DATES__;
 const IS_HISTORY = __IS_HISTORY__;
@@ -1011,7 +1006,7 @@ function renderSummary(containerId, textId, footerId, text, isApi) {
   
   if (footerEl) {
     if (isApi) {
-      footerEl.textContent = 'BRIEF POWERED BY QWEN';
+      footerEl.textContent = 'Brief powered by QWEN';
     } else {
       footerEl.textContent = '';
     }
@@ -1034,7 +1029,7 @@ function renderSummary(containerId, textId, footerId, text, isApi) {
   const isHistory = path.includes("/history/");
   let currentDate;
   if (isHistory) {
-    const m = path.match(/history\/(\\d{4}-\\d{2}-\\d{2})/);
+    const m = path.match(/history\/(\d{4}-\d{2}-\d{2})/);
     currentDate = m ? m[1] : DATA.date;
     if (btnToday) {
       btnToday.style.display = "inline-block";
@@ -1399,61 +1394,50 @@ function toggleTheme(){
   }
 }
 
-// ===== Glitch 引擎（可复用） =====
-window.glitchElements = [];
-let glitchIntervals = {};
-
-function updateGlitchColors() {
-  const computed = getComputedStyle(document.documentElement);
-  const riseColor = computed.getPropertyValue('--rise').trim();
-  const fallColor = computed.getPropertyValue('--fall').trim();
-  const change = DATA.index.change || 0;
-  const isUp = change >= 0;
-  window.glitchElements.forEach(el => {
-    el.style.setProperty('--glitch-color1', isUp ? (fallColor + 'cc') : (riseColor + 'cc'));
-    el.style.setProperty('--glitch-color2', isUp ? (fallColor + '99') : (riseColor + '99'));
-  });
-}
-
-function startGlitch(el) {
-  if (!el) return null;
-  // 若已存在则先停止
-  if (el._glitchInterval) {
-    clearInterval(el._glitchInterval);
-    delete el._glitchInterval;
-  }
-  // 加入全局列表（去重）
-  if (!window.glitchElements.includes(el)) {
-    window.glitchElements.push(el);
-  }
-
+// ===== Glitch 标题切换（颜色与数字相反） =====
+(function() {
+  const el = document.getElementById('glitchTitle');
+  if (!el) return;
+  
   const words = ['纳斯达克100', 'NDX'];
   let currentIndex = 0;
   let isSwitching = false;
+  
   const change = DATA.index.change || 0;
   const isUp = change >= 0;
-  const ndxColor = isUp ? 'var(--rise)' : 'var(--fall)';
-
-  function setInitialContent() {
-    const first = words[0];
-    if (first === 'NDX') {
-      el.innerHTML = 'ND<span style="color:' + ndxColor + '">X</span>';
-    } else if (first === '纳斯达克100') {
-      el.innerHTML = '纳斯达克<span style="color:' + ndxColor + '">100</span>';
+  
+  // 设置伪元素的颜色（与数字相反）
+  function setGlitchColors() {
+    const computed = getComputedStyle(document.documentElement);
+    const riseColor = computed.getPropertyValue('--rise').trim();
+    const fallColor = computed.getPropertyValue('--fall').trim();
+    if (isUp) {
+      // 涨 -> Glitch 闪紫色
+      el.style.setProperty('--glitch-color1', fallColor + 'cc');
+      el.style.setProperty('--glitch-color2', fallColor + '99');
     } else {
-      el.textContent = first;
+      // 跌 -> Glitch 闪绿色
+      el.style.setProperty('--glitch-color1', riseColor + 'cc');
+      el.style.setProperty('--glitch-color2', riseColor + '99');
     }
-    el.setAttribute('data-text', first);
-    el.style.color = '';
   }
-
+  setGlitchColors();
+  
+  // 暴露给全局，供主题切换调用
+  window.updateGlitchColors = setGlitchColors;
+  
+  const ndxColor = isUp ? 'var(--rise)' : 'var(--fall)';
+  
   function switchWord() {
     if (isSwitching) return;
     isSwitching = true;
+    
     el.classList.add('switching');
+    
     setTimeout(() => {
       currentIndex = (currentIndex + 1) % words.length;
       const newText = words[currentIndex];
+      
       if (newText === 'NDX') {
         el.innerHTML = 'ND<span style="color:' + ndxColor + '">X</span>';
       } else if (newText === '纳斯达克100') {
@@ -1461,83 +1445,28 @@ function startGlitch(el) {
       } else {
         el.textContent = newText;
       }
+      
       el.setAttribute('data-text', newText);
       el.style.color = '';
     }, 300);
+    
     setTimeout(() => {
       el.classList.remove('switching');
       isSwitching = false;
     }, 700);
   }
+  
+  setInterval(switchWord, 3000);
+})();
 
-  setInitialContent();
-  updateGlitchColors();
-  const intervalId = setInterval(switchWord, 3000);
-  el._glitchInterval = intervalId;
-  return intervalId;
-}
 
-function stopGlitch(el) {
-  if (el && el._glitchInterval) {
-    clearInterval(el._glitchInterval);
-    delete el._glitchInterval;
-    const idx = window.glitchElements.indexOf(el);
-    if (idx > -1) window.glitchElements.splice(idx, 1);
-  }
-}
-
-// 启动主标题 glitch
-const mainTitleEl = document.getElementById('glitchTitle');
-if (mainTitleEl) startGlitch(mainTitleEl);
-
-window.updateGlitchColors = updateGlitchColors;
-
-// ===== 点击标题切换沉浸模式（手动触发，修复标题被隐藏问题） =====
-const heroTitle = document.getElementById('heroTitle');
-const header = document.querySelector('.header');
-const container = document.querySelector('.container');
-let isImmersive = false;
-
-if (heroTitle) {
-  heroTitle.addEventListener('click', function(e) {
-    e.stopPropagation();
-    isImmersive = !isImmersive;
-    
-    if (isImmersive) {
-      // 隐藏 header
-      if (header) header.style.visibility = 'hidden';
-      // 添加 immersive 类，隐藏 container 中除 .hero 外的其他内容
-      if (container) container.classList.add('immersive');
-      
-      // 标题放大至 160px，并轻微缩放
-      heroTitle.style.fontSize = '160px';
-      heroTitle.style.transform = 'scale(1.05)';
-      heroTitle.classList.add('giant-mode');
-      
-      // 确保 glitch 特效运行（若已停止则重启）
-      if (mainTitleEl && !mainTitleEl._glitchInterval) {
-        startGlitch(mainTitleEl);
-      }
-    } else {
-      // 恢复
-      if (header) header.style.visibility = 'visible';
-      if (container) container.classList.remove('immersive');
-      
-      heroTitle.style.fontSize = '';
-      heroTitle.style.transform = '';
-      heroTitle.classList.remove('giant-mode');
-      
-      // 若希望恢复后 glitch 持续，则无需停止；若希望停止，取消注释下行
-      // if (mainTitleEl) stopGlitch(mainTitleEl);
-    }
-  });
-}
-
-// 原有的 rollNumber 函数
+// Odometer 数字滚动：从 fromValue 逐位翻滚到 toValue
 function rollNumber(el, fromValue, toValue, duration){
+  // 将数字转为字符串，统一用 0 补齐位数（修复 UP 滚动问题）
   const toStr = toValue.toLocaleString("en-US", {minimumFractionDigits: 1, maximumFractionDigits: 1});
   const fromStr = fromValue.toLocaleString("en-US", {minimumFractionDigits: 1, maximumFractionDigits: 1});
   const maxLen = Math.max(toStr.length, fromStr.length);
+  // 关键修改：用 '0' 填充，保证所有位都是数字，都会滚动
   const toPadded = toStr.padStart(maxLen, '0');
   const fromPadded = fromStr.padStart(maxLen, '0');
 
@@ -1552,6 +1481,7 @@ function rollNumber(el, fromValue, toValue, duration){
     const toCh = toPadded[i];
 
     if (fromCh === "," || fromCh === ".") {
+      // 逗号和点保持不变
       const span = document.createElement("span");
       span.textContent = toCh;
       span.style.display = "inline-block";
@@ -1571,6 +1501,7 @@ function rollNumber(el, fromValue, toValue, duration){
       strip.style.display = "flex";
       strip.style.flexDirection = "column";
 
+      // 构建滚动序列：从 fromNum 到 toNum（包括所有中间值）
       let seq = [];
       let n = fromNum;
       while (true) {
