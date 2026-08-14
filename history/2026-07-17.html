@@ -5,23 +5,6 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap');
 
-/* ===== View Transitions 页面滑动效果 ===== */
-::view-transition-old(root) {
-  animation: slide-out-left 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}
-::view-transition-new(root) {
-  animation: slide-in-right 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}
-
-@keyframes slide-out-left {
-  from { transform: translateX(0); opacity: 1; }
-  to { transform: translateX(-40px); opacity: 0.4; }
-}
-@keyframes slide-in-right {
-  from { transform: translateX(40px); opacity: 0.4; }
-  to { transform: translateX(0); opacity: 1; }
-}
-
 :root {
   --bg: #0a0a0a;
   --surface: #111111;
@@ -124,10 +107,10 @@ section{padding:60px 0}
 .hero{padding:80px 0 60px}
 .hero-inner{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:40px}
 .hero-left{flex:1;min-width:300px}
-.hero-tag{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:100px;border:1px solid var(--border);margin-bottom:24px}
-.hero-tag-dot{width:6px;height:6px;border-radius:50%;background:var(--rise)}
-.hero-tag-text{font-size:11px;font-weight:700;color:var(--text2);letter-spacing:1px}
-.hero-title{font-size:64px;font-weight:900;letter-spacing:-3px;margin:0;line-height:1;color:var(--text)}
+.hero-title{font-size:64px;font-weight:900;letter-spacing:-3px;margin:0;line-height:1;color:var(--text);opacity:0;transform:translateY(-6px);animation:hero-in 0.6s cubic-bezier(0.16,1,0.3,1) 0.2s forwards}
+@keyframes hero-in {
+  to { opacity:1; transform:translateY(0); }
+}
 .hero-accent{color:var(--accent)}
 .hero-desc{margin-top:20px;font-size:15px;color:var(--text2);line-height:1.6;max-width:400px}
 .hero-meta{margin-top:24px;display:flex;align-items:center;gap:12px}
@@ -142,10 +125,32 @@ section{padding:60px 0}
 .kpi-change.down{color:var(--fall)}
 .kpi-sub{font-size:13px;color:var(--text3);margin-top:8px;font-family:'JetBrains Mono',monospace}
 
-/* AI Summary */
-.ai-summary p{margin:0;font-size:28px;font-weight:700;line-height:1.4;color:var(--text);max-width:900px;letter-spacing:-0.5px}
-.ai-summary .up{color:var(--rise)}
-.ai-summary .down{color:var(--fall)}
+/* ===== AI 总结高亮（全局生效） ===== */
+.up { color: var(--rise); }
+.down { color: var(--fall); }
+
+/* AI Summary 主样式 */
+.ai-summary .summary-text {
+  margin:0;
+  font-size:28px;
+  font-weight:700;
+  line-height:1.4;
+  color:var(--text);
+  max-width:900px;
+  letter-spacing:-0.5px;
+  min-height:2.8em;
+}
+
+/* 全局 footer 样式（主总结和小卡片统一） */
+.summary-footer {
+  display: block;
+  margin-top: 8px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text3);
+  letter-spacing: 0.5px;
+  opacity: 0.6;
+}
 
 /* Cards */
 .card{background:var(--surface);border:1px solid var(--border);border-radius:16px;transition:transform 0.2s,border-color 0.2s}
@@ -171,7 +176,8 @@ section{padding:60px 0}
 .sector-bar{height:100%;position:relative}
 .sector-bar.up{background:var(--rise);border-radius:0 4px 4px 0}
 .sector-bar.down{background:var(--fall);border-radius:4px 0 0 4px;margin-left:auto}
-.sector-bar-label{position:absolute;top:50%;transform:translateY(-50%);font-size:12px;font-weight:800;font-family:'JetBrains Mono',monospace;white-space:nowrap}
+.sector-bar-label{position:absolute;top:50%;transform:translateY(-50%);font-size:12px;font-weight:800;font-family:'JetBrains Mono',monospace;white-space:nowrap;opacity:0;transition:opacity 0.3s ease 0.2s}
+.sector-bar.animate .sector-bar-label{opacity:1}
 .sector-bar-label.up{right:12px;color:rgba(0,0,0,0.6)}
 .sector-bar-label.down{left:12px;color:rgba(255,255,255,0.9)}
 
@@ -180,7 +186,8 @@ section{padding:60px 0}
 
 /* Stock grid */
 .stock-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px}
-.stock-cell{padding:14px 10px;border-radius:12px;text-align:center;border:1px solid var(--rise-border);color:var(--rise);background:var(--surface-raised);cursor:pointer;transition:all 0.15s}
+.stock-cell{padding:14px 10px;border-radius:12px;text-align:center;border:1px solid var(--rise-border);color:var(--rise);background:var(--surface-raised);cursor:pointer;transition:all 0.15s;opacity:0;transform:translateY(12px)}
+.stock-cell.visible{opacity:1;transform:translateY(0);transition:opacity 0.35s ease,transform 0.35s cubic-bezier(0.16,1,0.3,1)}
 .stock-cell.down{border-color:var(--fall-border);color:var(--fall)}
 .stock-cell:hover{transform:translateY(-2px) scale(1.02);border-color:var(--border-strong)}
 .stock-ticker{font-size:14px;font-weight:800;font-family:'JetBrains Mono',monospace;letter-spacing:0.5px}
@@ -246,6 +253,9 @@ section{padding:60px 0}
 }
 .sector-bar.animate {
   width: var(--final-width) !important;
+}
+.sector-bar.animate .sector-bar-label {
+  opacity: 1;
 }
 .sector-bar.animate.up:hover {
   transform: translateX(3px);
@@ -328,6 +338,80 @@ section{padding:60px 0}
   100% { transform: translate(-1%,-1%) scale(1); }
 }
 
+/* ===== Glitch 文字切换效果（抖动时闪绿/紫，颜色与数字相反） ===== */
+.glitch-word {
+  display: inline-block;
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+@keyframes glitch-skew {
+  0% { transform: skew(0deg); opacity: 1; }
+  10% { transform: skew(2deg); opacity: 0.8; }
+  20% { transform: skew(-3deg); opacity: 1; }
+  30% { transform: skew(1deg); opacity: 0.9; }
+  40% { transform: skew(-1deg); opacity: 1; }
+  50% { transform: skew(0deg); opacity: 1; }
+  100% { transform: skew(0deg); opacity: 1; }
+}
+
+@keyframes glitch-flicker {
+  0%, 100% { opacity: 1; }
+  15% { opacity: 0.1; }
+  30% { opacity: 1; }
+  45% { opacity: 0.3; }
+  60% { opacity: 1; }
+  75% { opacity: 0.1; }
+  90% { opacity: 1; }
+}
+
+.glitch-word.switching {
+  animation: glitch-skew 0.6s ease-in-out,
+             glitch-flicker 0.6s ease-in-out;
+}
+
+.glitch-word::before,
+.glitch-word::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.glitch-word.switching::before {
+  opacity: 1;
+  animation: glitch-offset1 0.4s ease-in-out;
+  color: var(--glitch-color1, rgba(57,255,20,0.7));
+  clip-path: inset(20% 0 60% 0);
+}
+
+.glitch-word.switching::after {
+  opacity: 1;
+  animation: glitch-offset2 0.5s ease-in-out;
+  color: var(--glitch-color2, rgba(191,0,255,0.7));
+  clip-path: inset(60% 0 10% 0);
+}
+
+@keyframes glitch-offset1 {
+  0% { transform: translate(0); }
+  20% { transform: translate(-4px, 2px); }
+  40% { transform: translate(3px, -3px); }
+  60% { transform: translate(-2px, 1px); }
+  80% { transform: translate(2px, -1px); }
+  100% { transform: translate(0); opacity: 0; }
+}
+
+@keyframes glitch-offset2 {
+  0% { transform: translate(0); }
+  25% { transform: translate(3px, -2px); }
+  50% { transform: translate(-5px, 3px); }
+  75% { transform: translate(2px, -2px); }
+  100% { transform: translate(0); opacity: 0; }
+}
 </style></head><body>
 
 <div id="app">
@@ -369,8 +453,11 @@ section{padding:60px 0}
   <section class="hero">
     <div class="hero-inner">
       <div class="hero-left">
-        <div class="hero-tag"><span class="hero-tag-dot"></span><span class="hero-tag-text">NASDAQ-100</span></div>
-        <h1 class="hero-title">纳斯达克<br><span class="hero-accent">100</span></h1>
+        <h1 class="hero-title">
+          <span class="glitch-word" id="glitchTitle" data-text="纳斯达克100">纳斯达克100</span>
+          <br>
+          <span class="hero-accent" style="font-size:0.6em;">NASDAQ-100</span>
+        </h1>
         <div class="hero-meta">
           <span class="hero-date" id="dateStr"></span>
           <span class="hero-dot"></span>
@@ -390,7 +477,7 @@ section{padding:60px 0}
         </div>
         <div>
           <div class="kpi-label">UP/DOWN</div>
-          <div class="kpi-value"><span style="color:var(--rise)" id="idxUp">--</span><span style="color:var(--text3);font-size:28px">/</span><span style="color:var(--fall)" id="idxDown">--</span></div>
+          <div class="kpi-value" id="upDownContainer"><span id="idxUp">--</span><span style="color:var(--text3);font-size:28px">/</span><span id="idxDown">--</span></div>
           <div class="kpi-sub"><span id="stockCount">--</span> components</div>
         </div>
       </div>
@@ -402,7 +489,8 @@ section{padding:60px 0}
   <!-- AI SUMMARY -->
   <section class="ai-summary" id="aiSummaryBox" style="display:none">
     <div class="section-label">Markets in Focus</div>
-    <p id="aiSummaryText"></p>
+    <p class="summary-text" id="aiSummaryText"></p>
+    <span class="summary-footer" id="aiSummaryFooter"></span>
   </section>
   <div class="divider" id="aiSummaryDivider" style="display:none"></div>
 
@@ -417,7 +505,8 @@ section{padding:60px 0}
     </div>
     <div class="dist-chart" id="distChart"></div>
     <div class="card" id="aiDistBox" style="display:none;margin-top:20px;padding:20px 24px;">
-      <p style="margin:0;font-size:20px;line-height:1.5;color:var(--text);font-weight:700;letter-spacing:-0.3px;"></p>
+      <p style="margin:0;font-size:20px;line-height:1.5;color:var(--text);font-weight:700;letter-spacing:-0.3px;" class="summary-text" id="aiDistText"></p>
+      <span class="summary-footer" id="aiDistFooter"></span>
     </div>
   </section>
 
@@ -438,7 +527,8 @@ section{padding:60px 0}
         <div class="pie-container" id="stockPie"></div>
         <div class="pie-legend" id="stockLegend"></div>
         <div class="card" id="aiStocksBox" style="display:none;margin-top:20px;padding:16px 20px;">
-          <p style="margin:0;font-size:20px;line-height:1.5;color:var(--text);font-weight:700;letter-spacing:-0.3px;"></p>
+          <p style="margin:0;font-size:20px;line-height:1.5;color:var(--text);font-weight:700;letter-spacing:-0.3px;" class="summary-text" id="aiStocksText"></p>
+          <span class="summary-footer" id="aiStocksFooter"></span>
         </div>
       </div>
       <div class="card" style="padding:48px">
@@ -447,7 +537,8 @@ section{padding:60px 0}
         <div class="pie-container" id="sectorPie"></div>
         <div class="pie-legend" id="sectorLegend"></div>
         <div class="card" id="aiSectorsBox" style="display:none;margin-top:20px;padding:16px 20px;">
-          <p style="margin:0;font-size:20px;line-height:1.5;color:var(--text);font-weight:700;letter-spacing:-0.3px;"></p>
+          <p style="margin:0;font-size:20px;line-height:1.5;color:var(--text);font-weight:700;letter-spacing:-0.3px;" class="summary-text" id="aiSectorsText"></p>
+          <span class="summary-footer" id="aiSectorsFooter"></span>
         </div>
       </div>
     </div>
@@ -464,7 +555,8 @@ section{padding:60px 0}
     </div>
     <div id="sectorBar"></div>
     <div class="card" id="aiIndustryBox" style="display:none;margin-top:20px;padding:20px 24px;">
-      <p style="margin:0;font-size:20px;line-height:1.5;color:var(--text);font-weight:700;letter-spacing:-0.3px;"></p>
+      <p style="margin:0;font-size:20px;line-height:1.5;color:var(--text);font-weight:700;letter-spacing:-0.3px;" class="summary-text" id="aiIndustryText"></p>
+      <span class="summary-footer" id="aiIndustryFooter"></span>
     </div>
   </section>
 
@@ -483,7 +575,8 @@ section{padding:60px 0}
       <svg class="trend-svg" id="trendLine" viewBox="0 0 900 200"></svg>
     </div>
     <div class="card" id="aiTrendBox" style="display:none;margin-top:20px;padding:20px 24px;">
-      <p style="margin:0;font-size:20px;line-height:1.5;color:var(--text);font-weight:700;letter-spacing:-0.3px;"></p>
+      <p style="margin:0;font-size:20px;line-height:1.5;color:var(--text);font-weight:700;letter-spacing:-0.3px;" class="summary-text" id="aiTrendText"></p>
+      <span class="summary-footer" id="aiTrendFooter"></span>
     </div>
   </section>
 
@@ -532,14 +625,15 @@ const FALL = STYLE.getPropertyValue('--fall').trim();
 const ACCENT = FALL;
 const TEXT = "#f5f5f5", TEXT2 = "#a1a1aa", TEXT3 = "#52525b", BG = "#0a0a0a";
 
-const DATA = {"index":{"price":28592.66,"prev_close":29025.77,"change":-1.49,"up":20,"down":80,"flat":0,"total":100},"stocks":[{"ticker":"AAPL","name":"苹果","sector":"科技","weight":11.04,"change":0.14},{"ticker":"NVDA","name":"英伟达","sector":"科技","weight":8.7,"change":-2.21},{"ticker":"MSFT","name":"微软","sector":"科技","weight":7.3,"change":-1.82},{"ticker":"AVGO","name":"博通","sector":"科技","weight":2.7,"change":-0.97},{"ticker":"ADBE","name":"Adobe","sector":"科技","weight":1.2,"change":0.82},{"ticker":"CSCO","name":"思科","sector":"科技","weight":1.0,"change":2.08},{"ticker":"INTU","name":"Intuit","sector":"科技","weight":0.9,"change":-1.26},{"ticker":"QCOM","name":"高通","sector":"科技","weight":0.85,"change":0.69},{"ticker":"AMAT","name":"应用材料","sector":"科技","weight":0.8,"change":-5.57},{"ticker":"TXN","name":"德州仪器","sector":"科技","weight":0.75,"change":-2.47},{"ticker":"AMD","name":"AMD","sector":"科技","weight":1.6,"change":-1.03},{"ticker":"PANW","name":"Palo Alto","sector":"科技","weight":0.55,"change":1.32},{"ticker":"ADI","name":"ADI","sector":"科技","weight":0.46,"change":-1.36},{"ticker":"MU","name":"美光","sector":"科技","weight":0.45,"change":-0.5},{"ticker":"LRCX","name":"Lam Research","sector":"科技","weight":0.42,"change":-2.39},{"ticker":"KLAC","name":"KLA","sector":"科技","weight":0.4,"change":-3.02},{"ticker":"SNPS","name":"Synopsys","sector":"科技","weight":0.35,"change":-7.85},{"ticker":"CDNS","name":"Cadence","sector":"科技","weight":0.34,"change":-9.47},{"ticker":"PYPL","name":"PayPal","sector":"科技","weight":0.33,"change":-0.3},{"ticker":"CRWD","name":"CrowdStrike","sector":"科技","weight":0.32,"change":-0.33},{"ticker":"FTNT","name":"Fortinet","sector":"科技","weight":0.29,"change":0.52},{"ticker":"MRVL","name":"Marvell","sector":"科技","weight":0.27,"change":0.2},{"ticker":"NXPI","name":"NXP","sector":"科技","weight":0.24,"change":-1.53},{"ticker":"DDOG","name":"Datadog","sector":"科技","weight":0.12,"change":-1.38},{"ticker":"ADP","name":"ADP","sector":"科技","weight":0.17,"change":-0.5},{"ticker":"PAYX","name":"Paychex","sector":"科技","weight":0.15,"change":-0.27},{"ticker":"INTC","name":"英特尔","sector":"科技","weight":0.19,"change":-2.0},{"ticker":"MCHP","name":"Microchip","sector":"科技","weight":0.07,"change":-0.88},{"ticker":"MSTR","name":"MicroStrategy","sector":"科技","weight":0.06,"change":0.87},{"ticker":"APP","name":"AppLovin","sector":"科技","weight":0.06,"change":-2.29},{"ticker":"ARM","name":"ARM","sector":"科技","weight":0.06,"change":1.98},{"ticker":"PLTR","name":"Palantir","sector":"科技","weight":0.05,"change":-1.53},{"ticker":"TEAM","name":"Atlassian","sector":"科技","weight":0.05,"change":1.01},{"ticker":"WDAY","name":"Workday","sector":"科技","weight":0.05,"change":-0.45},{"ticker":"STX","name":"希捷","sector":"科技","weight":0.04,"change":5.66},{"ticker":"WDC","name":"西数","sector":"科技","weight":0.04,"change":2.23},{"ticker":"ASML","name":"ASML","sector":"科技","weight":0.03,"change":-2.09},{"ticker":"MPWR","name":"MPS","sector":"科技","weight":0.03,"change":0.49},{"ticker":"ALAB","name":"Astera","sector":"科技","weight":0.02,"change":-5.04},{"ticker":"CRWV","name":"CoreWeave","sector":"科技","weight":0.02,"change":0.41},{"ticker":"TER","name":"泰瑞达","sector":"科技","weight":0.02,"change":0.02},{"ticker":"GOOGL","name":"谷歌A","sector":"通信服务","weight":2.5,"change":-2.17},{"ticker":"GOOG","name":"谷歌C","sector":"通信服务","weight":2.5,"change":-2.17},{"ticker":"META","name":"Meta","sector":"通信服务","weight":3.3,"change":-2.79},{"ticker":"NFLX","name":"奈飞","sector":"通信服务","weight":1.8,"change":-7.26},{"ticker":"TMUS","name":"T-Mobile","sector":"通信服务","weight":1.1,"change":-0.22},{"ticker":"CMCSA","name":"康卡斯特","sector":"通信服务","weight":0.7,"change":-1.29},{"ticker":"EA","name":"EA","sector":"通信服务","weight":0.11,"change":0.51},{"ticker":"WBD","name":"华纳兄弟","sector":"通信服务","weight":0.07,"change":-1.54},{"ticker":"TTWO","name":"Take-Two","sector":"通信服务","weight":0.07,"change":-1.21},{"ticker":"AMZN","name":"亚马逊","sector":"可选消费","weight":6.7,"change":-1.06},{"ticker":"TSLA","name":"特斯拉","sector":"可选消费","weight":3.6,"change":-2.61},{"ticker":"BKNG","name":"Booking","sector":"可选消费","weight":0.52,"change":-1.59},{"ticker":"SBUX","name":"星巴克","sector":"可选消费","weight":0.5,"change":-2.66},{"ticker":"MELI","name":"MercadoLibre","sector":"可选消费","weight":0.37,"change":-2.34},{"ticker":"MAR","name":"万豪","sector":"可选消费","weight":0.31,"change":-1.32},{"ticker":"DASH","name":"DoorDash","sector":"可选消费","weight":0.28,"change":-1.19},{"ticker":"ORLY","name":"O'Reilly","sector":"可选消费","weight":0.26,"change":-0.23},{"ticker":"ABNB","name":"Airbnb","sector":"可选消费","weight":0.2,"change":-1.23},{"ticker":"ROST","name":"Ross","sector":"可选消费","weight":0.14,"change":0.32},{"ticker":"SHOP","name":"Shopify","sector":"可选消费","weight":0.05,"change":-1.2},{"ticker":"PDD","name":"拼多多","sector":"可选消费","weight":0.02,"change":-2.93},{"ticker":"WMT","name":"沃尔玛","sector":"必需消费","weight":3.0,"change":-0.62},{"ticker":"COST","name":"开市客","sector":"必需消费","weight":2.2,"change":-0.5},{"ticker":"PEP","name":"百事","sector":"必需消费","weight":1.4,"change":-1.66},{"ticker":"MDLZ","name":"亿滋","sector":"必需消费","weight":0.36,"change":-0.68},{"ticker":"MNST","name":"Monster","sector":"必需消费","weight":0.21,"change":-2.44},{"ticker":"KDP","name":"Keurig","sector":"必需消费","weight":0.18,"change":-1.5},{"ticker":"KHC","name":"卡夫亨氏","sector":"必需消费","weight":0.16,"change":-1.33},{"ticker":"CCEP","name":"可口可乐欧洲","sector":"必需消费","weight":0.03,"change":-0.82},{"ticker":"AMGN","name":"安进","sector":"医疗保健","weight":0.65,"change":-1.42},{"ticker":"ISRG","name":"直觉外科","sector":"医疗保健","weight":0.58,"change":-14.15},{"ticker":"GILD","name":"吉利德","sector":"医疗保健","weight":0.48,"change":-1.48},{"ticker":"VRTX","name":"Vertex","sector":"医疗保健","weight":0.43,"change":-0.08},{"ticker":"REGN","name":"再生元","sector":"医疗保健","weight":0.38,"change":-0.33},{"ticker":"DXCM","name":"Dexcom","sector":"医疗保健","weight":0.22,"change":-1.71},{"ticker":"IDXX","name":"IDEXX","sector":"医疗保健","weight":0.08,"change":-1.5},{"ticker":"GEHC","name":"GE医疗","sector":"医疗保健","weight":0.08,"change":-4.0},{"ticker":"ALNY","name":"Alnylam","sector":"医疗保健","weight":0.05,"change":-5.54},{"ticker":"LIN","name":"林德","sector":"工业","weight":1.3,"change":-1.44},{"ticker":"HON","name":"霍尼韦尔","sector":"工业","weight":0.6,"change":-0.58},{"ticker":"CSX","name":"CSX","sector":"工业","weight":0.3,"change":-0.28},{"ticker":"CTAS","name":"Cintas","sector":"工业","weight":0.25,"change":-0.87},{"ticker":"CPRT","name":"Copart","sector":"工业","weight":0.23,"change":-2.4},{"ticker":"ODFL","name":"Old Dominion","sector":"工业","weight":0.13,"change":-1.4},{"ticker":"FAST","name":"Fastenal","sector":"工业","weight":0.1,"change":-2.53},{"ticker":"ROP","name":"Roper","sector":"工业","weight":0.05,"change":-0.29},{"ticker":"VRSK","name":"Verisk","sector":"工业","weight":0.04,"change":-0.4},{"ticker":"FER","name":"Ferrovial","sector":"工业","weight":0.02,"change":-0.11},{"ticker":"TRI","name":"汤森路透","sector":"工业","weight":0.02,"change":-2.65},{"ticker":"PCAR","name":"Paccar","sector":"工业","weight":0.02,"change":-0.37},{"ticker":"AXON","name":"Axon","sector":"工业","weight":0.03,"change":-5.81},{"ticker":"RKLB","name":"Rocket Lab","sector":"工业","weight":0.02,"change":0.4},{"ticker":"EXC","name":"Exelon","sector":"公用事业","weight":0.1,"change":-1.13},{"ticker":"XEL","name":"Xcel","sector":"公用事业","weight":0.09,"change":-1.51},{"ticker":"AEP","name":"AEP","sector":"公用事业","weight":0.09,"change":-0.74},{"ticker":"CEG","name":"Constellation","sector":"公用事业","weight":0.03,"change":0.25},{"ticker":"FANG","name":"Diamondback","sector":"能源","weight":0.03,"change":2.85},{"ticker":"BKR","name":"Baker Hughes","sector":"能源","weight":0.02,"change":-1.04},{"ticker":"CSGP","name":"CoStar","sector":"房地产","weight":0.04,"change":-1.94}],"pie_stocks":[{"ticker":"AAPL","name":"苹果","sector":"科技","weight":11.04,"change":0.14},{"ticker":"NVDA","name":"英伟达","sector":"科技","weight":8.7,"change":-2.21},{"ticker":"MSFT","name":"微软","sector":"科技","weight":7.3,"change":-1.82},{"ticker":"AMZN","name":"亚马逊","sector":"可选消费","weight":6.7,"change":-1.06},{"ticker":"TSLA","name":"特斯拉","sector":"可选消费","weight":3.6,"change":-2.61},{"ticker":"META","name":"Meta","sector":"通信服务","weight":3.3,"change":-2.79},{"ticker":"WMT","name":"沃尔玛","sector":"必需消费","weight":3.0,"change":-0.62},{"ticker":"AVGO","name":"博通","sector":"科技","weight":2.7,"change":-0.97},{"ticker":"GOOGL","name":"谷歌A","sector":"通信服务","weight":2.5,"change":-2.17},{"ticker":"GOOG","name":"谷歌C","sector":"通信服务","weight":2.5,"change":-2.17},{"ticker":"COST","name":"开市客","sector":"必需消费","weight":2.2,"change":-0.5},{"ticker":"NFLX","name":"奈飞","sector":"通信服务","weight":1.8,"change":-7.26},{"ticker":"AMD","name":"AMD","sector":"科技","weight":1.6,"change":-1.03},{"ticker":"PEP","name":"百事","sector":"必需消费","weight":1.4,"change":-1.66},{"ticker":"LIN","name":"林德","sector":"工业","weight":1.3,"change":-1.44},{"ticker":"其他","name":"其他85只","sector":"","weight":21.95,"change":-1.51}],"sectors":[{"name":"科技","weight":42.49,"change":-1.14,"count":41},{"name":"可选消费","weight":12.95,"change":-1.59,"count":12},{"name":"通信服务","weight":12.15,"change":-2.83,"count":9},{"name":"必需消费","weight":7.54,"change":-0.87,"count":8},{"name":"工业","weight":3.11,"change":-1.21,"count":14},{"name":"医疗保健","weight":2.95,"change":-3.76,"count":9},{"name":"公用事业","weight":0.31,"change":-0.99,"count":4},{"name":"能源","weight":0.05,"change":1.29,"count":2},{"name":"房地产","weight":0.04,"change":-1.94,"count":1}],"bins":{"labels":["<-3%","-3~-2%","-2~-1%","-1~0%","0~1%","1~2%","2~3%",">3%"],"counts":[10,16,30,24,13,3,3,1]},"history":[29414.26,29084.5,28508.03,29446.18,29635.95,30543.92,29968.13,29670.95,30406.19,30347.08,29347.27,29220.06,29440.32,29118.24,29774.75,30276.35,29809.13,29329.21,29697.87,29173.02,29252.56,29727.1,29825.11,29264.1,29586.29,29502.6,29025.77,28592.66],"date":"2026-07-17","ai_summary":"纳指100今日收跌1.49%，80只成分股下跌，市场承压调整。","ai_stocks":"苹果（AAPL）、英伟达（NVDA）、微软（MSFT）三家头部企业今日表现不一，合计27.0%权重，互相抵消。","ai_sectors":"今日资金青睐能源，板块报+1.29%；医疗保健资金流出，报-3.76%。","ai_distribution":"今日涨跌分布峰值在-2~-1%，30只。20只上涨、80只下跌，普跌格局。","ai_industry":"1个赛道收涨，8个收跌，板块整体偏弱。","ai_trend":"回顾近30个交易日，NDX累计下跌2.79%，从29,414点降至28,593点，调整幅度有限。区间高点30,544、低点28,508。"};
+const DATA = {"index":{"price":28592.66,"prev_close":29025.77,"change":-1.49,"up":20,"down":80,"flat":0,"total":100},"stocks":[{"ticker":"AAPL","name":"苹果","sector":"科技","weight":11.04,"change":0.14},{"ticker":"NVDA","name":"英伟达","sector":"科技","weight":8.7,"change":-2.21},{"ticker":"MSFT","name":"微软","sector":"科技","weight":7.3,"change":-1.82},{"ticker":"AVGO","name":"博通","sector":"科技","weight":2.7,"change":-0.97},{"ticker":"ADBE","name":"Adobe","sector":"科技","weight":1.2,"change":0.82},{"ticker":"CSCO","name":"思科","sector":"科技","weight":1.0,"change":2.08},{"ticker":"INTU","name":"Intuit","sector":"科技","weight":0.9,"change":-1.26},{"ticker":"QCOM","name":"高通","sector":"科技","weight":0.85,"change":0.69},{"ticker":"AMAT","name":"应用材料","sector":"科技","weight":0.8,"change":-5.57},{"ticker":"TXN","name":"德州仪器","sector":"科技","weight":0.75,"change":-2.47},{"ticker":"AMD","name":"AMD","sector":"科技","weight":1.6,"change":-1.03},{"ticker":"PANW","name":"Palo Alto","sector":"科技","weight":0.55,"change":1.32},{"ticker":"ADI","name":"ADI","sector":"科技","weight":0.46,"change":-1.36},{"ticker":"MU","name":"美光","sector":"科技","weight":0.45,"change":-0.5},{"ticker":"LRCX","name":"Lam Research","sector":"科技","weight":0.42,"change":-2.39},{"ticker":"KLAC","name":"KLA","sector":"科技","weight":0.4,"change":-3.02},{"ticker":"SNPS","name":"Synopsys","sector":"科技","weight":0.35,"change":-7.85},{"ticker":"CDNS","name":"Cadence","sector":"科技","weight":0.34,"change":-9.47},{"ticker":"PYPL","name":"PayPal","sector":"科技","weight":0.33,"change":-0.3},{"ticker":"CRWD","name":"CrowdStrike","sector":"科技","weight":0.32,"change":-0.33},{"ticker":"FTNT","name":"Fortinet","sector":"科技","weight":0.29,"change":0.52},{"ticker":"MRVL","name":"Marvell","sector":"科技","weight":0.27,"change":0.2},{"ticker":"NXPI","name":"NXP","sector":"科技","weight":0.24,"change":-1.53},{"ticker":"DDOG","name":"Datadog","sector":"科技","weight":0.12,"change":-1.38},{"ticker":"ADP","name":"ADP","sector":"科技","weight":0.17,"change":-0.5},{"ticker":"PAYX","name":"Paychex","sector":"科技","weight":0.15,"change":-0.27},{"ticker":"INTC","name":"英特尔","sector":"科技","weight":0.19,"change":-2.0},{"ticker":"MCHP","name":"Microchip","sector":"科技","weight":0.07,"change":-0.88},{"ticker":"MSTR","name":"MicroStrategy","sector":"科技","weight":0.06,"change":0.87},{"ticker":"APP","name":"AppLovin","sector":"科技","weight":0.06,"change":-2.29},{"ticker":"ARM","name":"ARM","sector":"科技","weight":0.06,"change":1.98},{"ticker":"PLTR","name":"Palantir","sector":"科技","weight":0.05,"change":-1.53},{"ticker":"TEAM","name":"Atlassian","sector":"科技","weight":0.05,"change":1.01},{"ticker":"WDAY","name":"Workday","sector":"科技","weight":0.05,"change":-0.45},{"ticker":"STX","name":"希捷","sector":"科技","weight":0.04,"change":5.66},{"ticker":"WDC","name":"西数","sector":"科技","weight":0.04,"change":2.23},{"ticker":"ASML","name":"ASML","sector":"科技","weight":0.03,"change":-2.09},{"ticker":"MPWR","name":"MPS","sector":"科技","weight":0.03,"change":0.49},{"ticker":"ALAB","name":"Astera","sector":"科技","weight":0.02,"change":-5.04},{"ticker":"CRWV","name":"CoreWeave","sector":"科技","weight":0.02,"change":0.41},{"ticker":"TER","name":"泰瑞达","sector":"科技","weight":0.02,"change":0.02},{"ticker":"GOOGL","name":"谷歌A","sector":"通信服务","weight":2.5,"change":-2.17},{"ticker":"GOOG","name":"谷歌C","sector":"通信服务","weight":2.5,"change":-2.17},{"ticker":"META","name":"Meta","sector":"通信服务","weight":3.3,"change":-2.79},{"ticker":"NFLX","name":"奈飞","sector":"通信服务","weight":1.8,"change":-7.26},{"ticker":"TMUS","name":"T-Mobile","sector":"通信服务","weight":1.1,"change":-0.22},{"ticker":"CMCSA","name":"康卡斯特","sector":"通信服务","weight":0.7,"change":-1.29},{"ticker":"EA","name":"EA","sector":"通信服务","weight":0.11,"change":0.51},{"ticker":"WBD","name":"华纳兄弟","sector":"通信服务","weight":0.07,"change":-1.54},{"ticker":"TTWO","name":"Take-Two","sector":"通信服务","weight":0.07,"change":-1.21},{"ticker":"AMZN","name":"亚马逊","sector":"可选消费","weight":6.7,"change":-1.06},{"ticker":"TSLA","name":"特斯拉","sector":"可选消费","weight":3.6,"change":-2.61},{"ticker":"BKNG","name":"Booking","sector":"可选消费","weight":0.52,"change":-1.59},{"ticker":"SBUX","name":"星巴克","sector":"可选消费","weight":0.5,"change":-2.66},{"ticker":"MELI","name":"MercadoLibre","sector":"可选消费","weight":0.37,"change":-2.34},{"ticker":"MAR","name":"万豪","sector":"可选消费","weight":0.31,"change":-1.32},{"ticker":"DASH","name":"DoorDash","sector":"可选消费","weight":0.28,"change":-1.19},{"ticker":"ORLY","name":"O'Reilly","sector":"可选消费","weight":0.26,"change":-0.23},{"ticker":"ABNB","name":"Airbnb","sector":"可选消费","weight":0.2,"change":-1.23},{"ticker":"ROST","name":"Ross","sector":"可选消费","weight":0.14,"change":0.32},{"ticker":"SHOP","name":"Shopify","sector":"可选消费","weight":0.05,"change":-1.2},{"ticker":"PDD","name":"拼多多","sector":"可选消费","weight":0.02,"change":-2.93},{"ticker":"WMT","name":"沃尔玛","sector":"必需消费","weight":3.0,"change":-0.62},{"ticker":"COST","name":"开市客","sector":"必需消费","weight":2.2,"change":-0.5},{"ticker":"PEP","name":"百事","sector":"必需消费","weight":1.4,"change":-1.66},{"ticker":"MDLZ","name":"亿滋","sector":"必需消费","weight":0.36,"change":-0.68},{"ticker":"MNST","name":"Monster","sector":"必需消费","weight":0.21,"change":-2.44},{"ticker":"KDP","name":"Keurig","sector":"必需消费","weight":0.18,"change":-1.5},{"ticker":"KHC","name":"卡夫亨氏","sector":"必需消费","weight":0.16,"change":-1.33},{"ticker":"CCEP","name":"可口可乐欧洲","sector":"必需消费","weight":0.03,"change":-0.82},{"ticker":"AMGN","name":"安进","sector":"医疗保健","weight":0.65,"change":-1.42},{"ticker":"ISRG","name":"直觉外科","sector":"医疗保健","weight":0.58,"change":-14.15},{"ticker":"GILD","name":"吉利德","sector":"医疗保健","weight":0.48,"change":-1.48},{"ticker":"VRTX","name":"Vertex","sector":"医疗保健","weight":0.43,"change":-0.08},{"ticker":"REGN","name":"再生元","sector":"医疗保健","weight":0.38,"change":-0.33},{"ticker":"DXCM","name":"Dexcom","sector":"医疗保健","weight":0.22,"change":-1.71},{"ticker":"IDXX","name":"IDEXX","sector":"医疗保健","weight":0.08,"change":-1.5},{"ticker":"GEHC","name":"GE医疗","sector":"医疗保健","weight":0.08,"change":-4.0},{"ticker":"ALNY","name":"Alnylam","sector":"医疗保健","weight":0.05,"change":-5.54},{"ticker":"LIN","name":"林德","sector":"工业","weight":1.3,"change":-1.44},{"ticker":"HON","name":"霍尼韦尔","sector":"工业","weight":0.6,"change":-0.58},{"ticker":"CSX","name":"CSX","sector":"工业","weight":0.3,"change":-0.28},{"ticker":"CTAS","name":"Cintas","sector":"工业","weight":0.25,"change":-0.87},{"ticker":"CPRT","name":"Copart","sector":"工业","weight":0.23,"change":-2.4},{"ticker":"ODFL","name":"Old Dominion","sector":"工业","weight":0.13,"change":-1.4},{"ticker":"FAST","name":"Fastenal","sector":"工业","weight":0.1,"change":-2.53},{"ticker":"ROP","name":"Roper","sector":"工业","weight":0.05,"change":-0.29},{"ticker":"VRSK","name":"Verisk","sector":"工业","weight":0.04,"change":-0.4},{"ticker":"FER","name":"Ferrovial","sector":"工业","weight":0.02,"change":-0.11},{"ticker":"TRI","name":"汤森路透","sector":"工业","weight":0.02,"change":-2.65},{"ticker":"PCAR","name":"Paccar","sector":"工业","weight":0.02,"change":-0.37},{"ticker":"AXON","name":"Axon","sector":"工业","weight":0.03,"change":-5.81},{"ticker":"RKLB","name":"Rocket Lab","sector":"工业","weight":0.02,"change":0.4},{"ticker":"EXC","name":"Exelon","sector":"公用事业","weight":0.1,"change":-1.13},{"ticker":"XEL","name":"Xcel","sector":"公用事业","weight":0.09,"change":-1.51},{"ticker":"AEP","name":"AEP","sector":"公用事业","weight":0.09,"change":-0.74},{"ticker":"CEG","name":"Constellation","sector":"公用事业","weight":0.03,"change":0.25},{"ticker":"FANG","name":"Diamondback","sector":"能源","weight":0.03,"change":2.85},{"ticker":"BKR","name":"Baker Hughes","sector":"能源","weight":0.02,"change":-1.04},{"ticker":"CSGP","name":"CoStar","sector":"房地产","weight":0.04,"change":-1.94}],"pie_stocks":[{"ticker":"AAPL","name":"苹果","sector":"科技","weight":11.04,"change":0.14},{"ticker":"NVDA","name":"英伟达","sector":"科技","weight":8.7,"change":-2.21},{"ticker":"MSFT","name":"微软","sector":"科技","weight":7.3,"change":-1.82},{"ticker":"AMZN","name":"亚马逊","sector":"可选消费","weight":6.7,"change":-1.06},{"ticker":"TSLA","name":"特斯拉","sector":"可选消费","weight":3.6,"change":-2.61},{"ticker":"META","name":"Meta","sector":"通信服务","weight":3.3,"change":-2.79},{"ticker":"WMT","name":"沃尔玛","sector":"必需消费","weight":3.0,"change":-0.62},{"ticker":"AVGO","name":"博通","sector":"科技","weight":2.7,"change":-0.97},{"ticker":"GOOGL","name":"谷歌A","sector":"通信服务","weight":2.5,"change":-2.17},{"ticker":"GOOG","name":"谷歌C","sector":"通信服务","weight":2.5,"change":-2.17},{"ticker":"COST","name":"开市客","sector":"必需消费","weight":2.2,"change":-0.5},{"ticker":"NFLX","name":"奈飞","sector":"通信服务","weight":1.8,"change":-7.26},{"ticker":"AMD","name":"AMD","sector":"科技","weight":1.6,"change":-1.03},{"ticker":"PEP","name":"百事","sector":"必需消费","weight":1.4,"change":-1.66},{"ticker":"LIN","name":"林德","sector":"工业","weight":1.3,"change":-1.44},{"ticker":"其他","name":"其他85只","sector":"","weight":21.95,"change":-1.51}],"sectors":[{"name":"科技","weight":42.49,"change":-1.14,"count":41},{"name":"可选消费","weight":12.95,"change":-1.59,"count":12},{"name":"通信服务","weight":12.15,"change":-2.83,"count":9},{"name":"必需消费","weight":7.54,"change":-0.87,"count":8},{"name":"工业","weight":3.11,"change":-1.21,"count":14},{"name":"医疗保健","weight":2.95,"change":-3.76,"count":9},{"name":"公用事业","weight":0.31,"change":-0.99,"count":4},{"name":"能源","weight":0.05,"change":1.29,"count":2},{"name":"房地产","weight":0.04,"change":-1.94,"count":1}],"bins":{"labels":["<-3%","-3~-2%","-2~-1%","-1~0%","0~1%","1~2%","2~3%",">3%"],"counts":[10,16,30,24,13,3,3,1]},"history":[29414.26,29084.5,28508.03,29446.18,29635.95,30543.92,29968.13,29670.95,30406.19,30347.08,29347.27,29220.06,29440.32,29118.24,29774.75,30276.35,29809.13,29329.21,29697.87,29173.02,29252.56,29727.1,29825.11,29264.1,29586.29,29502.6,29025.77,28592.66],"date":"2026-07-17","ai_summary":"NDX报-1.49%，上涨20家，下跌80家。","ai_stocks":"权重股苹果（AAPL）、英伟达（NVDA）涨跌互现，权重合计约19.7%。","ai_sectors":"能源领涨+1.29%，医疗保健领跌-3.76%。","ai_distribution":"20涨80跌，-2~-1%区间30只。","ai_industry":"1个行业上涨，8个下跌。","ai_trend":"30日-2.79%，区间28,508-30,544。"};
+const IS_API = {};
 
 function colorForChange(c){ return c >= 0 ? 'var(--rise)' : 'var(--fall)'; }
 function fmtPct(c){return(c>=0?"▲ +":"▼ ")+c.toFixed(2)+"%"}
 function fmtPctRaw(c){return(c>=0?"+":"")+c.toFixed(2)+"%"}
 function svgEl(tag,attrs){const el=document.createElementNS("http://www.w3.org/2000/svg",tag);for(let k in attrs)el.setAttribute(k,attrs[k]);return el}
 
-const HISTORY_DATES = ["2026-07-16", "2026-07-17", "2026-07-20", "2026-07-21", "2026-07-22", "2026-07-23", "2026-07-24", "2026-07-27", "2026-07-28", "2026-07-29", "2026-07-30", "2026-07-31", "2026-08-03", "2026-08-04", "2026-08-05", "2026-08-06", "2026-08-07", "2026-08-10", "2026-08-11", "2026-08-12", "2026-08-13"];
+const HISTORY_DATES = ["2026-07-16", "2026-07-17", "2026-07-20", "2026-07-21", "2026-07-22", "2026-07-23", "2026-07-24", "2026-07-27", "2026-07-28", "2026-07-29", "2026-07-30", "2026-07-31", "2026-08-03", "2026-08-04", "2026-08-05", "2026-08-06", "2026-08-07", "2026-08-10", "2026-08-11", "2026-08-12", "2026-08-13", "2026-08-14"];
 const IS_HISTORY = true;
 
 // 市场状态
@@ -561,14 +655,80 @@ function getMarketStatus(){
   return"已收盘";
 }
 
-// 带滑动过渡的页面跳转
-function navigateWithTransition(url) {
-  if (document.startViewTransition) {
-    document.startViewTransition(() => {
-      window.location.href = url;
-    });
-  } else {
-    window.location.href = url; // 旧浏览器无动画，直接跳转
+// 带颜色的数字高亮
+function highlightNumbers(text) {
+  text = text.replace(/([+-]?\d+\.?\d*%)/g, function(match) {
+    var num = parseFloat(match);
+    if (num > 0) return '<span class="up">' + match + '</span>';
+    else if (num < 0) return '<span class="down">' + match + '</span>';
+    return match;
+  });
+  text = text.replace(/([+-]?\d+\.?\d*)(?![%\d])/g, function(match) {
+    var num = parseFloat(match);
+    if (num > 0) return '<span class="up">' + match + '</span>';
+    else if (num < 0) return '<span class="down">' + match + '</span>';
+    return match;
+  });
+  return text;
+}
+
+// 改进的打字机效果：按标签整体插入，只对纯文本字符逐字显示
+function typeWriter(element, html, callback, speed) {
+  speed = speed || 25;
+  // 解析html字符串，拆分成标签和普通文本
+  var tokens = [];
+  var i = 0;
+  while (i < html.length) {
+    if (html[i] === '<') {
+      var j = html.indexOf('>', i);
+      if (j !== -1) {
+        tokens.push(html.substring(i, j + 1));
+        i = j + 1;
+        continue;
+      }
+    }
+    // 普通字符（包括数字、汉字、标点等）
+    tokens.push(html[i]);
+    i++;
+  }
+  var index = 0;
+  element.innerHTML = '';
+  function type() {
+    if (index < tokens.length) {
+      var token = tokens[index];
+      // 如果是标签，直接插入（不会拆分）
+      element.innerHTML += token;
+      index++;
+      setTimeout(type, speed);
+    } else {
+      if (callback) callback();
+    }
+  }
+  type();
+}
+
+// 渲染带脚标的总结
+function renderSummary(containerId, textId, footerId, text, isApi) {
+  var container = document.getElementById(containerId);
+  if (!container) return;
+  if (!text) { container.style.display = 'none'; return; }
+  
+  container.style.display = 'block';
+  var textEl = document.getElementById(textId);
+  var footerEl = document.getElementById(footerId);
+  
+  if (footerEl) {
+    if (isApi) {
+      footerEl.textContent = 'Brief powered by QWEN';
+    } else {
+      footerEl.textContent = '';
+    }
+  }
+  
+  if (textEl) {
+    var highlighted = highlightNumbers(text);
+    textEl._fullHtml = highlighted;
+    typeWriter(textEl, highlighted, null, 20);
   }
 }
 
@@ -586,7 +746,9 @@ function navigateWithTransition(url) {
     currentDate = m ? m[1] : DATA.date;
     if (btnToday) {
       btnToday.style.display = "inline-block";
-      btnToday.onclick = () => navigateWithTransition("../index.html");
+      btnToday.onclick = function() {
+        window.location.href = "../index.html";
+      };
     }
   } else {
     currentDate = DATA.date;
@@ -596,18 +758,25 @@ function navigateWithTransition(url) {
   if (idx > 0) {
     const prevDate = HISTORY_DATES[idx - 1];
     btnPrev.disabled = false;
-    btnPrev.onclick = () => navigateWithTransition(isHistory ? "./" + prevDate + ".html" : "./history/" + prevDate + ".html");
+    btnPrev.onclick = function() {
+      window.location.href = isHistory ? "./" + prevDate + ".html" : "./history/" + prevDate + ".html";
+    };
   }
   if (idx < HISTORY_DATES.length - 1) {
     const nextDate = HISTORY_DATES[idx + 1];
     btnNext.disabled = false;
     if (nextDate === DATA.date && isHistory) {
-      btnNext.onclick = () => navigateWithTransition("../index.html");
+      btnNext.onclick = function() {
+        window.location.href = "../index.html";
+      };
     } else {
-      btnNext.onclick = () => navigateWithTransition(isHistory ? "./" + nextDate + ".html" : "./history/" + nextDate + ".html");
+      btnNext.onclick = function() {
+        window.location.href = isHistory ? "./" + nextDate + ".html" : "./history/" + nextDate + ".html";
+      };
     }
   }
 })();
+
 
 // KPI
 (function(){
@@ -616,17 +785,15 @@ function navigateWithTransition(url) {
   document.getElementById("statusBadge").textContent=getMarketStatus();
   document.querySelector('.hero-accent').style.color = idx.change >= 0 ? 'var(--rise)' : 'var(--fall)';
   document.querySelectorAll('.section-label').forEach(el=>{el.style.color=idx.change>=0?'var(--rise)':'var(--fall)';});
-  document.querySelector('.hero-tag-dot').style.background=idx.change>=0?'var(--rise)':'var(--fall)';
   document.getElementById('siteLogo').style.color=idx.change>=0?'var(--rise)':'var(--fall)';
 
+  // INDEX 价格滚动
   const priceEl=document.getElementById("idxPrice");
   const chgEl=document.getElementById("idxChange");
 
   if(idx.price&&idx.prev_close){
-    // 价格 odometer 滚动（从昨日收盘价滚到今日）
     rollNumber(priceEl, idx.prev_close, idx.price, 5000);
 
-    // 涨跌幅直接设置，不参与滚动（避免格式复杂化）
     const diff=idx.price-idx.prev_close;
     const sign=idx.change>=0?"▲ +":"▼ ";
     const diffSign=diff>=0?"+":"";
@@ -638,41 +805,63 @@ function navigateWithTransition(url) {
     chgEl.className="kpi-change "+(idx.change>=0?"up":"down");
   }
 
-  document.getElementById("idxUp").textContent=idx.up;
-  document.getElementById("idxDown").textContent=idx.down;
-  document.getElementById("stockCount").textContent=idx.total;
+  // 30D 涨跌幅滚动（从0滚动到目标值）
   const hist=DATA.history;
   if(hist.length>=2){
-    const c30=((hist[hist.length-1]-hist[0])/hist[0]*100).toFixed(2);
-    const t30=document.getElementById("trend30d");
-    t30.textContent=(c30>=0?"▲ +":"▼ ")+c30+"%";
-    t30.className="kpi-change "+(c30>=0?"up":"down");
-    document.getElementById("trendRange").textContent=Math.round(hist[0]).toLocaleString()+" → "+Math.round(hist[hist.length-1]).toLocaleString();
+    const c30 = ((hist[hist.length-1]-hist[0])/hist[0]*100);
+    const trendEl = document.getElementById("trend30d");
+    trendEl.innerHTML = '';
+    const signSpan = document.createElement('span');
+    signSpan.textContent = c30 >= 0 ? '▲ +' : '▼ ';
+    signSpan.style.display = 'inline-block';
+    trendEl.appendChild(signSpan);
+
+    const numSpan = document.createElement('span');
+    numSpan.style.display = 'inline-block';
+    numSpan.style.fontFamily = "'JetBrains Mono', monospace";
+    trendEl.appendChild(numSpan);
+
+    const pctSpan = document.createElement('span');
+    pctSpan.textContent = '%';
+    trendEl.appendChild(pctSpan);
+
+    trendEl.className = "kpi-change " + (c30 >= 0 ? "up" : "down");
+    rollNumber(numSpan, 0, Math.abs(c30), 2000);
+
+    document.getElementById("trendRange").textContent = Math.round(hist[0]).toLocaleString() + " → " + Math.round(hist[hist.length-1]).toLocaleString();
   }else{
-    document.getElementById("trend30d").textContent="--";
-    document.getElementById("trendRange").textContent="数据暂缺";
+    document.getElementById("trend30d").textContent = "--";
+    document.getElementById("trendRange").textContent = "数据暂缺";
   }
+
+  // UP/DOWN 滚动（从0滚动到实际值），并设置颜色
+  const upEl = document.getElementById("idxUp");
+  const downEl = document.getElementById("idxDown");
+  upEl.style.color = 'var(--rise)';
+  downEl.style.color = 'var(--fall)';
+  rollNumber(upEl, 0, idx.up, 2000);
+  rollNumber(downEl, 0, idx.down, 2000);
+  document.getElementById("stockCount").textContent = idx.total;
 })();
 
-// AI Summaries
+
+// AI Summaries - 使用打字机效果 + 脚标
 (function(){
-  const summaries=[
-    {key:"ai_summary",box:"aiSummaryBox",text:"aiSummaryText",div:"aiSummaryDivider"},
-    {key:"ai_stocks",box:"aiStocksBox",text:null},
-    {key:"ai_sectors",box:"aiSectorsBox",text:null},
-    {key:"ai_distribution",box:"aiDistBox",text:null},
-    {key:"ai_industry",box:"aiIndustryBox",text:null},
-    {key:"ai_trend",box:"aiTrendBox",text:null}
+  var isApi = DATA._is_api || {};
+  var summaries = [
+    {key:"ai_summary", box:"aiSummaryBox", text:"aiSummaryText", footer:"aiSummaryFooter", div:"aiSummaryDivider"},
+    {key:"ai_stocks", box:"aiStocksBox", text:"aiStocksText", footer:"aiStocksFooter"},
+    {key:"ai_sectors", box:"aiSectorsBox", text:"aiSectorsText", footer:"aiSectorsFooter"},
+    {key:"ai_distribution", box:"aiDistBox", text:"aiDistText", footer:"aiDistFooter"},
+    {key:"ai_industry", box:"aiIndustryBox", text:"aiIndustryText", footer:"aiIndustryFooter"},
+    {key:"ai_trend", box:"aiTrendBox", text:"aiTrendText", footer:"aiTrendFooter"}
   ];
-  summaries.forEach(s=>{
-    if(DATA[s.key]){
-      const box=document.getElementById(s.box);
-      if(box){
-        const el=s.text?document.getElementById(s.text):box.querySelector("p");
-        if(el)el.textContent=DATA[s.key];
-        box.style.display="block";
-        if(s.div){document.getElementById(s.div).style.display="block"}
-      }
+  summaries.forEach(function(s){
+    var key = s.key;
+    var isApiKey = isApi[key] || false;
+    if (DATA[key]) {
+      renderSummary(s.box, s.text, s.footer, DATA[key], isApiKey);
+      if (s.div) { document.getElementById(s.div).style.display = "block"; }
     }
   });
 })();
@@ -756,9 +945,10 @@ function navigateWithTransition(url) {
   svg.appendChild(svgEl("text",{x:W-padR,y:H-5,"text-anchor":"end",fill:TEXT3,"font-size":"11","font-weight":"600"})).textContent="Today";
 })();
 
-// 股票网格
+// 股票网格 - 逐个淡入
 (function(){
   const grid=document.getElementById("stockGrid");
+  const cells = [];
   DATA.stocks.forEach(s=>{
     const cell=document.createElement("div");
     cell.className="stock-cell "+(s.change>=0?"":"down");
@@ -766,10 +956,25 @@ function navigateWithTransition(url) {
     cell.addEventListener("mouseenter",e=>showTip(e,s.ticker+" "+s.name+"<br>权重 "+s.weight+"% - "+s.sector));
     cell.addEventListener("mouseleave",hideTip);
     grid.appendChild(cell);
+    cells.push(cell);
   });
+  
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        cells.forEach((cell, i) => {
+          setTimeout(() => {
+            cell.classList.add('visible');
+          }, i * 20);
+        });
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.05 });
+  observer.observe(grid);
 })();
 
-// 个股饼图
+// 个股饼图 - 无阴影
 (function(){
   const container=document.getElementById("stockPie");
   const data=DATA.pie_stocks;
@@ -779,18 +984,12 @@ function navigateWithTransition(url) {
   const cx=200,cy=170,R=120,sw=44;
   const C=2*Math.PI*R;
 
-  // 底部光晕（涨跌变色）
-  const glow=document.createElement("div");
-  glow.className="pie-glow "+(DATA.index.change>=0?"up":"down");
-  container.appendChild(glow);
-
   let rot=-90;
   data.forEach((d,idx)=>{
     const angle=(d.weight/total)*360;
     const arc=(angle/360)*C;
     const color=colorForChange(d.change);
 
-    // 关键：用 <g> 做 scale 生长动画
     const gWrap=svgEl("g",{class:"pie-seg"});
     gWrap.style.transitionDelay=(idx*0.05)+"s";
     gWrap.style.transformOrigin="200px 170px";
@@ -798,21 +997,18 @@ function navigateWithTransition(url) {
     gWrap.addEventListener("mouseenter",e=>showTip(e,d.name+"（"+d.ticker+"）<br>权重 "+d.weight+"% · "+fmtPct(d.change)));
     gWrap.addEventListener("mouseleave",hideTip);
 
-    // <circle> 只管 rotate，不再加 class="pie-seg"
     const seg=svgEl("circle",{cx:cx,cy:cy,r:R,fill:"none",stroke:color,"stroke-width":sw,"stroke-dasharray":arc+" "+(C-arc),transform:"rotate("+rot+" "+cx+" "+cy+")"});
     gWrap.appendChild(seg);
     svg.appendChild(gWrap);
     rot+=angle;
   });
 
-  // Donut 中间挖空
   svg.appendChild(svgEl("circle",{cx:cx,cy:cy,r:R-sw/2,fill:"var(--bg)"}));
 
-  // 文字盖在最上层，加阴影保证任何颜色扇形上都能看清
-  const shadow="text-shadow:0 2px 10px rgba(0,0,0,0.85)";
-  svg.appendChild(svgEl("text",{x:cx,y:cy-12,"text-anchor":"middle",fill:"var(--text)","font-size":28,"font-weight":900,"letter-spacing":"-1",style:shadow})).textContent="NDX";
+  // 无阴影
+  svg.appendChild(svgEl("text",{x:cx,y:cy-12,"text-anchor":"middle",fill:"var(--text)","font-size":28,"font-weight":900,"letter-spacing":"-1"})).textContent="NDX";
   const chgColor=DATA.index.change>=0?"var(--rise)":"var(--fall)";
-  svg.appendChild(svgEl("text",{x:cx,y:cy+15,"text-anchor":"middle",fill:chgColor,"font-size":18,"font-weight":800,"font-family":"'JetBrains Mono',monospace",style:shadow})).textContent=fmtPct(DATA.index.change);
+  svg.appendChild(svgEl("text",{x:cx,y:cy+15,"text-anchor":"middle",fill:chgColor,"font-size":18,"font-weight":800,"font-family":"'JetBrains Mono',monospace"})).textContent=fmtPct(DATA.index.change);
 
   container.appendChild(svg);
   const leg=document.getElementById("stockLegend");
@@ -823,7 +1019,7 @@ function navigateWithTransition(url) {
   });
 })();
 
-// 行业饼图
+// 行业饼图 - 无阴影
 (function(){
   const container=document.getElementById("sectorPie");
   const data=DATA.sectors;
@@ -832,11 +1028,6 @@ function navigateWithTransition(url) {
   svg.setAttribute("viewBox","0 0 400 340");svg.style.width="100%";svg.style.maxWidth="380px";svg.style.height="auto";svg.style.position="relative";svg.style.zIndex="1";
   const cx=200,cy=170,R=120,sw=44;
   const C=2*Math.PI*R;
-
-  // 底部光晕
-  const glow=document.createElement("div");
-  glow.className="pie-glow "+(DATA.index.change>=0?"up":"down");
-  container.appendChild(glow);
 
   let rot=-90;
   data.forEach((d,idx)=>{
@@ -857,18 +1048,17 @@ function navigateWithTransition(url) {
     rot+=angle;
   });
 
-  // Donut 中间挖空
   svg.appendChild(svgEl("circle",{cx:cx,cy:cy,r:R-sw/2,fill:"var(--bg)"}));
 
-  const shadow="text-shadow:0 2px 10px rgba(0,0,0,0.85)";
-  svg.appendChild(svgEl("text",{x:cx,y:cy-22,"text-anchor":"middle",fill:"var(--text)","font-size":24,"font-weight":900,"letter-spacing":"-0.5",style:shadow})).textContent="SECTORS";
+  // 无阴影
+  svg.appendChild(svgEl("text",{x:cx,y:cy-22,"text-anchor":"middle",fill:"var(--text)","font-size":24,"font-weight":900,"letter-spacing":"-0.5"})).textContent="SECTORS";
 
   const upSectors=data.filter(d=>d.change>=0);
   const downSectors=data.filter(d=>d.change<0);
   const upAvg=upSectors.length?upSectors.reduce((a,b)=>a+b.change,0)/upSectors.length:0;
   const downAvg=downSectors.length?downSectors.reduce((a,b)=>a+b.change,0)/downSectors.length:0;
-  svg.appendChild(svgEl("text",{x:cx,y:cy+5,"text-anchor":"middle",fill:"var(--rise)","font-size":16,"font-weight":800,"font-family":"'JetBrains Mono',monospace",style:shadow})).textContent="▲ "+fmtPctRaw(upAvg);
-  svg.appendChild(svgEl("text",{x:cx,y:cy+25,"text-anchor":"middle",fill:"var(--fall)","font-size":14,"font-weight":700,"font-family":"'JetBrains Mono',monospace",style:shadow})).textContent="▼ "+fmtPctRaw(downAvg);
+  svg.appendChild(svgEl("text",{x:cx,y:cy+5,"text-anchor":"middle",fill:"var(--rise)","font-size":16,"font-weight":800,"font-family":"'JetBrains Mono',monospace"})).textContent="▲ "+fmtPctRaw(upAvg);
+  svg.appendChild(svgEl("text",{x:cx,y:cy+25,"text-anchor":"middle",fill:"var(--fall)","font-size":14,"font-weight":700,"font-family":"'JetBrains Mono',monospace"})).textContent="▼ "+fmtPctRaw(downAvg);
 
   container.appendChild(svg);
   const leg=document.getElementById("sectorLegend");
@@ -877,7 +1067,9 @@ function navigateWithTransition(url) {
     item.innerHTML='<span class="pie-legend-dot" style="background:'+colorForChange(d.change)+'"></span>'+d.name+" "+d.weight+"%";
     leg.appendChild(item);
   });
-})();// 行情条
+})();
+
+// 行情条
 (function(){
   const topStocks=DATA.stocks.slice().sort((a,b)=>Math.abs(b.change)-Math.abs(a.change));
   const bottomStocks=DATA.stocks.slice().sort(()=>Math.random()-0.5);
@@ -899,7 +1091,7 @@ function navigateWithTransition(url) {
   buildTicker("tickerBottom",bottomStocks,true);
 })();
 
-// 主题切换
+// 主题切换 - 同时更新 Glitch 颜色
 function toggleTheme(){
   const root=document.documentElement;
   const btn=document.getElementById("themeToggleBtn");
@@ -910,79 +1102,148 @@ function toggleTheme(){
     root.classList.add("light");
     if(btn)btn.textContent="夜间模式";
   }
+  if (window.updateGlitchColors) {
+    window.updateGlitchColors();
+  }
 }
+
+// ===== Glitch 标题切换（颜色与数字相反） =====
+(function() {
+  const el = document.getElementById('glitchTitle');
+  if (!el) return;
+  
+  const words = ['纳斯达克100', 'NDX'];
+  let currentIndex = 0;
+  let isSwitching = false;
+  
+  const change = DATA.index.change || 0;
+  const isUp = change >= 0;
+  
+  // 设置伪元素的颜色（与数字相反）
+  function setGlitchColors() {
+    const computed = getComputedStyle(document.documentElement);
+    const riseColor = computed.getPropertyValue('--rise').trim();
+    const fallColor = computed.getPropertyValue('--fall').trim();
+    if (isUp) {
+      // 涨 -> Glitch 闪紫色
+      el.style.setProperty('--glitch-color1', fallColor + 'cc');
+      el.style.setProperty('--glitch-color2', fallColor + '99');
+    } else {
+      // 跌 -> Glitch 闪绿色
+      el.style.setProperty('--glitch-color1', riseColor + 'cc');
+      el.style.setProperty('--glitch-color2', riseColor + '99');
+    }
+  }
+  setGlitchColors();
+  
+  // 暴露给全局，供主题切换调用
+  window.updateGlitchColors = setGlitchColors;
+  
+  const ndxColor = isUp ? 'var(--rise)' : 'var(--fall)';
+  
+  function switchWord() {
+    if (isSwitching) return;
+    isSwitching = true;
+    
+    el.classList.add('switching');
+    
+    setTimeout(() => {
+      currentIndex = (currentIndex + 1) % words.length;
+      const newText = words[currentIndex];
+      
+      if (newText === 'NDX') {
+        el.innerHTML = 'ND<span style="color:' + ndxColor + '">X</span>';
+      } else if (newText === '纳斯达克100') {
+        el.innerHTML = '纳斯达克<span style="color:' + ndxColor + '">100</span>';
+      } else {
+        el.textContent = newText;
+      }
+      
+      el.setAttribute('data-text', newText);
+      el.style.color = '';
+    }, 300);
+    
+    setTimeout(() => {
+      el.classList.remove('switching');
+      isSwitching = false;
+    }, 700);
+  }
+  
+  setInterval(switchWord, 3000);
+})();
 
 
 // Odometer 数字滚动：从 fromValue 逐位翻滚到 toValue
 function rollNumber(el, fromValue, toValue, duration){
-  const toStr=toValue.toLocaleString("en-US",{minimumFractionDigits:1,maximumFractionDigits:1});
-  const fromStr=fromValue.toLocaleString("en-US",{minimumFractionDigits:1,maximumFractionDigits:1});
+  // 将数字转为字符串，统一用 0 补齐位数（修复 UP 滚动问题）
+  const toStr = toValue.toLocaleString("en-US", {minimumFractionDigits: 1, maximumFractionDigits: 1});
+  const fromStr = fromValue.toLocaleString("en-US", {minimumFractionDigits: 1, maximumFractionDigits: 1});
+  const maxLen = Math.max(toStr.length, fromStr.length);
+  // 关键修改：用 '0' 填充，保证所有位都是数字，都会滚动
+  const toPadded = toStr.padStart(maxLen, '0');
+  const fromPadded = fromStr.padStart(maxLen, '0');
 
-  // 对齐长度（前补空格）
-  const maxLen=Math.max(toStr.length,fromStr.length);
-  const toPadded=toStr.padStart(maxLen,' ');
-  const fromPadded=fromStr.padStart(maxLen,' ');
+  el.innerHTML = "";
+  el.style.display = "inline-flex";
+  el.style.alignItems = "flex-end";
 
-  el.innerHTML="";
-  el.style.display="inline-flex";
-  el.style.alignItems="flex-end";
+  const digits = [];
 
-  const digits=[];
+  for (let i = 0; i < maxLen; i++) {
+    const fromCh = fromPadded[i];
+    const toCh = toPadded[i];
 
-  for(let i=0;i<maxLen;i++){
-    const fromCh=fromPadded[i];
-    const toCh=toPadded[i];
-
-    if(fromCh===","||fromCh==="."||fromCh===" "){
-      const span=document.createElement("span");
-      span.textContent=toCh;
-      span.style.display="inline-block";
+    if (fromCh === "," || fromCh === ".") {
+      // 逗号和点保持不变
+      const span = document.createElement("span");
+      span.textContent = toCh;
+      span.style.display = "inline-block";
       el.appendChild(span);
-    }else{
-      const fromNum=parseInt(fromCh);
-      const toNum=parseInt(toCh);
+    } else {
+      const fromNum = parseInt(fromCh);
+      const toNum = parseInt(toCh);
 
-      const wrap=document.createElement("span");
-      wrap.style.display="inline-block";
-      wrap.style.overflow="hidden";
-      wrap.style.height="1em";
-      wrap.style.lineHeight="1em";
-      wrap.style.verticalAlign="bottom";
+      const wrap = document.createElement("span");
+      wrap.style.display = "inline-block";
+      wrap.style.overflow = "hidden";
+      wrap.style.height = "1em";
+      wrap.style.lineHeight = "1em";
+      wrap.style.verticalAlign = "bottom";
 
-      const strip=document.createElement("span");
-      strip.style.display="flex";
-      strip.style.flexDirection="column";
+      const strip = document.createElement("span");
+      strip.style.display = "flex";
+      strip.style.flexDirection = "column";
 
-      // 构建滚动序列：从 fromNum 向上滚动到 toNum（循环）
-      let seq=[];
-      let n=fromNum;
-      while(true){
+      // 构建滚动序列：从 fromNum 到 toNum（包括所有中间值）
+      let seq = [];
+      let n = fromNum;
+      while (true) {
         seq.push(n);
-        if(n===toNum) break;
-        n=(n+1)%10;
+        if (n === toNum) break;
+        n = (n + 1) % 10;
       }
 
-      seq.forEach(num=>{
-        const d=document.createElement("span");
-        d.textContent=num;
-        d.style.display="block";
-        d.style.height="1em";
-        d.style.lineHeight="1em";
+      seq.forEach(num => {
+        const d = document.createElement("span");
+        d.textContent = num;
+        d.style.display = "block";
+        d.style.height = "1em";
+        d.style.lineHeight = "1em";
         strip.appendChild(d);
       });
 
       wrap.appendChild(strip);
       el.appendChild(wrap);
-      digits.push({strip,count:seq.length,delay:i*70,duration:duration});
+      digits.push({ strip, count: seq.length, delay: i * 70, duration: duration });
     }
   }
 
-  requestAnimationFrame(()=>{
-    digits.forEach(({strip,count,delay,duration})=>{
-      strip.style.transition=`transform ${duration}ms cubic-bezier(0.25,1,0.5,1)`;
-      setTimeout(()=>{
-        strip.style.transform=`translateY(-${count-1}em)`;
-      },delay);
+  requestAnimationFrame(() => {
+    digits.forEach(({ strip, count, delay, duration }) => {
+      strip.style.transition = `transform ${duration}ms cubic-bezier(0.25, 1, 0.5, 1)`;
+      setTimeout(() => {
+        strip.style.transform = `translateY(-${count - 1}em)`;
+      }, delay);
     });
   });
 }
