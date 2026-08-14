@@ -278,13 +278,28 @@ def build_mock_data():
     return result
 
 
-HTML_TEMPLATE = """<!DOCTYPE html>
-<html lang="zh-CN"><head><meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NDX Dashboard</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap');
 
+/* ===== View Transitions 页面滑动效果 ===== */
+::view-transition-old(root) {
+  animation: slide-out-left 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+::view-transition-new(root) {
+  animation: slide-in-right 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes slide-out-left {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(-40px); opacity: 0.4; }
+}
+@keyframes slide-in-right {
+  from { transform: translateX(40px); opacity: 0.4; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* 回退方案（不支持 API 的浏览器依然正常跳转，无动画） */
+/* 这行现在可以删除，因为 @import 已经移到最上面了 */
 :root {
   --bg: #0a0a0a;
   --surface: #111111;
@@ -824,32 +839,51 @@ function getMarketStatus(){
   return"已收盘";
 }
 
+// 带滑动过渡的页面跳转
+function navigateWithTransition(url) {
+  if (document.startViewTransition) {
+    document.startViewTransition(() => {
+      window.location.href = url;
+    });
+  } else {
+    window.location.href = url; // 旧浏览器无动画，直接跳转
+  }
+}
+
 // 导航
 (function(){
-  const btnPrev=document.getElementById("btnPrev");
-  const btnNext=document.getElementById("btnNext");
-  const btnToday=document.getElementById("btnToday");
-  if(!btnPrev||!btnNext)return;
-  const path=window.location.pathname;
-  const isHistory=path.includes("/history/");
+  const btnPrev = document.getElementById("btnPrev");
+  const btnNext = document.getElementById("btnNext");
+  const btnToday = document.getElementById("btnToday");
+  if (!btnPrev || !btnNext) return;
+  const path = window.location.pathname;
+  const isHistory = path.includes("/history/");
   let currentDate;
-  if(isHistory){
-    const m=path.match(/history\/(\d{4}-\d{2}-\d{2})/);
-    currentDate=m?m[1]:DATA.date;
-    if(btnToday){btnToday.style.display="inline-block";btnToday.onclick=()=>location.href="../index.html"}
-  }else{currentDate=DATA.date}
-  const idx=HISTORY_DATES.indexOf(currentDate);
-  if(idx===-1)return;
-  if(idx>0){
-    const prevDate=HISTORY_DATES[idx-1];
-    btnPrev.disabled=false;
-    btnPrev.onclick=()=>{location.href=isHistory?"./"+prevDate+".html":"./history/"+prevDate+".html"}
+  if (isHistory) {
+    const m = path.match(/history\/(\d{4}-\d{2}-\d{2})/);
+    currentDate = m ? m[1] : DATA.date;
+    if (btnToday) {
+      btnToday.style.display = "inline-block";
+      btnToday.onclick = () => navigateWithTransition("../index.html");
+    }
+  } else {
+    currentDate = DATA.date;
   }
-  if(idx<HISTORY_DATES.length-1){
-    const nextDate=HISTORY_DATES[idx+1];
-    btnNext.disabled=false;
-    if(nextDate===DATA.date&&isHistory){btnNext.onclick=()=>location.href="../index.html"}
-    else{btnNext.onclick=()=>{location.href=isHistory?"./"+nextDate+".html":"./history/"+nextDate+".html"}}
+  const idx = HISTORY_DATES.indexOf(currentDate);
+  if (idx === -1) return;
+  if (idx > 0) {
+    const prevDate = HISTORY_DATES[idx - 1];
+    btnPrev.disabled = false;
+    btnPrev.onclick = () => navigateWithTransition(isHistory ? "./" + prevDate + ".html" : "./history/" + prevDate + ".html");
+  }
+  if (idx < HISTORY_DATES.length - 1) {
+    const nextDate = HISTORY_DATES[idx + 1];
+    btnNext.disabled = false;
+    if (nextDate === DATA.date && isHistory) {
+      btnNext.onclick = () => navigateWithTransition("../index.html");
+    } else {
+      btnNext.onclick = () => navigateWithTransition(isHistory ? "./" + nextDate + ".html" : "./history/" + nextDate + ".html");
+    }
   }
 })();
 
