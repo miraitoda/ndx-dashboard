@@ -27,7 +27,7 @@ def ensure_dir():
 SILICONFLOW_API_KEY = os.environ.get("SILICONFLOW_API_KEY", "your-api-key-here")
 SILICONFLOW_BASE_URL = os.environ.get("SILICONFLOW_BASE_URL", "https://api.siliconflow.cn/v1/chat/completions")
 SILICONFLOW_MODEL = os.environ.get("SILICONFLOW_MODEL", "Qwen/Qwen3-8B")
-SILICONFLOW_TIMEOUT = 180
+SILICONFLOW_TIMEOUT = 10
 
 
 def fetch_stock_data(tickers, max_batch=25):
@@ -380,23 +380,64 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:
 /* Container */
 .container{max-width:1200px;margin:0 auto;padding:0 24px;position:relative;z-index:1}
 
-/* Sections */
-section{padding:60px 0}
-.section-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:32px}
-.section-label{font-size:11px;font-weight:800;color:var(--accent);letter-spacing:3px;margin-bottom:8px;text-transform:uppercase}
-.section-title{font-size:24px;font-weight:800;color:var(--text);letter-spacing:-0.5px}
-.section-sub{font-size:13px;color:var(--text3);font-weight:500}
+/* ===== Intro Overlay ===== */
+#intro-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  pointer-events: auto;
+  transition: opacity 0.6s ease;
+  opacity: 1;
+}
+#intro-overlay.hide {
+  opacity: 0;
+  pointer-events: none;
+}
+#intro-overlay .intro-title {
+  font-size: 12vw;
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  color: var(--text);
+}
+#intro-overlay .intro-sub {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.3em;
+  opacity: 0.6;
+  margin-top: 1rem;
+}
+/* 内容初始隐藏，intro结束后显示 */
+body.intro-active .main-content {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+}
+body.intro-done .main-content {
+  opacity: 1;
+  pointer-events: auto;
+}
 
-/* Divider */
-.divider{height:1px;background:linear-gradient(90deg,transparent,var(--border-strong),transparent)}
-
-/* Hero */
-.hero{padding:80px 0 60px}
-.hero-inner{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:40px}
-.hero-left{flex:1;min-width:300px}
-.hero-title{font-size:64px;font-weight:900;letter-spacing:-3px;margin:0;line-height:1;color:var(--text);opacity:0;transform:translateY(-6px);animation:hero-in 0.6s cubic-bezier(0.16,1,0.3,1) 0.2s forwards}
-@keyframes hero-in {
-  to { opacity:1; transform:translateY(0); }
+/* 原有标题的入场动画由JS控制 */
+.hero-title {
+  font-size:64px;
+  font-weight:900;
+  letter-spacing:-3px;
+  margin:0;
+  line-height:1;
+  color:var(--text);
+  opacity:0;
+  transform:translateY(-6px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.hero-title.animate {
+  opacity:1;
+  transform:translateY(0);
 }
 .hero-accent{color:var(--accent)}
 .hero-desc{margin-top:20px;font-size:15px;color:var(--text2);line-height:1.6;max-width:400px}
@@ -625,7 +666,7 @@ section{padding:60px 0}
   100% { transform: translate(-1%,-1%) scale(1); }
 }
 
-/* ===== Glitch 文字切换效果（抖动时闪绿/紫，颜色与数字相反） ===== */
+/* ===== Glitch 文字切换效果 ===== */
 .glitch-word {
   display: inline-block;
   position: relative;
@@ -721,6 +762,12 @@ section{padding:60px 0}
   <div class="ticker-track" id="tickerTop"></div>
 </div>
 
+<!-- INTRO OVERLAY -->
+<div id="intro-overlay">
+  <span class="glitch-word intro-title" id="introTitle" data-text="纳斯达克100">纳斯达克100</span>
+  <p class="intro-sub">NASDAQ-100</p>
+</div>
+
 <!-- Header -->
 <div class="header">
   <div class="header-inner">
@@ -734,161 +781,164 @@ section{padding:60px 0}
   </div>
 </div>
 
-<div class="container">
+<!-- 主内容区域 -->
+<div class="main-content">
+  <div class="container">
 
-  <!-- HERO -->
-  <section class="hero">
-    <div class="hero-inner">
-      <div class="hero-left">
-        <h1 class="hero-title">
-          <span class="glitch-word" id="glitchTitle" data-text="纳斯达克100">纳斯达克100</span>
-          <br>
-          <span class="hero-accent" style="font-size:0.6em;">NASDAQ-100</span>
-        </h1>
-        <div class="hero-meta">
-          <span class="hero-date" id="dateStr"></span>
-          <span class="hero-dot"></span>
-          <span class="hero-badge" id="statusBadge">已收盘</span>
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-inner">
+        <div class="hero-left">
+          <h1 class="hero-title" id="mainTitle">
+            <span class="glitch-word" id="glitchTitle" data-text="纳斯达克100">纳斯达克100</span>
+            <br>
+            <span class="hero-accent" style="font-size:0.6em;">NASDAQ-100</span>
+          </h1>
+          <div class="hero-meta">
+            <span class="hero-date" id="dateStr"></span>
+            <span class="hero-dot"></span>
+            <span class="hero-badge" id="statusBadge">已收盘</span>
+          </div>
+        </div>
+        <div class="hero-kpis">
+          <div>
+            <div class="kpi-label">INDEX</div>
+            <div class="kpi-value" id="idxPrice">--</div>
+            <div class="kpi-change up" id="idxChange">--</div>
+          </div>
+          <div>
+            <div class="kpi-label">30D</div>
+            <div class="kpi-change up" id="trend30d">--</div>
+            <div class="kpi-sub" id="trendRange">--</div>
+          </div>
+          <div>
+            <div class="kpi-label">UP/DOWN</div>
+            <div class="kpi-value" id="upDownContainer"><span id="idxUp">--</span><span style="color:var(--text3);font-size:28px">/</span><span id="idxDown">--</span></div>
+            <div class="kpi-sub"><span id="stockCount">--</span> components</div>
+          </div>
         </div>
       </div>
-      <div class="hero-kpis">
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- AI SUMMARY -->
+    <section class="ai-summary" id="aiSummaryBox" style="display:none">
+      <div class="section-label">Markets in Focus</div>
+      <p class="summary-text" id="aiSummaryText"></p>
+      <span class="summary-footer" id="aiSummaryFooter"></span>
+    </section>
+    <div class="divider" id="aiSummaryDivider" style="display:none"></div>
+
+    <!-- DISTRIBUTION -->
+    <section>
+      <div class="section-header">
         <div>
-          <div class="kpi-label">INDEX</div>
-          <div class="kpi-value" id="idxPrice">--</div>
-          <div class="kpi-change up" id="idxChange">--</div>
+          <div class="section-label">Distribution</div>
+          <div class="section-title">涨跌分布</div>
         </div>
+        <div class="section-sub">100 components by change range</div>
+      </div>
+      <div class="dist-chart" id="distChart"></div>
+      <div class="card" id="aiDistBox" style="display:none;margin-top:20px;padding:20px 24px;">
+        <p style="margin:0;font-size:20px;line-height:1.5;color:var(--text);font-weight:700;letter-spacing:-0.3px;" class="summary-text" id="aiDistText"></p>
+        <span class="summary-footer" id="aiDistFooter"></span>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- PIE CHARTS -->
+    <section>
+      <div class="section-header">
         <div>
-          <div class="kpi-label">30D</div>
-          <div class="kpi-change up" id="trend30d">--</div>
-          <div class="kpi-sub" id="trendRange">--</div>
+          <div class="section-label">Breakdown</div>
+          <div class="section-title">权重分布</div>
         </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+        <div class="card" style="padding:48px">
+          <div class="card-title">个股权重</div>
+          <div class="card-sub">Top 15 + Others</div>
+          <div class="pie-container" id="stockPie"></div>
+          <div class="pie-legend" id="stockLegend"></div>
+          <div class="card" id="aiStocksBox" style="display:none;margin-top:20px;padding:16px 20px;">
+            <p style="margin:0;font-size:20px;line-height:1.5;color:var(--text);font-weight:700;letter-spacing:-0.3px;" class="summary-text" id="aiStocksText"></p>
+            <span class="summary-footer" id="aiStocksFooter"></span>
+          </div>
+        </div>
+        <div class="card" style="padding:48px">
+          <div class="card-title">行业权重</div>
+          <div class="card-sub">Sector Distribution</div>
+          <div class="pie-container" id="sectorPie"></div>
+          <div class="pie-legend" id="sectorLegend"></div>
+          <div class="card" id="aiSectorsBox" style="display:none;margin-top:20px;padding:16px 20px;">
+            <p style="margin:0;font-size:20px;line-height:1.5;color:var(--text);font-weight:700;letter-spacing:-0.3px;" class="summary-text" id="aiSectorsText"></p>
+            <span class="summary-footer" id="aiSectorsFooter"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTORS -->
+    <section>
+      <div class="section-header">
         <div>
-          <div class="kpi-label">UP/DOWN</div>
-          <div class="kpi-value" id="upDownContainer"><span id="idxUp">--</span><span style="color:var(--text3);font-size:28px">/</span><span id="idxDown">--</span></div>
-          <div class="kpi-sub"><span id="stockCount">--</span> components</div>
+          <div class="section-label">Sectors</div>
+          <div class="section-title">行业表现</div>
         </div>
+        <div class="section-sub">Weighted average by sector</div>
       </div>
-    </div>
-  </section>
-
-  <div class="divider"></div>
-
-  <!-- AI SUMMARY -->
-  <section class="ai-summary" id="aiSummaryBox" style="display:none">
-    <div class="section-label">Markets in Focus</div>
-    <p class="summary-text" id="aiSummaryText"></p>
-    <span class="summary-footer" id="aiSummaryFooter"></span>
-  </section>
-  <div class="divider" id="aiSummaryDivider" style="display:none"></div>
-
-  <!-- DISTRIBUTION -->
-  <section>
-    <div class="section-header">
-      <div>
-        <div class="section-label">Distribution</div>
-        <div class="section-title">涨跌分布</div>
+      <div id="sectorBar"></div>
+      <div class="card" id="aiIndustryBox" style="display:none;margin-top:20px;padding:20px 24px;">
+        <p style="margin:0;font-size:20px;line-height:1.5;color:var(--text);font-weight:700;letter-spacing:-0.3px;" class="summary-text" id="aiIndustryText"></p>
+        <span class="summary-footer" id="aiIndustryFooter"></span>
       </div>
-      <div class="section-sub">100 components by change range</div>
-    </div>
-    <div class="dist-chart" id="distChart"></div>
-    <div class="card" id="aiDistBox" style="display:none;margin-top:20px;padding:20px 24px;">
-      <p style="margin:0;font-size:20px;line-height:1.5;color:var(--text);font-weight:700;letter-spacing:-0.3px;" class="summary-text" id="aiDistText"></p>
-      <span class="summary-footer" id="aiDistFooter"></span>
-    </div>
-  </section>
+    </section>
 
-  <div class="divider"></div>
+    <div class="divider"></div>
 
-  <!-- PIE CHARTS -->
-  <section>
-    <div class="section-header">
-      <div>
-        <div class="section-label">Breakdown</div>
-        <div class="section-title">权重分布</div>
-      </div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
-      <div class="card" style="padding:48px">
-        <div class="card-title">个股权重</div>
-        <div class="card-sub">Top 15 + Others</div>
-        <div class="pie-container" id="stockPie"></div>
-        <div class="pie-legend" id="stockLegend"></div>
-        <div class="card" id="aiStocksBox" style="display:none;margin-top:20px;padding:16px 20px;">
-          <p style="margin:0;font-size:20px;line-height:1.5;color:var(--text);font-weight:700;letter-spacing:-0.3px;" class="summary-text" id="aiStocksText"></p>
-          <span class="summary-footer" id="aiStocksFooter"></span>
+    <!-- TREND -->
+    <section>
+      <div class="section-header">
+        <div>
+          <div class="section-label">Trend</div>
+          <div class="section-title">30日走势</div>
         </div>
+        <div class="section-sub">30-day closing price</div>
       </div>
-      <div class="card" style="padding:48px">
-        <div class="card-title">行业权重</div>
-        <div class="card-sub">Sector Distribution</div>
-        <div class="pie-container" id="sectorPie"></div>
-        <div class="pie-legend" id="sectorLegend"></div>
-        <div class="card" id="aiSectorsBox" style="display:none;margin-top:20px;padding:16px 20px;">
-          <p style="margin:0;font-size:20px;line-height:1.5;color:var(--text);font-weight:700;letter-spacing:-0.3px;" class="summary-text" id="aiSectorsText"></p>
-          <span class="summary-footer" id="aiSectorsFooter"></span>
+      <div style="padding:20px 0">
+        <svg class="trend-svg" id="trendLine" viewBox="0 0 900 200"></svg>
+      </div>
+      <div class="card" id="aiTrendBox" style="display:none;margin-top:20px;padding:20px 24px;">
+        <p style="margin:0;font-size:20px;line-height:1.5;color:var(--text);font-weight:700;letter-spacing:-0.3px;" class="summary-text" id="aiTrendText"></p>
+        <span class="summary-footer" id="aiTrendFooter"></span>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- STOCK GRID -->
+    <section>
+      <div class="section-header">
+        <div>
+          <div class="section-label">Components</div>
+          <div class="section-title">成分股一览</div>
         </div>
+        <div class="section-sub">100 stocks</div>
       </div>
-    </div>
-  </section>
+      <div class="stock-grid" id="stockGrid"></div>
+    </section>
 
-  <!-- SECTORS -->
-  <section>
-    <div class="section-header">
-      <div>
-        <div class="section-label">Sectors</div>
-        <div class="section-title">行业表现</div>
-      </div>
-      <div class="section-sub">Weighted average by sector</div>
-    </div>
-    <div id="sectorBar"></div>
-    <div class="card" id="aiIndustryBox" style="display:none;margin-top:20px;padding:20px 24px;">
-      <p style="margin:0;font-size:20px;line-height:1.5;color:var(--text);font-weight:700;letter-spacing:-0.3px;" class="summary-text" id="aiIndustryText"></p>
-      <span class="summary-footer" id="aiIndustryFooter"></span>
-    </div>
-  </section>
+    <div class="divider"></div>
 
-  <div class="divider"></div>
-
-  <!-- TREND -->
-  <section>
-    <div class="section-header">
-      <div>
-        <div class="section-label">Trend</div>
-        <div class="section-title">30日走势</div>
-      </div>
-      <div class="section-sub">30-day closing price</div>
+    <!-- FOOTER -->
+    <div class="footer">
+      <div style="height:1px;background:linear-gradient(90deg,transparent,var(--border-strong),transparent);margin-bottom:40px"></div>
+      <div class="footer-text">数据来自 Yahoo Finance · 每日自动更新 · 仅供参考不构成投资建议</div>
     </div>
-    <div style="padding:20px 0">
-      <svg class="trend-svg" id="trendLine" viewBox="0 0 900 200"></svg>
-    </div>
-    <div class="card" id="aiTrendBox" style="display:none;margin-top:20px;padding:20px 24px;">
-      <p style="margin:0;font-size:20px;line-height:1.5;color:var(--text);font-weight:700;letter-spacing:-0.3px;" class="summary-text" id="aiTrendText"></p>
-      <span class="summary-footer" id="aiTrendFooter"></span>
-    </div>
-  </section>
 
-  <div class="divider"></div>
-
-  <!-- STOCK GRID -->
-  <section>
-    <div class="section-header">
-      <div>
-        <div class="section-label">Components</div>
-        <div class="section-title">成分股一览</div>
-      </div>
-      <div class="section-sub">100 stocks</div>
-    </div>
-    <div class="stock-grid" id="stockGrid"></div>
-  </section>
-
-  <div class="divider"></div>
-
-  <!-- FOOTER -->
-  <div class="footer">
-    <div style="height:1px;background:linear-gradient(90deg,transparent,var(--border-strong),transparent);margin-bottom:40px"></div>
-    <div class="footer-text">数据来自 Yahoo Finance · 每日自动更新 · 仅供参考不构成投资建议</div>
   </div>
-
 </div>
 
 <!-- BOTTOM TICKER -->
@@ -962,7 +1012,6 @@ function highlightNumbers(text) {
 // 改进的打字机效果：按标签整体插入，只对纯文本字符逐字显示
 function typeWriter(element, html, callback, speed) {
   speed = speed || 25;
-  // 解析html字符串，拆分成标签和普通文本
   var tokens = [];
   var i = 0;
   while (i < html.length) {
@@ -974,7 +1023,6 @@ function typeWriter(element, html, callback, speed) {
         continue;
       }
     }
-    // 普通字符（包括数字、汉字、标点等）
     tokens.push(html[i]);
     i++;
   }
@@ -983,7 +1031,6 @@ function typeWriter(element, html, callback, speed) {
   function type() {
     if (index < tokens.length) {
       var token = tokens[index];
-      // 如果是标签，直接插入（不会拆分）
       element.innerHTML += token;
       index++;
       setTimeout(type, speed);
@@ -1006,7 +1053,7 @@ function renderSummary(containerId, textId, footerId, text, isApi) {
   
   if (footerEl) {
     if (isApi) {
-      footerEl.textContent = 'BRIEF POWERED BY QWEN';
+      footerEl.textContent = 'Brief powered by QWEN';
     } else {
       footerEl.textContent = '';
     }
@@ -1412,18 +1459,15 @@ function toggleTheme(){
     const riseColor = computed.getPropertyValue('--rise').trim();
     const fallColor = computed.getPropertyValue('--fall').trim();
     if (isUp) {
-      // 涨 -> Glitch 闪紫色
       el.style.setProperty('--glitch-color1', fallColor + 'cc');
       el.style.setProperty('--glitch-color2', fallColor + '99');
     } else {
-      // 跌 -> Glitch 闪绿色
       el.style.setProperty('--glitch-color1', riseColor + 'cc');
       el.style.setProperty('--glitch-color2', riseColor + '99');
     }
   }
   setGlitchColors();
   
-  // 暴露给全局，供主题切换调用
   window.updateGlitchColors = setGlitchColors;
   
   const ndxColor = isUp ? 'var(--rise)' : 'var(--fall)';
@@ -1460,13 +1504,114 @@ function toggleTheme(){
 })();
 
 
+// ===== INTRO ANIMATION =====
+(function() {
+  const overlay = document.getElementById('intro-overlay');
+  const introTitle = document.getElementById('introTitle');
+  const mainTitle = document.getElementById('mainTitle');
+  const mainContent = document.querySelector('.main-content');
+  const body = document.body;
+  
+  if (!overlay || !introTitle || !mainContent) return;
+  
+  // 锁定滚动，隐藏主内容
+  body.classList.add('intro-active');
+  mainContent.style.opacity = '0';
+  
+  const change = DATA.index.change || 0;
+  const isUp = change >= 0;
+  const ndxColor = isUp ? 'var(--rise)' : 'var(--fall)';
+  
+  // 获取主题色用于伪元素
+  function getCurrentColors() {
+    const computed = getComputedStyle(document.documentElement);
+    const rise = computed.getPropertyValue('--rise').trim();
+    const fall = computed.getPropertyValue('--fall').trim();
+    return { rise, fall };
+  }
+  
+  function setIntroGlitchColors() {
+    const { rise, fall } = getCurrentColors();
+    if (isUp) {
+      introTitle.style.setProperty('--glitch-color1', fall + 'cc');
+      introTitle.style.setProperty('--glitch-color2', fall + '99');
+    } else {
+      introTitle.style.setProperty('--glitch-color1', rise + 'cc');
+      introTitle.style.setProperty('--glitch-color2', rise + '99');
+    }
+  }
+  setIntroGlitchColors();
+  
+  // 时间线
+  const steps = [
+    { time: 0, action: 'show' },
+    { time: 800, action: 'glitch1' },    // 第一次glitch，切换为NDX
+    { time: 1500, action: 'glitch2' },   // 第二次glitch，切换回纳斯达克100
+    { time: 3000, action: 'end' }        // 结束
+  ];
+  
+  setTimeout(() => {
+    // 第一次glitch: 切换为NDX
+    introTitle.classList.add('switching');
+    setTimeout(() => {
+      introTitle.innerHTML = 'ND<span style="color:' + ndxColor + '">X</span>';
+      introTitle.setAttribute('data-text', 'NDX');
+    }, 300);
+    setTimeout(() => {
+      introTitle.classList.remove('switching');
+    }, 900);
+  }, 800);
+  
+  setTimeout(() => {
+    // 第二次glitch: 切换回纳斯达克100（100带颜色）
+    introTitle.classList.add('switching');
+    setTimeout(() => {
+      introTitle.innerHTML = '纳斯达克<span style="color:' + ndxColor + '">100</span>';
+      introTitle.setAttribute('data-text', '纳斯达克100');
+    }, 300);
+    setTimeout(() => {
+      introTitle.classList.remove('switching');
+    }, 900);
+  }, 1500);
+  
+  setTimeout(() => {
+    // 结束动画：隐藏overlay，显示主内容
+    overlay.classList.add('hide');
+    body.classList.remove('intro-active');
+    body.classList.add('intro-done');
+    // 显示主内容
+    mainContent.style.opacity = '1';
+    // 触发原有标题入场
+    const mainTitleEl = document.getElementById('mainTitle');
+    if (mainTitleEl) {
+      mainTitleEl.classList.add('animate');
+    }
+    // 强制触发滚动动画（有些元素可能因为隐藏没触发）
+    // 手动触发IntersectionObserver检测
+    const allAnimateTargets = document.querySelectorAll('.dist-bar, .pie-seg, .sector-bar, .trend-area, .trend-path, .trend-point');
+    allAnimateTargets.forEach(el => {
+      if (el.getBoundingClientRect().top < window.innerHeight) {
+        // 如果已经可见，直接触发
+        if (el.classList.contains('dist-bar')) {
+          // 但需要触发具体的动画，直接模拟观察者
+          // 简单处理：重新创建观察者？或直接添加类
+        }
+      }
+    });
+    // 更简单：重载滚动触发逻辑，但现有的observer已经在监听，且当元素变为可见时会触发。
+    // 因为之前mainContent是隐藏的，observer可能没有触发，现在变为可见，且元素在视口内，observer会触发。
+    // 但observer是在页面加载时注册的，如果当时不可见，不会触发。现在变为可见，会触发。
+    // 所以不需要额外操作。
+  }, 3000);
+  
+})();
+
+
 // Odometer 数字滚动：从 fromValue 逐位翻滚到 toValue
 function rollNumber(el, fromValue, toValue, duration){
-  // 将数字转为字符串，统一用 0 补齐位数（修复 UP 滚动问题）
   const toStr = toValue.toLocaleString("en-US", {minimumFractionDigits: 1, maximumFractionDigits: 1});
   const fromStr = fromValue.toLocaleString("en-US", {minimumFractionDigits: 1, maximumFractionDigits: 1});
   const maxLen = Math.max(toStr.length, fromStr.length);
-  // 关键修改：用 '0' 填充，保证所有位都是数字，都会滚动
   const toPadded = toStr.padStart(maxLen, '0');
   const fromPadded = fromStr.padStart(maxLen, '0');
 
@@ -1481,7 +1626,6 @@ function rollNumber(el, fromValue, toValue, duration){
     const toCh = toPadded[i];
 
     if (fromCh === "," || fromCh === ".") {
-      // 逗号和点保持不变
       const span = document.createElement("span");
       span.textContent = toCh;
       span.style.display = "inline-block";
@@ -1501,7 +1645,6 @@ function rollNumber(el, fromValue, toValue, duration){
       strip.style.display = "flex";
       strip.style.flexDirection = "column";
 
-      // 构建滚动序列：从 fromNum 到 toNum（包括所有中间值）
       let seq = [];
       let n = fromNum;
       while (true) {
@@ -1695,19 +1838,19 @@ def call_qwen_summary(summary_type, data):
     total = index.get("total", 0)
 
     if summary_type == "overview":
-        prompt = f"请用一句话（不少于80字）概括今日纳斯达克100指数表现，类似彭博社标题。今日日期：{date_str}，涨跌幅{change:.2f}%，上涨{up}家，下跌{down}家。只输出一句话。"
+        prompt = f"请用一句话（不少于50字）概括今日纳斯达克100指数表现，类似彭博社标题。今日日期：{date_str}，涨跌幅{change:.2f}%，上涨{up}家，下跌{down}家。只输出一句话。"
     elif summary_type == "stocks":
         stocks = data.get("stocks", [])
         top5 = sorted(stocks, key=lambda x: x.get("weight", 0), reverse=True)[:5]
         desc = "，".join([f"{s['name']}({s['ticker']})权重{s['weight']}%涨{s['change']:.2f}%" for s in top5])
-        prompt = f"请用一句话（不少于80字）评价今日纳斯达克100指数权重股表现。权重股表现：{desc}。只输出一句话。"
+        prompt = f"请用一句话（不少于50字）评价今日纳斯达克100指数权重股表现。权重股表现：{desc}。只输出一句话。"
     elif summary_type == "sectors":
         sectors = data.get("sectors", [])
         if not sectors:
             return None
         best = max(sectors, key=lambda x: x["change"])
         worst = min(sectors, key=lambda x: x["change"])
-        prompt = f"请用一句话（不少于80字）概括今日纳斯达克100指数行业板块表现。领涨：{best['name']}涨{best['change']:.2f}%，领跌：{worst['name']}跌{worst['change']:.2f}%。只输出一句话。"
+        prompt = f"请用一句话（不少于50字）概括今日纳斯达克100指数行业板块表现。领涨：{best['name']}涨{best['change']:.2f}%，领跌：{worst['name']}跌{worst['change']:.2f}%。只输出一句话。"
     elif summary_type == "distribution":
         bins = data.get("bins", {})
         counts = bins.get("counts", [])
@@ -1718,20 +1861,20 @@ def call_qwen_summary(summary_type, data):
         max_idx = counts.index(max(counts))
         labels = bins.get("labels", [])
         max_label = labels[max_idx] if max_idx < len(labels) else ""
-        prompt = f"请用一句话（不少于80字）描述今日纳斯达克100指数涨跌分布。上涨{up_count}只，下跌{down_count}只，最密集区间{max_label}有{counts[max_idx]}只。只输出一句话。"
+        prompt = f"请用一句话（不少于50字）描述今日纳斯达克100指数涨跌分布。上涨{up_count}只，下跌{down_count}只，最密集区间{max_label}有{counts[max_idx]}只。只输出一句话。"
     elif summary_type == "industry":
         sectors = data.get("sectors", [])
         if not sectors:
             return None
         up_sectors = [s for s in sectors if s["change"] > 0]
         down_sectors = [s for s in sectors if s["change"] < 0]
-        prompt = f"请用一句话（不少于80字）总结今日纳斯达克100指数整体情况。上涨行业{len(up_sectors)}个，下跌行业{len(down_sectors)}个。只输出一句话。"
+        prompt = f"请用一句话（不少于50字）总结今日纳斯达克100指数整体情况。上涨行业{len(up_sectors)}个，下跌行业{len(down_sectors)}个。只输出一句话。"
     elif summary_type == "trend":
         history = data.get("history", [])
         if len(history) < 2:
             return None
         change_30d = (history[-1] - history[0]) / history[0] * 100
-        prompt = f"请用一句话（不少于80字）概括近30日纳斯达克100指数趋势。30日涨跌幅{change_30d:.2f}%，最新价{history[-1]:.2f}。只输出一句话。"
+        prompt = f"请用一句话（不少于50字）概括近30日纳斯达克100指数趋势。30日涨跌幅{change_30d:.2f}%，最新价{history[-1]:.2f}。只输出一句话。"
     else:
         return None
 
@@ -1743,7 +1886,7 @@ def call_qwen_summary(summary_type, data):
         "model": SILICONFLOW_MODEL,
         "messages": [{"role": "user", "content": prompt}],
         "temperature": 0.3,
-        "max_tokens": 200
+        "max_tokens": 800  # 拉长生成字数
     }
 
     try:
