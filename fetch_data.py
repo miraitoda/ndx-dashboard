@@ -380,6 +380,11 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:
 /* Container */
 .container{max-width:1200px;margin:0 auto;padding:0 24px;position:relative;z-index:1}
 
+/* 沉浸模式：隐藏容器内除 hero 外的所有直接子元素 */
+.container.immersive > *:not(.hero) {
+  visibility: hidden;
+}
+
 /* Sections */
 section{padding:60px 0}
 .section-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:32px}
@@ -1487,7 +1492,7 @@ if (mainTitleEl) startGlitch(mainTitleEl);
 
 window.updateGlitchColors = updateGlitchColors;
 
-// ===== 点击标题切换沉浸模式（手动触发） =====
+// ===== 点击标题切换沉浸模式（手动触发，修复标题被隐藏问题） =====
 const heroTitle = document.getElementById('heroTitle');
 const header = document.querySelector('.header');
 const container = document.querySelector('.container');
@@ -1499,11 +1504,12 @@ if (heroTitle) {
     isImmersive = !isImmersive;
     
     if (isImmersive) {
-      // 隐藏 header 和 container（保留占位，滚动条不变）
+      // 隐藏 header
       if (header) header.style.visibility = 'hidden';
-      if (container) container.style.visibility = 'hidden';
+      // 添加 immersive 类，隐藏 container 中除 .hero 外的其他内容
+      if (container) container.classList.add('immersive');
       
-      // 标题放大至 240px，并轻微放大
+      // 标题放大至 240px，并轻微缩放
       heroTitle.style.fontSize = '240px';
       heroTitle.style.transform = 'scale(1.05)';
       heroTitle.classList.add('giant-mode');
@@ -1515,7 +1521,7 @@ if (heroTitle) {
     } else {
       // 恢复
       if (header) header.style.visibility = 'visible';
-      if (container) container.style.visibility = 'visible';
+      if (container) container.classList.remove('immersive');
       
       heroTitle.style.fontSize = '';
       heroTitle.style.transform = '';
