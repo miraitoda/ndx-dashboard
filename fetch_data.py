@@ -27,7 +27,7 @@ def ensure_dir():
 SILICONFLOW_API_KEY = os.environ.get("SILICONFLOW_API_KEY", "your-api-key-here")
 SILICONFLOW_BASE_URL = os.environ.get("SILICONFLOW_BASE_URL", "https://api.siliconflow.cn/v1/chat/completions")
 SILICONFLOW_MODEL = os.environ.get("SILICONFLOW_MODEL", "Qwen/Qwen3-8B")
-SILICONFLOW_TIMEOUT = 120  # 超时秒数
+SILICONFLOW_TIMEOUT = 120  # 超时秒数，给免费GPU充分的排队时间
 
 
 def fetch_stock_data(tickers, max_batch=25):
@@ -284,23 +284,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 <title>NDX Dashboard</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap');
-
-/* ===== View Transitions 页面滑动效果 ===== */
-::view-transition-old(root) {
-  animation: slide-out-left 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}
-::view-transition-new(root) {
-  animation: slide-in-right 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}
-
-@keyframes slide-out-left {
-  from { transform: translateX(0); opacity: 1; }
-  to { transform: translateX(-40px); opacity: 0.4; }
-}
-@keyframes slide-in-right {
-  from { transform: translateX(40px); opacity: 0.4; }
-  to { transform: translateX(0); opacity: 1; }
-}
 
 :root {
   --bg: #0a0a0a;
@@ -841,17 +824,6 @@ function getMarketStatus(){
   return"已收盘";
 }
 
-// 带滑动过渡的页面跳转
-function navigateWithTransition(url) {
-  if (document.startViewTransition) {
-    document.startViewTransition(() => {
-      window.location.href = url;
-    });
-  } else {
-    window.location.href = url; // 旧浏览器无动画，直接跳转
-  }
-}
-
 // 导航
 (function(){
   const btnPrev = document.getElementById("btnPrev");
@@ -866,7 +838,9 @@ function navigateWithTransition(url) {
     currentDate = m ? m[1] : DATA.date;
     if (btnToday) {
       btnToday.style.display = "inline-block";
-      btnToday.onclick = () => navigateWithTransition("../index.html");
+      btnToday.onclick = function() {
+        window.location.href = "../index.html";
+      };
     }
   } else {
     currentDate = DATA.date;
@@ -876,15 +850,21 @@ function navigateWithTransition(url) {
   if (idx > 0) {
     const prevDate = HISTORY_DATES[idx - 1];
     btnPrev.disabled = false;
-    btnPrev.onclick = () => navigateWithTransition(isHistory ? "./" + prevDate + ".html" : "./history/" + prevDate + ".html");
+    btnPrev.onclick = function() {
+      window.location.href = isHistory ? "./" + prevDate + ".html" : "./history/" + prevDate + ".html";
+    };
   }
   if (idx < HISTORY_DATES.length - 1) {
     const nextDate = HISTORY_DATES[idx + 1];
     btnNext.disabled = false;
     if (nextDate === DATA.date && isHistory) {
-      btnNext.onclick = () => navigateWithTransition("../index.html");
+      btnNext.onclick = function() {
+        window.location.href = "../index.html";
+      };
     } else {
-      btnNext.onclick = () => navigateWithTransition(isHistory ? "./" + nextDate + ".html" : "./history/" + nextDate + ".html");
+      btnNext.onclick = function() {
+        window.location.href = isHistory ? "./" + nextDate + ".html" : "./history/" + nextDate + ".html";
+      };
     }
   }
 })();
