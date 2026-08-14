@@ -394,7 +394,7 @@ section{padding:60px 0}
 .hero{padding:80px 0 60px}
 .hero-inner{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:40px}
 .hero-left{flex:1;min-width:300px}
-.hero-title{font-size:64px;font-weight:900;letter-spacing:-3px;margin:0;line-height:1;color:var(--text);opacity:0;transform:translateY(-6px);animation:hero-in 0.6s cubic-bezier(0.16,1,0.3,1) 0.2s forwards}
+.hero-title{font-size:64px;font-weight:900;letter-spacing:-3px;margin:0;line-height:1;color:var(--text);opacity:0;transform:translateY(-6px);animation:hero-in 0.6s cubic-bezier(0.16,1,0.3,1) 0.2s forwards;cursor:pointer;transition:font-size 0.4s ease, transform 0.4s ease;}
 @keyframes hero-in {
   to { opacity:1; transform:translateY(0); }
 }
@@ -740,7 +740,7 @@ section{padding:60px 0}
   <section class="hero">
     <div class="hero-inner">
       <div class="hero-left">
-        <h1 class="hero-title">
+        <h1 class="hero-title" id="heroTitle">
           <span class="glitch-word" id="glitchTitle" data-text="纳斯达克100">纳斯达克100</span>
           <br>
           <span class="hero-accent" style="font-size:0.6em;">NASDAQ-100</span>
@@ -889,16 +889,7 @@ section{padding:60px 0}
     <div class="footer-text">数据来自 Yahoo Finance · 每日自动更新 · 仅供参考不构成投资建议</div>
   </div>
 
-</div>
-
-<!-- ===== IDLE OVERLAY（修正版） ===== -->
-<div id="idleOverlay" style="position:fixed; inset:0; z-index:50; display:none; background:transparent; justify-content:center; align-items:center; flex-direction:column; pointer-events:none;">
-  <h1 style="font-size:150px; text-align:center; line-height:1.2; margin:0; font-weight:900; letter-spacing:-6px; color:var(--text);">
-    <span class="glitch-word" id="idleGlitchWord" data-text="纳斯达克100">纳斯达克100</span>
-    <br>
-    <span style="font-size:0.6em; color:var(--accent);">NASDAQ-100</span>
-  </h1>
-</div>
+</div> <!-- .container -->
 
 <!-- BOTTOM TICKER -->
 <div class="ticker-bar ticker-bar-bottom">
@@ -1496,62 +1487,45 @@ if (mainTitleEl) startGlitch(mainTitleEl);
 
 window.updateGlitchColors = updateGlitchColors;
 
-// ===== 空闲超时（60秒无滚动） - 修正版 =====
-let idleTimer = null;
-const idleOverlay = document.getElementById('idleOverlay');
+// ===== 点击标题切换沉浸模式（手动触发） =====
+const heroTitle = document.getElementById('heroTitle');
+const header = document.querySelector('.header');
 const container = document.querySelector('.container');
-const idleGlitchWord = document.getElementById('idleGlitchWord');
+let isImmersive = false;
 
-function showIdleOverlay() {
-  if (!container || !idleOverlay) return;
-  container.style.display = 'none';
-  idleOverlay.style.display = 'flex';
-  // 启动 idle 的 glitch
-  if (idleGlitchWord) {
-    startGlitch(idleGlitchWord);
-  }
+if (heroTitle) {
+  heroTitle.addEventListener('click', function(e) {
+    e.stopPropagation();
+    isImmersive = !isImmersive;
+    
+    if (isImmersive) {
+      // 隐藏 header 和 container（保留占位，滚动条不变）
+      if (header) header.style.visibility = 'hidden';
+      if (container) container.style.visibility = 'hidden';
+      
+      // 标题放大至 240px，并轻微放大
+      heroTitle.style.fontSize = '240px';
+      heroTitle.style.transform = 'scale(1.05)';
+      heroTitle.classList.add('giant-mode');
+      
+      // 确保 glitch 特效运行（若已停止则重启）
+      if (mainTitleEl && !mainTitleEl._glitchInterval) {
+        startGlitch(mainTitleEl);
+      }
+    } else {
+      // 恢复
+      if (header) header.style.visibility = 'visible';
+      if (container) container.style.visibility = 'visible';
+      
+      heroTitle.style.fontSize = '';
+      heroTitle.style.transform = '';
+      heroTitle.classList.remove('giant-mode');
+      
+      // 若希望恢复后 glitch 持续，则无需停止；若希望停止，取消注释下行
+      // if (mainTitleEl) stopGlitch(mainTitleEl);
+    }
+  });
 }
-
-function hideIdleOverlay() {
-  if (!container || !idleOverlay) return;
-  idleOverlay.style.display = 'none';
-  container.style.display = 'block';
-  // 停止 idle 的 glitch
-  if (idleGlitchWord) {
-    stopGlitch(idleGlitchWord);
-  }
-  // 注意：不再调用 resetIdleTimer，由调用方决定是否重置
-}
-
-function resetIdleTimer() {
-  // 如果 overlay 正在显示，先隐藏（用户有动作）
-  if (idleOverlay && idleOverlay.style.display === 'flex') {
-    hideIdleOverlay();
-  }
-  // 清除旧定时器，创建新定时器
-  if (idleTimer) clearTimeout(idleTimer);
-  idleTimer = setTimeout(showIdleOverlay, 10000);
-}
-
-// 监听滚动事件（重置计时器）
-let scrollListenerActive = false;
-window.addEventListener('scroll', function() {
-  if (!scrollListenerActive) {
-    scrollListenerActive = true;
-    requestAnimationFrame(() => {
-      resetIdleTimer();
-      scrollListenerActive = false;
-    });
-  }
-});
-
-// 页面加载时启动计时器
-resetIdleTimer();
-
-// 页面可见性变化时重新计时（避免切后台导致误触发）
-document.addEventListener('visibilitychange', function() {
-  if (!document.hidden) resetIdleTimer();
-});
 
 // 原有的 rollNumber 函数
 function rollNumber(el, fromValue, toValue, duration){
