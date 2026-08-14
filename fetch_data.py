@@ -29,6 +29,7 @@ SILICONFLOW_BASE_URL = os.environ.get("SILICONFLOW_BASE_URL", "https://api.silic
 SILICONFLOW_MODEL = os.environ.get("SILICONFLOW_MODEL", "Qwen/Qwen2.5-7B-Instruct")
 SILICONFLOW_TIMEOUT = 10  # 超时秒数
 
+
 def fetch_stock_data(tickers, max_batch=25):
     all_data = {}
     for i in range(0, len(tickers), max_batch):
@@ -170,25 +171,27 @@ def build_data():
         "sectors": sector_list, "bins": {"labels": labels, "counts": counts},
         "history": history, "date": datetime.now().strftime("%Y-%m-%d"),
     }
+
     # 生成6个独立总结
- print("\n[AI 总结生成]")
-summary_types = ["overview", "stocks", "sectors", "distribution", "industry", "trend"]
-key_map = {
-    "overview": "ai_summary",
-    "stocks": "ai_stocks",
-    "sectors": "ai_sectors",
-    "distribution": "ai_distribution",
-    "industry": "ai_industry",
-    "trend": "ai_trend"
-}
-for stype in summary_types:
-    api_result = call_qwen_summary(stype, result)
-    key = key_map[stype]
-    if api_result:
-        result[key] = api_result
-    else:
-        print(f"   [千问] 降级使用本地 {stype} 总结")
-        result[key] = generate_summary(result, stype)
+    print("\n[AI 总结生成]")
+    summary_types = ["overview", "stocks", "sectors", "distribution", "industry", "trend"]
+    key_map = {
+        "overview": "ai_summary",
+        "stocks": "ai_stocks",
+        "sectors": "ai_sectors",
+        "distribution": "ai_distribution",
+        "industry": "ai_industry",
+        "trend": "ai_trend"
+    }
+    for stype in summary_types:
+        api_result = call_qwen_summary(stype, result)
+        key = key_map[stype]
+        if api_result:
+            result[key] = api_result
+        else:
+            print(f"   [千问] 降级使用本地 {stype} 总结")
+            result[key] = generate_summary(result, stype)
+
     return result
 
 
@@ -249,12 +252,30 @@ def build_mock_data():
     oc = sum(s["weight"] * s["change"] for s in others) / ow if ow > 0 else 0
     pie = top15 + [{"ticker": "其他", "name": f"其他{len(others)}只", "sector": "", "weight": round(ow, 2), "change": round(oc, 2)}]
 
-    return {
+    result = {
         "index": {"price": history[-1], "prev_close": round(history[-1] / (1 + index_change/100), 2), "change": index_change, "up": up, "down": down, "flat": 0, "total": len(stocks)},
         "stocks": stocks, "pie_stocks": pie, "sectors": sector_list,
         "bins": {"labels": labels, "counts": counts}, "history": history,
         "date": datetime.now().strftime("%Y-%m-%d"),
     }
+
+    # mock 数据使用本地总结（不调用 API，避免超时）
+    print("\n[AI 总结生成 - Mock 模式]")
+    summary_types = ["overview", "stocks", "sectors", "distribution", "industry", "trend"]
+    key_map = {
+        "overview": "ai_summary",
+        "stocks": "ai_stocks",
+        "sectors": "ai_sectors",
+        "distribution": "ai_distribution",
+        "industry": "ai_industry",
+        "trend": "ai_trend"
+    }
+    for stype in summary_types:
+        key = key_map[stype]
+        result[key] = generate_summary(result, stype)
+        print(f"   本地生成 {stype}: {result[key][:50]}...")
+
+    return result
 
 
 HTML_TEMPLATE = """<!DOCTYPE html>
@@ -967,7 +988,7 @@ function getMarketStatus(){
   data.forEach((v,i)=>lineD+=" L "+x(i)+" "+y(v));
   const linePath=svgEl("path",{d:lineD,fill:"none",stroke:"var(--rise)","stroke-width":"2.5","stroke-linecap":"round","stroke-linejoin":"round",class:"trend-path"});svg.appendChild(linePath);requestAnimationFrame(()=>{try{const len=linePath.getTotalLength();linePath.style.setProperty("--path-length",len)}catch(e){}});
   data.forEach((v,i)=>{
-    const c=svgEl("circle",{cx:x(i),cy:y(v),r:i===data.length-1?5:3.5,fill:i===data.length-1?RISE:BG,stroke:RISE,"stroke-width":i===data.length-1?2.5:1.5,class:"trend-point"});c.style.transitionDelay=(i*0.04)+"s";
+    const c=svgEl("circle",{cx:x(i),cy:y(v),r:i===data.length-1?5:3.5,fill:i===data.length-1?"var(--rise)":"var(--bg)",stroke:"var(--rise)","stroke-width":i===data.length-1?2.5:1.5,class:"trend-point"});c.style.transitionDelay=(i*0.04)+"s";
     c.style.cursor="pointer";
     const daysAgo=data.length-i;
     const dayLabel=daysAgo===1?"今日":daysAgo+"天前";
@@ -1264,6 +1285,7 @@ function hideTip(){tip.style.opacity="0"}
 
 </script>
 </body></html>"""
+
 
 def generate_summary(data, summary_type):
     """本地生成AI总结，使用彭博社/华尔街日报专业话术模板，每天固定组合保证一致性。"""
@@ -1638,6 +1660,93 @@ def generate_summary(data, summary_type):
         )
 
     return ""
+
+
+def call_qwen_summary(summary_type, data):
+    """调用千问 API 生成指定类型的总结，失败返回 None"""
+    if not SILICONFLOW_API_KEY or SILICONFLOW_API_KEY == "your-api-key-here":
+        print(f"   [千问] API Key 未配置，跳过 {summary_type}")
+        return None
+
+    # 根据类型构建不同的 prompt
+    index = data.get("index", {})
+    date_str = data.get("date", "")
+    change = index.get("change", 0)
+    up = index.get("up", 0)
+    down = index.get("down", 0)
+    total = index.get("total", 0)
+
+    if summary_type == "overview":
+        prompt = f"请用一句话（不超过30字）概括今日纳斯达克100指数表现，类似彭博社标题。今日日期：{date_str}，涨跌幅{change:.2f}%，上涨{up}家，下跌{down}家。只输出一句话。"
+    elif summary_type == "stocks":
+        stocks = data.get("stocks", [])
+        top5 = sorted(stocks, key=lambda x: x.get("weight", 0), reverse=True)[:5]
+        desc = "，".join([f"{s['name']}({s['ticker']})权重{s['weight']}%涨{s['change']:.2f}%" for s in top5])
+        prompt = f"请用一句话（不超过30字）评价今日纳指100权重股表现。权重股表现：{desc}。只输出一句话。"
+    elif summary_type == "sectors":
+        sectors = data.get("sectors", [])
+        if not sectors:
+            return None
+        best = max(sectors, key=lambda x: x["change"])
+        worst = min(sectors, key=lambda x: x["change"])
+        prompt = f"请用一句话（不超过30字）概括今日行业板块表现。领涨：{best['name']}涨{best['change']:.2f}%，领跌：{worst['name']}跌{worst['change']:.2f}%。只输出一句话。"
+    elif summary_type == "distribution":
+        bins = data.get("bins", {})
+        counts = bins.get("counts", [])
+        if not counts or len(counts) < 8:
+            return None
+        up_count = sum(counts[4:])
+        down_count = sum(counts[:4])
+        max_idx = counts.index(max(counts))
+        labels = bins.get("labels", [])
+        max_label = labels[max_idx] if max_idx < len(labels) else ""
+        prompt = f"请用一句话（不超过30字）描述今日涨跌分布。上涨{up_count}只，下跌{down_count}只，最密集区间{max_label}有{counts[max_idx]}只。只输出一句话。"
+    elif summary_type == "industry":
+        sectors = data.get("sectors", [])
+        if not sectors:
+            return None
+        up_sectors = [s for s in sectors if s["change"] > 0]
+        down_sectors = [s for s in sectors if s["change"] < 0]
+        prompt = f"请用一句话（不超过30字）总结行业整体情况。上涨行业{len(up_sectors)}个，下跌行业{len(down_sectors)}个。只输出一句话。"
+    elif summary_type == "trend":
+        history = data.get("history", [])
+        if len(history) < 2:
+            return None
+        change_30d = (history[-1] - history[0]) / history[0] * 100
+        prompt = f"请用一句话（不超过30字）概括近30日纳指100趋势。30日涨跌幅{change_30d:.2f}%，最新价{history[-1]:.2f}。只输出一句话。"
+    else:
+        return None
+
+    headers = {
+        "Authorization": f"Bearer {SILICONFLOW_API_KEY}",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "model": SILICONFLOW_MODEL,
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.3,
+        "max_tokens": 50
+    }
+
+    try:
+        print(f"   [千问] 尝试调用 API 生成 {summary_type}...")
+        resp = requests.post(SILICONFLOW_BASE_URL, headers=headers, json=payload, timeout=SILICONFLOW_TIMEOUT)
+        if resp.status_code == 200:
+            result = resp.json()
+            content = result["choices"][0]["message"]["content"].strip()
+            if content:
+                print(f"   [千问] 成功获取 {summary_type}: {content}")
+                return content
+            else:
+                print(f"   [千问] 返回内容为空 for {summary_type}")
+        else:
+            print(f"   [千问] API 错误 {resp.status_code} for {summary_type}: {resp.text}")
+    except requests.exceptions.Timeout:
+        print(f"   [千问] 超时（{SILICONFLOW_TIMEOUT}秒）for {summary_type}")
+    except Exception as e:
+        print(f"   [千问] 异常 for {summary_type}: {e}")
+    return None
+
 
 def get_existing_history_dates(output_dir="docs"):
     import glob
