@@ -17,8 +17,11 @@ jobs:
         with:
           python-version: "3.11"
           cache: "pip"
-      - run: pip install -r requirements.txt
-      
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install requests   # 确保 requests 已安装
+
       # 关键：把 gh-pages 上的历史文件完整复制回来
       - name: Restore history files
         run: |
@@ -31,10 +34,12 @@ jobs:
             echo "gh-pages 上没有 history 目录"
           fi
         continue-on-error: true
-      
+
       - name: Generate Dashboard
         run: python fetch_data.py
-      
+        env:
+          SILICONFLOW_API_KEY: ${{ secrets.SILICONFLOW_API_KEY }}
+
       - uses: peaceiris/actions-gh-pages@v4
         if: github.ref == 'refs/heads/main'
         with:
