@@ -278,6 +278,10 @@ def build_mock_data():
     return result
 
 
+HTML_TEMPLATE = """<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NDX Dashboard</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap');
 
@@ -298,8 +302,6 @@ def build_mock_data():
   to { transform: translateX(0); opacity: 1; }
 }
 
-/* 回退方案（不支持 API 的浏览器依然正常跳转，无动画） */
-/* 这行现在可以删除，因为 @import 已经移到最上面了 */
 :root {
   --bg: #0a0a0a;
   --surface: #111111;
