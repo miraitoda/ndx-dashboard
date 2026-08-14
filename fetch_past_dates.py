@@ -6,6 +6,7 @@
 - 自动计算过去30个自然日（含今天）
 - 不开盘的日期自动跳过
 - 每个成功日期保留30日走势历史
+- 与 fetch_data.py 保持完全一致的模板和逻辑
 """
 
 import os
@@ -19,7 +20,13 @@ from collections import defaultdict
 import yfinance as yf
 
 from ndx_components import STOCKS
-from fetch_data import generate_html, generate_summary, ensure_dir
+from fetch_data import (
+    generate_html,
+    generate_summary,
+    call_qwen_summary,
+    ensure_dir,
+    SILICONFLOW_API_KEY,
+)
 
 OUTPUT_DIR = "docs"
 DAYS_BACK = 30  # 过去30个自然日
@@ -84,10 +91,12 @@ def fetch_index_history_range(start_date, end_date):
 
 
 def build_data_for_date(date_str, raw_data, ndx_hist):
+    """为指定日期构建完整的数据字典，与 fetch_data.build_data 格式一致。"""
     date = datetime.strptime(date_str, "%Y-%m-%d").date()
     if not raw_data:
         return None
 
+    # 获取所有股票共有的日期列表
     sample_df = None
     for ticker in [s[0] for s in STOCKS]:
         if ticker in raw_data:
@@ -113,6 +122,7 @@ def build_data_for_date(date_str, raw_data, ndx_hist):
     prev_date = all_dates[idx - 1]
     print(f"  对比: {date_str} vs {prev_date}")
 
+    # 构建个股列表
     stocks = []
     for ticker, name, sector, weight in STOCKS:
         if ticker not in raw_data:
@@ -133,7 +143,13 @@ def build_data_for_date(date_str, raw_data, ndx_hist):
             change = round((close - prev_close) / prev_close * 100, 2)
             if math.isnan(change):
                 continue
-            stocks.append({"ticker": ticker, "name": name, "sector": sector, "weight": weight, "change": change})
+            stocks.append({
+                "ticker": ticker,
+                "name": name,
+                "sector": sector,
+                "weight": weight,
+                "change": change
+            })
         except Exception as e:
             print(f"    处理失败 {ticker}: {e}")
 
@@ -141,7 +157,7 @@ def build_data_for_date(date_str, raw_data, ndx_hist):
         print(f"  警告: 仅 {len(stocks)} 只有效数据，跳过")
         return None
 
-    # 指数数据
+    # 指数信息
     if ndx_hist is not None and not ndx_hist.empty:
         ndx_dates = [
             d.tz_localize(None).date() if hasattr(d, 'tz_localize') else d.date()
@@ -157,7 +173,11 @@ def build_data_for_date(date_str, raw_data, ndx_hist):
             price = float(target_ndx["Close"].iloc[-1])
             prev_close = float(prev_ndx["Close"].iloc[-1])
             change = round((price - prev_close) / prev_close * 100, 2)
-            index_info = {"price": round(price, 2), "prev_close": round(prev_close, 2), "change": change}
+            index_info = {
+                "price": round(price, 2),
+                "prev_close": round(prev_close, 2),
+                "change": change
+            }
         else:
             total_weight = sum(s["weight"] for s in stocks)
             weighted_change = sum(s["weight"] * s["change"] for s in stocks) / total_weight
@@ -167,11 +187,13 @@ def build_data_for_date(date_str, raw_data, ndx_hist):
         weighted_change = sum(s["weight"] * s["change"] for s in stocks) / total_weight
         index_info = {"price": 0, "prev_close": 0, "change": round(weighted_change, 2)}
 
+    # 涨跌家数
     up = sum(1 for s in stocks if s["change"] > 0)
     down = sum(1 for s in stocks if s["change"] < 0)
     flat = sum(1 for s in stocks if s["change"] == 0)
     index_info.update({"up": up, "down": down, "flat": flat, "total": len(stocks)})
 
+    # 行业汇总
     sectors = defaultdict(lambda: {"weight": 0, "total_change": 0, "count": 0})
     for s in stocks:
         sectors[s["sector"]]["weight"] += s["weight"]
@@ -181,12 +203,14 @@ def build_data_for_date(date_str, raw_data, ndx_hist):
     sector_list = []
     for name, d in sectors.items():
         sector_list.append({
-            "name": name, "weight": round(d["weight"], 2),
+            "name": name,
+            "weight": round(d["weight"], 2),
             "change": round(d["total_change"] / d["weight"], 2) if d["weight"] > 0 else 0,
             "count": d["count"]
         })
     sector_list.sort(key=lambda x: -x["weight"])
 
+    # 涨跌分布
     bins = [(-999, -3), (-3, -2), (-2, -1), (-1, 0), (0, 1), (1, 2), (2, 3), (3, 999)]
     labels = ["<-3%", "-3~-2%", "-2~-1%", "-1~0%", "0~1%", "1~2%", "2~3%", ">3%"]
     counts = [0] * len(bins)
@@ -197,62 +221,104 @@ def build_data_for_date(date_str, raw_data, ndx_hist):
                 counts[i] += 1
                 break
 
-    # 30日走势历史：从该日期往前推最多30个交易日
+    # 30日历史走势（从该日期往前取最多30个交易日）
     history = []
     if ndx_hist is not None and not ndx_hist.empty:
         ndx_dates = [
             d.tz_localize(None).date() if hasattr(d, 'tz_localize') else d.date()
             for d in ndx_hist.index
         ]
-        try:
+        if date in ndx_dates:
             date_idx = ndx_dates.index(date)
-            start_idx = max(0, date_idx - 29)
+            start_idx = max(0, date_idx - 29)  # 最多30天（含当天）
             hist_slice = ndx_hist.iloc[start_idx:date_idx + 1]
             history = [round(float(c), 2) for c in hist_slice["Close"].tolist()]
-            print(f"  history: {len(history)} 天")
-        except ValueError:
+        else:
+            # 如果日期不在指数数据中，尝试用个股加权构造（但一般不会）
             pass
+    if not history:
+        # 保底：用所有股票的加权平均构造一个近似走势（但非真实指数）
+        # 这里简单生成一个占位，实际应依赖指数数据
+        print(f"  警告: 无法获取指数历史，history 将为空")
+    print(f"  history: {len(history)} 天")
 
+    # 权重饼图（前15 + 其他）
     sorted_w = sorted(stocks, key=lambda x: -x["weight"])
     top15 = sorted_w[:15]
     others = sorted_w[15:]
     ow = sum(s["weight"] for s in others)
     oc = sum(s["weight"] * s["change"] for s in others) / ow if ow > 0 else 0
-    pie = top15 + [{"ticker": "其他", "name": f"其他{len(others)}只", "sector": "", "weight": round(ow, 2), "change": round(oc, 2)}]
+    pie = top15 + [{
+        "ticker": "其他",
+        "name": f"其他{len(others)}只",
+        "sector": "",
+        "weight": round(ow, 2),
+        "change": round(oc, 2)
+    }]
 
     result = {
-        "index": index_info, "stocks": stocks, "pie_stocks": pie,
-        "sectors": sector_list, "bins": {"labels": labels, "counts": counts},
-        "history": history, "date": date_str,
+        "index": index_info,
+        "stocks": stocks,
+        "pie_stocks": pie,
+        "sectors": sector_list,
+        "bins": {"labels": labels, "counts": counts},
+        "history": history,
+        "date": date_str,
     }
 
+    # 生成 AI 总结（优先 API，失败则本地）
     print("  生成 AI 总结...")
-    result["ai_summary"] = generate_summary(result, "overview")
-    result["ai_stocks"] = generate_summary(result, "stocks")
-    result["ai_sectors"] = generate_summary(result, "sectors")
-    result["ai_distribution"] = generate_summary(result, "distribution")
-    result["ai_industry"] = generate_summary(result, "industry")
-    result["ai_trend"] = generate_summary(result, "trend")
+    summary_types = ["overview", "stocks", "sectors", "distribution", "industry", "trend"]
+    key_map = {
+        "overview": "ai_summary",
+        "stocks": "ai_stocks",
+        "sectors": "ai_sectors",
+        "distribution": "ai_distribution",
+        "industry": "ai_industry",
+        "trend": "ai_trend"
+    }
+    for stype in summary_types:
+        api_result = None
+        # 如果 API key 存在则尝试调用
+        if SILICONFLOW_API_KEY and SILICONFLOW_API_KEY != "your-api-key-here":
+            api_result = call_qwen_summary(stype, result)
+        if api_result:
+            result[key_map[stype]] = api_result
+            print(f"    [API] {stype}: {api_result[:50]}...")
+        else:
+            result[key_map[stype]] = generate_summary(result, stype)
+            print(f"    [本地] {stype}: {result[key_map[stype]][:50]}...")
 
     return result
 
 
-def save_history(data, all_dates):
-    history_dir = os.path.join(OUTPUT_DIR, "history")
-    os.makedirs(history_dir, exist_ok=True)
+def save_history_json(data, history_dir):
+    """仅保存 JSON 数据，不生成 HTML（后面统一生成）。"""
     date_str = data["date"]
-
     json_file = os.path.join(history_dir, f"{date_str}.json")
     with open(json_file, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False)
+    print(f"  已保存 JSON: {json_file}")
+    return json_file
 
-    # 与 fetch_data.py 的 generate_html 签名保持一致
-    html = generate_html(data, all_dates, is_history=True)
-    html_file = os.path.join(history_dir, f"{date_str}.html")
-    with open(html_file, "w", encoding="utf-8") as f:
-        f.write(html)
 
-    print(f"  已保存: {html_file}")
+def regenerate_all_html(all_dates, history_dir):
+    """根据所有已保存的 JSON 数据，重新生成所有历史页面的 HTML。"""
+    if not all_dates:
+        return
+    print("\n重新生成所有历史页面的 HTML...")
+    for date_str in all_dates:
+        json_file = os.path.join(history_dir, f"{date_str}.json")
+        if not os.path.exists(json_file):
+            print(f"  警告: {json_file} 不存在，跳过")
+            continue
+        with open(json_file, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        html = generate_html(data, all_dates, is_history=True)
+        html_file = os.path.join(history_dir, f"{date_str}.html")
+        with open(html_file, "w", encoding="utf-8") as f:
+            f.write(html)
+        print(f"  已生成: {html_file}")
 
 
 def main():
@@ -263,6 +329,8 @@ def main():
     print("=" * 50)
 
     ensure_dir()
+    history_dir = os.path.join(OUTPUT_DIR, "history")
+    os.makedirs(history_dir, exist_ok=True)
 
     # 计算下载范围：最早日期往前推40天，确保30日历史数据完整
     dates_dt = [datetime.strptime(d, "%Y-%m-%d") for d in target_dates]
@@ -282,7 +350,7 @@ def main():
         data = build_data_for_date(date_str, raw_data, ndx_hist)
         if data:
             all_dates.append(date_str)
-            save_history(data, all_dates)
+            save_history_json(data, history_dir)
         else:
             print(f"  → 跳过 {date_str}（不开盘或无数据）")
 
@@ -291,19 +359,10 @@ def main():
         return 1
 
     all_dates.sort()
-    print(f"\n更新导航: {all_dates}")
+    print(f"\n成功日期: {all_dates}")
 
-    # 重新生成所有历史页面（更新导航链接）
-    history_dir = os.path.join(OUTPUT_DIR, "history")
-    for date_str in all_dates:
-        json_file = os.path.join(history_dir, f"{date_str}.json")
-        if not os.path.exists(json_file):
-            continue
-        with open(json_file, "r", encoding="utf-8") as f:
-            old_data = json.load(f)
-        html = generate_html(old_data, all_dates, is_history=True)
-        with open(os.path.join(history_dir, f"{date_str}.html"), "w", encoding="utf-8") as f:
-            f.write(html)
+    # 重新生成所有历史页面（保证导航日期列表完整）
+    regenerate_all_html(all_dates, history_dir)
 
     print(f"\n{'=' * 50}")
     print(f"完成！成功 {len(all_dates)} 天，跳过 {DAYS_BACK - len(all_dates)} 天")
