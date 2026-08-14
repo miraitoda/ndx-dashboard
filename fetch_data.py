@@ -1294,46 +1294,66 @@ function hideTip(){tip.style.opacity="0"}
   });
 })();
 
-// 获取纳指100盘前指数 (^QMI) —— 非盘前时段显示 "----"
+// 获取纳指100盘前指数 (^QMI) —— 优化版
 (function fetchPreMarket() {
   const prePriceEl = document.getElementById('prePrice');
   const preChangeEl = document.getElementById('preChange');
 
   if (!prePriceEl || !preChangeEl) return;
 
-  prePriceEl.textContent = '...';
-  preChangeEl.textContent = '加载中';
+  // 更友好的加载状态
+  prePriceEl.textContent = '--';
+  preChangeEl.textContent = '加载...';
+  preChangeEl.className = 'kpi-change';
 
+  // 1. 判断是否在盘前时段（美东时间 4:00-9:30，仅交易日）
   function isPreMarket() {
     const now = new Date();
-    const utc = now.getTime() + now.getTimezoneOffset() * 60000;
-    const beijing = new Date(utc + 8 * 3600000);
-    const day = beijing.getDay();
-    if (day === 0 || day === 6) return false;
-    const year = beijing.getFullYear();
-    const dstStart = new Date(year, 2, 14 - new Date(year, 2, 1).getDay());
-    const dstEnd = new Date(year, 10, 7 - new Date(year, 10, 1).getDay());
-    const isDST = beijing >= dstStart && beijing < dstEnd;
-    const hour = beijing.getHours(), minute = beijing.getMinutes();
-    const timeVal = hour + minute / 60;
-    const offset = isDST ? 12 : 13;
-    const usTime = timeVal - offset;
+    // 获取美东时间（UTC-4 夏令时，UTC-5 冬令时）
+    // 简单方式：直接获取 UTC 小时，然后根据美国夏令时规则调整
+    const utcHours = now.getUTCHours();
+    const utcMinutes = now.getUTCMinutes();
+    const utcDay = now.getUTCDay(); // 0=周日
+
+    // 周末不显示
+    if (utcDay === 0 || utcDay === 6) return false;
+
+    // 判断是否夏令时（美国夏令时：3月第二个周日到11月第一个周日）
+    const year = now.getUTCFullYear();
+    const dstStart = new Date(Date.UTC(year, 2, 14 - new Date(Date.UTC(year, 2, 1)).getUTCDay() + 7));
+    const dstEnd = new Date(Date.UTC(year, 10, 7 - new Date(Date.UTC(year, 10, 1)).getUTCDay() + 7));
+    const isDST = now >= dstStart && now < dstEnd;
+    const offset = isDST ? 4 : 5; // 夏令时 UTC-4，冬令时 UTC-5
+
+    // 美东时间（小时+分钟）
+    let usHours = utcHours - offset;
+    if (usHours < 0) usHours += 24;
+    const usMinutes = utcMinutes;
+    const usTime = usHours + usMinutes / 60;
+
+    // 盘前：4:00 - 9:30
     return usTime >= 4 && usTime < 9.5;
   }
 
+  // 2. 如果不在盘前时段，直接显示“盘前休市”
   if (!isPreMarket()) {
-    prePriceEl.textContent = '----';
-    preChangeEl.textContent = '----';
-    preChangeEl.className = 'kpi-change';
+    prePriceEl.textContent = '--';
+    preChangeEl.textContent = '盘前休市';
+    preChangeEl.className = 'kpi-change'; // 灰色
     return;
   }
 
+  // 3. 请求数据
   fetch('https://query1.finance.yahoo.com/v8/finance/chart/%5EQMI?interval=1d&range=1d')
     .then(res => {
-      if (!res.ok) throw new Error('网络错误');
+      if (!res.ok) throw new Error('HTTP ' + res.status);
       return res.json();
     })
     .then(data => {
+      // 检查返回数据结构
+      if (!data.chart || !data.chart.result || data.chart.result.length === 0) {
+        throw new Error('空数据');
+      }
       const result = data.chart.result[0];
       const meta = result.meta;
       const price = meta.regularMarketPrice;
@@ -1347,15 +1367,16 @@ function hideTip(){tip.style.opacity="0"}
         preChangeEl.textContent = sign + change.toFixed(2) + '% (' + (diff >= 0 ? '+' : '') + diff.toFixed(2) + ')';
         preChangeEl.className = 'kpi-change ' + (change >= 0 ? 'up' : 'down');
       } else {
-        prePriceEl.textContent = '----';
-        preChangeEl.textContent = '无数据';
+        // 数据无效（可能价格等于昨收，或无盘前交易）
+        prePriceEl.textContent = '--';
+        preChangeEl.textContent = '无盘前交易';
         preChangeEl.className = 'kpi-change';
       }
     })
     .catch(err => {
-      console.warn('获取盘前指数失败:', err);
-      prePriceEl.textContent = '----';
-      preChangeEl.textContent = '加载失败';
+      console.warn('盘前数据获取失败:', err);
+      prePriceEl.textContent = '--';
+      preChangeEl.textContent = '盘前暂不可用';
       preChangeEl.className = 'kpi-change';
     });
 })();
