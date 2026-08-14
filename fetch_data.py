@@ -27,7 +27,7 @@ def ensure_dir():
 SILICONFLOW_API_KEY = os.environ.get("SILICONFLOW_API_KEY", "your-api-key-here")
 SILICONFLOW_BASE_URL = os.environ.get("SILICONFLOW_BASE_URL", "https://api.siliconflow.cn/v1/chat/completions")
 SILICONFLOW_MODEL = os.environ.get("SILICONFLOW_MODEL", "Qwen/Qwen3-8B")
-SILICONFLOW_TIMEOUT = 10  # 超时秒数，给免费GPU充分的排队时间
+SILICONFLOW_TIMEOUT = 180
 
 
 def fetch_stock_data(tickers, max_batch=25):
@@ -166,7 +166,6 @@ def build_data():
     oc = sum(s["weight"] * s["change"] for s in others) / ow if ow > 0 else 0
     pie = top15 + [{"ticker": "其他", "name": f"其他{len(others)}只", "sector": "", "weight": round(ow, 2), "change": round(oc, 2)}]
 
-    # 用于标记总结是否来自 API
     is_api_summary = {}
 
     result = {
@@ -176,7 +175,6 @@ def build_data():
         "_is_api": is_api_summary,
     }
 
-    # 生成6个独立总结
     print("\n[AI 总结生成]")
     summary_types = ["overview", "stocks", "sectors", "distribution", "industry", "trend"]
     key_map = {
@@ -268,7 +266,6 @@ def build_mock_data():
         "_is_api": is_api_summary,
     }
 
-    # mock 数据使用本地总结（不调用 API，避免超时）
     print("\n[AI 总结生成 - Mock 模式]")
     summary_types = ["overview", "stocks", "sectors", "distribution", "industry", "trend"]
     key_map = {
@@ -397,9 +394,6 @@ section{padding:60px 0}
 .hero{padding:80px 0 60px}
 .hero-inner{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:40px}
 .hero-left{flex:1;min-width:300px}
-.hero-tag{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:100px;border:1px solid var(--border);margin-bottom:24px}
-.hero-tag-dot{width:6px;height:6px;border-radius:50%;background:var(--rise)}
-.hero-tag-text{font-size:11px;font-weight:700;color:var(--text2);letter-spacing:1px}
 .hero-title{font-size:64px;font-weight:900;letter-spacing:-3px;margin:0;line-height:1;color:var(--text);opacity:0;transform:translateY(-6px);animation:hero-in 0.6s cubic-bezier(0.16,1,0.3,1) 0.2s forwards}
 @keyframes hero-in {
   to { opacity:1; transform:translateY(0); }
@@ -725,7 +719,6 @@ section{padding:60px 0}
   <section class="hero">
     <div class="hero-inner">
       <div class="hero-left">
-        <div class="hero-tag"><span class="hero-tag-dot"></span><span class="hero-tag-text">NASDAQ-100</span></div>
         <h1 class="hero-title">
           <span class="glitch-word" id="glitchTitle" data-text="纳斯达克100">纳斯达克100</span>
           <br>
@@ -1034,26 +1027,6 @@ function renderSummary(containerId, textId, footerId, text, isApi) {
   }
 })();
 
-// KPI 滚动数字扩展
-function rollKPI(elementId, target, duration) {
-  var el = document.getElementById(elementId);
-  if (!el) return;
-  var start = 0;
-  var startTime = null;
-  
-  function animate(timestamp) {
-    if (!startTime) startTime = timestamp;
-    var progress = Math.min((timestamp - startTime) / duration, 1);
-    var current = Math.floor(progress * target);
-    el.textContent = current;
-    if (progress < 1) {
-      requestAnimationFrame(animate);
-    } else {
-      el.textContent = target;
-    }
-  }
-  requestAnimationFrame(animate);
-}
 
 // KPI
 (function(){
@@ -1062,9 +1035,9 @@ function rollKPI(elementId, target, duration) {
   document.getElementById("statusBadge").textContent=getMarketStatus();
   document.querySelector('.hero-accent').style.color = idx.change >= 0 ? 'var(--rise)' : 'var(--fall)';
   document.querySelectorAll('.section-label').forEach(el=>{el.style.color=idx.change>=0?'var(--rise)':'var(--fall)';});
-  document.querySelector('.hero-tag-dot').style.background=idx.change>=0?'var(--rise)':'var(--fall)';
   document.getElementById('siteLogo').style.color=idx.change>=0?'var(--rise)':'var(--fall)';
 
+  // INDEX 价格滚动
   const priceEl=document.getElementById("idxPrice");
   const chgEl=document.getElementById("idxChange");
 
@@ -1082,23 +1055,41 @@ function rollKPI(elementId, target, duration) {
     chgEl.className="kpi-change "+(idx.change>=0?"up":"down");
   }
 
-  // UP/DOWN 滚动数字
-  rollKPI("idxUp", idx.up, 2000);
-  rollKPI("idxDown", idx.down, 2000);
-  document.getElementById("stockCount").textContent=idx.total;
-  
+  // 30D 涨跌幅滚动（从0滚动到目标值）
   const hist=DATA.history;
   if(hist.length>=2){
-    const c30=((hist[hist.length-1]-hist[0])/hist[0]*100).toFixed(2);
-    const t30=document.getElementById("trend30d");
-    t30.textContent=(c30>=0?"▲ +":"▼ ")+c30+"%";
-    t30.className="kpi-change "+(c30>=0?"up":"down");
-    document.getElementById("trendRange").textContent=Math.round(hist[0]).toLocaleString()+" → "+Math.round(hist[hist.length-1]).toLocaleString();
+    const c30 = ((hist[hist.length-1]-hist[0])/hist[0]*100);
+    const trendEl = document.getElementById("trend30d");
+    trendEl.innerHTML = '';
+    const signSpan = document.createElement('span');
+    signSpan.textContent = c30 >= 0 ? '▲ +' : '▼ ';
+    signSpan.style.display = 'inline-block';
+    trendEl.appendChild(signSpan);
+
+    const numSpan = document.createElement('span');
+    numSpan.style.display = 'inline-block';
+    numSpan.style.fontFamily = "'JetBrains Mono', monospace";
+    trendEl.appendChild(numSpan);
+
+    const pctSpan = document.createElement('span');
+    pctSpan.textContent = '%';
+    trendEl.appendChild(pctSpan);
+
+    trendEl.className = "kpi-change " + (c30 >= 0 ? "up" : "down");
+    rollNumber(numSpan, 0, Math.abs(c30), 2000);
+
+    document.getElementById("trendRange").textContent = Math.round(hist[0]).toLocaleString() + " → " + Math.round(hist[hist.length-1]).toLocaleString();
   }else{
-    document.getElementById("trend30d").textContent="--";
-    document.getElementById("trendRange").textContent="数据暂缺";
+    document.getElementById("trend30d").textContent = "--";
+    document.getElementById("trendRange").textContent = "数据暂缺";
   }
+
+  // UP/DOWN 滚动（从0滚动到实际值）
+  rollNumber(document.getElementById("idxUp"), 0, idx.up, 2000);
+  rollNumber(document.getElementById("idxDown"), 0, idx.down, 2000);
+  document.getElementById("stockCount").textContent = idx.total;
 })();
+
 
 // AI Summaries - 使用打字机效果 + 脚标
 (function(){
@@ -1346,7 +1337,7 @@ function rollKPI(elementId, target, duration) {
   buildTicker("tickerBottom",bottomStocks,true);
 })();
 
-// 主题切换
+// 主题切换 - 同时更新 Glitch 颜色
 function toggleTheme(){
   const root=document.documentElement;
   const btn=document.getElementById("themeToggleBtn");
@@ -1357,9 +1348,12 @@ function toggleTheme(){
     root.classList.add("light");
     if(btn)btn.textContent="夜间模式";
   }
+  if (window.updateGlitchColors) {
+    window.updateGlitchColors();
+  }
 }
 
-// ===== Glitch 标题切换（抖动时闪绿/紫，跟随涨跌） =====
+// ===== Glitch 标题切换（抖动时闪绿/紫，跟随涨跌，支持主题切换） =====
 (function() {
   const el = document.getElementById('glitchTitle');
   if (!el) return;
@@ -1371,12 +1365,11 @@ function toggleTheme(){
   const change = DATA.index.change || 0;
   const isUp = change >= 0;
   
-  // 获取当前主题下的绿/紫（从 CSS 变量读取）
-  const riseColor = getComputedStyle(document.documentElement).getPropertyValue('--rise').trim();
-  const fallColor = getComputedStyle(document.documentElement).getPropertyValue('--fall').trim();
-  
   // 设置伪元素的颜色（跟随涨跌）
   function setGlitchColors() {
+    const computed = getComputedStyle(document.documentElement);
+    const riseColor = computed.getPropertyValue('--rise').trim();
+    const fallColor = computed.getPropertyValue('--fall').trim();
     if (isUp) {
       el.style.setProperty('--glitch-color1', riseColor + 'cc');
       el.style.setProperty('--glitch-color2', riseColor + '99');
@@ -1386,6 +1379,9 @@ function toggleTheme(){
     }
   }
   setGlitchColors();
+  
+  // 暴露给全局，供主题切换调用
+  window.updateGlitchColors = setGlitchColors;
   
   const ndxColor = isUp ? 'var(--rise)' : 'var(--fall)';
   
@@ -1401,6 +1397,8 @@ function toggleTheme(){
       
       if (newText === 'NDX') {
         el.innerHTML = 'ND<span style="color:' + ndxColor + '">X</span>';
+      } else if (newText === '纳斯达克100') {
+        el.innerHTML = '纳斯达克<span style="color:' + ndxColor + '">100</span>';
       } else {
         el.textContent = newText;
       }
