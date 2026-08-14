@@ -4,6 +4,7 @@
 纳指100每日收盘 Dashboard 数据抓取脚本
 """
 
+import requests
 import json
 import math
 import os
@@ -22,6 +23,11 @@ OUTPUT_FILE = os.path.join(OUTPUT_DIR, "index.html")
 def ensure_dir():
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
+# ===== SiliconFlow API 配置（千问） =====
+SILICONFLOW_API_KEY = os.environ.get("SILICONFLOW_API_KEY", "your-api-key-here")
+SILICONFLOW_BASE_URL = os.environ.get("SILICONFLOW_BASE_URL", "https://api.siliconflow.cn/v1/chat/completions")
+SILICONFLOW_MODEL = os.environ.get("SILICONFLOW_MODEL", "Qwen/Qwen2.5-7B-Instruct")
+SILICONFLOW_TIMEOUT = 10  # 超时秒数
 
 def fetch_stock_data(tickers, max_batch=25):
     all_data = {}
@@ -165,13 +171,24 @@ def build_data():
         "history": history, "date": datetime.now().strftime("%Y-%m-%d"),
     }
     # 生成6个独立总结
-    print("\n[AI 总结生成]")
-    result["ai_summary"] = generate_summary(result, "overview")
-    result["ai_stocks"] = generate_summary(result, "stocks")
-    result["ai_sectors"] = generate_summary(result, "sectors")
-    result["ai_distribution"] = generate_summary(result, "distribution")
-    result["ai_industry"] = generate_summary(result, "industry")
-    result["ai_trend"] = generate_summary(result, "trend")
+ print("\n[AI 总结生成]")
+summary_types = ["overview", "stocks", "sectors", "distribution", "industry", "trend"]
+key_map = {
+    "overview": "ai_summary",
+    "stocks": "ai_stocks",
+    "sectors": "ai_sectors",
+    "distribution": "ai_distribution",
+    "industry": "ai_industry",
+    "trend": "ai_trend"
+}
+for stype in summary_types:
+    api_result = call_qwen_summary(stype, result)
+    key = key_map[stype]
+    if api_result:
+        result[key] = api_result
+    else:
+        print(f"   [千问] 降级使用本地 {stype} 总结")
+        result[key] = generate_summary(result, stype)
     return result
 
 
