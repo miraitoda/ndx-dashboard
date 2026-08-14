@@ -27,7 +27,7 @@ def ensure_dir():
 SILICONFLOW_API_KEY = os.environ.get("SILICONFLOW_API_KEY", "your-api-key-here")
 SILICONFLOW_BASE_URL = os.environ.get("SILICONFLOW_BASE_URL", "https://api.siliconflow.cn/v1/chat/completions")
 SILICONFLOW_MODEL = os.environ.get("SILICONFLOW_MODEL", "Qwen/Qwen3-8B")
-SILICONFLOW_TIMEOUT = 180
+SILICONFLOW_TIMEOUT = 10
 
 
 def fetch_stock_data(tickers, max_batch=25):
@@ -416,7 +416,17 @@ section{padding:60px 0}
 .ai-summary .summary-text{margin:0;font-size:28px;font-weight:700;line-height:1.4;color:var(--text);max-width:900px;letter-spacing:-0.5px;min-height:2.8em}
 .ai-summary .summary-text .up{color:var(--rise)}
 .ai-summary .summary-text .down{color:var(--fall)}
-.ai-summary .summary-footer{display:block;margin-top:8px;font-size:11px;font-weight:500;color:var(--text3);letter-spacing:0.5px;opacity:0.6}
+
+/* 全局 footer 样式（主总结和小卡片统一） */
+.summary-footer {
+  display: block;
+  margin-top: 8px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text3);
+  letter-spacing: 0.5px;
+  opacity: 0.6;
+}
 
 /* Cards */
 .card{background:var(--surface);border:1px solid var(--border);border-radius:16px;transition:transform 0.2s,border-color 0.2s}
@@ -938,16 +948,32 @@ function highlightNumbers(text) {
   return text;
 }
 
-// 打字机效果
-function typeWriter(element, text, callback, speed) {
+// 改进的打字机效果：按标签整体插入，只对纯文本字符逐字显示
+function typeWriter(element, html, callback, speed) {
   speed = speed || 25;
-  var chars = text.split('');
+  // 解析html字符串，拆分成标签和普通文本
+  var tokens = [];
+  var i = 0;
+  while (i < html.length) {
+    if (html[i] === '<') {
+      var j = html.indexOf('>', i);
+      if (j !== -1) {
+        tokens.push(html.substring(i, j + 1));
+        i = j + 1;
+        continue;
+      }
+    }
+    // 普通字符（包括数字、汉字、标点等）
+    tokens.push(html[i]);
+    i++;
+  }
   var index = 0;
   element.innerHTML = '';
-  
   function type() {
-    if (index < chars.length) {
-      element.innerHTML += chars[index];
+    if (index < tokens.length) {
+      var token = tokens[index];
+      // 如果是标签，直接插入（不会拆分）
+      element.innerHTML += token;
       index++;
       setTimeout(type, speed);
     } else {
