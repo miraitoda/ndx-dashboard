@@ -93,11 +93,6 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:
 /* Container */
 .container{max-width:1200px;margin:0 auto;padding:0 24px;position:relative;z-index:1}
 
-/* 沉浸模式：隐藏容器内除 hero 外的所有直接子元素 */
-.container.immersive > *:not(.hero) {
-  visibility: hidden;
-}
-
 /* Sections */
 section{padding:60px 0}
 .section-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:32px}
@@ -112,7 +107,7 @@ section{padding:60px 0}
 .hero{padding:80px 0 60px}
 .hero-inner{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:40px}
 .hero-left{flex:1;min-width:300px}
-.hero-title{font-size:64px;font-weight:900;letter-spacing:-3px;margin:0;line-height:1;color:var(--text);opacity:0;transform:translateY(-6px);animation:hero-in 0.6s cubic-bezier(0.16,1,0.3,1) 0.2s forwards;cursor:pointer;transition:font-size 0.4s ease, transform 0.4s ease;}
+.hero-title{font-size:64px;font-weight:900;letter-spacing:-3px;margin:0;line-height:1;color:var(--text);opacity:0;transform:translateY(-6px);animation:hero-in 0.6s cubic-bezier(0.16,1,0.3,1) 0.2s forwards}
 @keyframes hero-in {
   to { opacity:1; transform:translateY(0); }
 }
@@ -458,7 +453,7 @@ section{padding:60px 0}
   <section class="hero">
     <div class="hero-inner">
       <div class="hero-left">
-        <h1 class="hero-title" id="heroTitle">
+        <h1 class="hero-title">
           <span class="glitch-word" id="glitchTitle" data-text="纳斯达克100">纳斯达克100</span>
           <br>
           <span class="hero-accent" style="font-size:0.6em;">NASDAQ-100</span>
@@ -607,7 +602,7 @@ section{padding:60px 0}
     <div class="footer-text">数据来自 Yahoo Finance · 每日自动更新 · 仅供参考不构成投资建议</div>
   </div>
 
-</div> <!-- .container -->
+</div>
 
 <!-- BOTTOM TICKER -->
 <div class="ticker-bar ticker-bar-bottom">
@@ -630,13 +625,13 @@ const FALL = STYLE.getPropertyValue('--fall').trim();
 const ACCENT = FALL;
 const TEXT = "#f5f5f5", TEXT2 = "#a1a1aa", TEXT3 = "#52525b", BG = "#0a0a0a";
 
-const DATA = {"index":{"price":30067.51,"prev_close":30084.5,"change":-0.06,"up":36,"down":62,"flat":1,"total":99},"stocks":[{"ticker":"AAPL","name":"苹果","sector":"科技","weight":11.04,"change":-0.12},{"ticker":"NVDA","name":"英伟达","sector":"科技","weight":8.7,"change":0.4},{"ticker":"MSFT","name":"微软","sector":"科技","weight":7.3,"change":0.45},{"ticker":"AVGO","name":"博通","sector":"科技","weight":2.7,"change":-4.57},{"ticker":"ADBE","name":"Adobe","sector":"科技","weight":1.2,"change":-3.04},{"ticker":"CSCO","name":"思科","sector":"科技","weight":1.0,"change":-1.93},{"ticker":"INTU","name":"Intuit","sector":"科技","weight":0.9,"change":-3.29},{"ticker":"QCOM","name":"高通","sector":"科技","weight":0.85,"change":0.76},{"ticker":"AMAT","name":"应用材料","sector":"科技","weight":0.8,"change":-4.19},{"ticker":"TXN","name":"德州仪器","sector":"科技","weight":0.75,"change":1.94},{"ticker":"AMD","name":"AMD","sector":"科技","weight":1.6,"change":5.04},{"ticker":"PANW","name":"Palo Alto","sector":"科技","weight":0.55,"change":-2.49},{"ticker":"ADI","name":"ADI","sector":"科技","weight":0.46,"change":1.43},{"ticker":"MU","name":"美光","sector":"科技","weight":0.45,"change":2.24},{"ticker":"LRCX","name":"Lam Research","sector":"科技","weight":0.42,"change":-1.12},{"ticker":"KLAC","name":"KLA","sector":"科技","weight":0.4,"change":-2.27},{"ticker":"SNPS","name":"Synopsys","sector":"科技","weight":0.35,"change":0.93},{"ticker":"CDNS","name":"Cadence","sector":"科技","weight":0.34,"change":-0.15},{"ticker":"PYPL","name":"PayPal","sector":"科技","weight":0.33,"change":-1.29},{"ticker":"CRWD","name":"CrowdStrike","sector":"科技","weight":0.32,"change":-2.7},{"ticker":"FTNT","name":"Fortinet","sector":"科技","weight":0.29,"change":-3.02},{"ticker":"MRVL","name":"Marvell","sector":"科技","weight":0.27,"change":-0.57},{"ticker":"NXPI","name":"NXP","sector":"科技","weight":0.24,"change":0.41},{"ticker":"DDOG","name":"Datadog","sector":"科技","weight":0.12,"change":-0.18},{"ticker":"ADP","name":"ADP","sector":"科技","weight":0.17,"change":-1.71},{"ticker":"PAYX","name":"Paychex","sector":"科技","weight":0.15,"change":-2.57},{"ticker":"INTC","name":"英特尔","sector":"科技","weight":0.19,"change":0.54},{"ticker":"MCHP","name":"Microchip","sector":"科技","weight":0.07,"change":0.75},{"ticker":"MSTR","name":"MicroStrategy","sector":"科技","weight":0.06,"change":-4.58},{"ticker":"APP","name":"AppLovin","sector":"科技","weight":0.06,"change":2.46},{"ticker":"ARM","name":"ARM","sector":"科技","weight":0.06,"change":0.64},{"ticker":"PLTR","name":"Palantir","sector":"科技","weight":0.05,"change":-1.26},{"ticker":"TEAM","name":"Atlassian","sector":"科技","weight":0.05,"change":-2.13},{"ticker":"WDAY","name":"Workday","sector":"科技","weight":0.05,"change":-5.23},{"ticker":"STX","name":"希捷","sector":"科技","weight":0.04,"change":4.23},{"ticker":"WDC","name":"西数","sector":"科技","weight":0.04,"change":1.48},{"ticker":"ASML","name":"ASML","sector":"科技","weight":0.03,"change":-0.4},{"ticker":"MPWR","name":"MPS","sector":"科技","weight":0.03,"change":2.0},{"ticker":"ALAB","name":"Astera","sector":"科技","weight":0.02,"change":-0.09},{"ticker":"CRWV","name":"CoreWeave","sector":"科技","weight":0.02,"change":-0.4},{"ticker":"TER","name":"泰瑞达","sector":"科技","weight":0.02,"change":-1.01},{"ticker":"GOOGL","name":"谷歌A","sector":"通信服务","weight":2.5,"change":0.0},{"ticker":"GOOG","name":"谷歌C","sector":"通信服务","weight":2.5,"change":0.01},{"ticker":"META","name":"Meta","sector":"通信服务","weight":3.3,"change":-0.11},{"ticker":"NFLX","name":"奈飞","sector":"通信服务","weight":1.8,"change":-0.38},{"ticker":"TMUS","name":"T-Mobile","sector":"通信服务","weight":1.1,"change":-0.6},{"ticker":"CMCSA","name":"康卡斯特","sector":"通信服务","weight":0.7,"change":0.36},{"ticker":"WBD","name":"华纳兄弟","sector":"通信服务","weight":0.07,"change":-0.05},{"ticker":"TTWO","name":"Take-Two","sector":"通信服务","weight":0.07,"change":1.86},{"ticker":"AMZN","name":"亚马逊","sector":"可选消费","weight":6.7,"change":-0.35},{"ticker":"TSLA","name":"特斯拉","sector":"可选消费","weight":3.6,"change":0.9},{"ticker":"BKNG","name":"Booking","sector":"可选消费","weight":0.52,"change":-0.19},{"ticker":"SBUX","name":"星巴克","sector":"可选消费","weight":0.5,"change":-0.68},{"ticker":"MELI","name":"MercadoLibre","sector":"可选消费","weight":0.37,"change":1.52},{"ticker":"MAR","name":"万豪","sector":"可选消费","weight":0.31,"change":1.06},{"ticker":"DASH","name":"DoorDash","sector":"可选消费","weight":0.28,"change":0.14},{"ticker":"ORLY","name":"O'Reilly","sector":"可选消费","weight":0.26,"change":-1.23},{"ticker":"ABNB","name":"Airbnb","sector":"可选消费","weight":0.2,"change":0.23},{"ticker":"ROST","name":"Ross","sector":"可选消费","weight":0.14,"change":0.46},{"ticker":"SHOP","name":"Shopify","sector":"可选消费","weight":0.05,"change":-2.97},{"ticker":"PDD","name":"拼多多","sector":"可选消费","weight":0.02,"change":-0.16},{"ticker":"WMT","name":"沃尔玛","sector":"必需消费","weight":3.0,"change":-0.54},{"ticker":"COST","name":"开市客","sector":"必需消费","weight":2.2,"change":-0.15},{"ticker":"PEP","name":"百事","sector":"必需消费","weight":1.4,"change":-0.12},{"ticker":"MDLZ","name":"亿滋","sector":"必需消费","weight":0.36,"change":-0.25},{"ticker":"MNST","name":"Monster","sector":"必需消费","weight":0.21,"change":0.13},{"ticker":"KDP","name":"Keurig","sector":"必需消费","weight":0.18,"change":1.61},{"ticker":"KHC","name":"卡夫亨氏","sector":"必需消费","weight":0.16,"change":-0.33},{"ticker":"CCEP","name":"可口可乐欧洲","sector":"必需消费","weight":0.03,"change":0.44},{"ticker":"AMGN","name":"安进","sector":"医疗保健","weight":0.65,"change":-1.53},{"ticker":"ISRG","name":"直觉外科","sector":"医疗保健","weight":0.58,"change":-0.39},{"ticker":"GILD","name":"吉利德","sector":"医疗保健","weight":0.48,"change":-0.84},{"ticker":"VRTX","name":"Vertex","sector":"医疗保健","weight":0.43,"change":-2.3},{"ticker":"REGN","name":"再生元","sector":"医疗保健","weight":0.38,"change":-1.13},{"ticker":"DXCM","name":"Dexcom","sector":"医疗保健","weight":0.22,"change":-0.69},{"ticker":"IDXX","name":"IDEXX","sector":"医疗保健","weight":0.08,"change":-2.0},{"ticker":"GEHC","name":"GE医疗","sector":"医疗保健","weight":0.08,"change":-0.26},{"ticker":"ALNY","name":"Alnylam","sector":"医疗保健","weight":0.05,"change":-1.73},{"ticker":"LIN","name":"林德","sector":"工业","weight":1.3,"change":0.3},{"ticker":"HON","name":"霍尼韦尔","sector":"工业","weight":0.6,"change":-0.38},{"ticker":"CSX","name":"CSX","sector":"工业","weight":0.3,"change":1.13},{"ticker":"CTAS","name":"Cintas","sector":"工业","weight":0.25,"change":-0.73},{"ticker":"CPRT","name":"Copart","sector":"工业","weight":0.23,"change":4.98},{"ticker":"ODFL","name":"Old Dominion","sector":"工业","weight":0.13,"change":-0.49},{"ticker":"FAST","name":"Fastenal","sector":"工业","weight":0.1,"change":-0.99},{"ticker":"ROP","name":"Roper","sector":"工业","weight":0.05,"change":-1.58},{"ticker":"VRSK","name":"Verisk","sector":"工业","weight":0.04,"change":-2.41},{"ticker":"FER","name":"Ferrovial","sector":"工业","weight":0.02,"change":-0.08},{"ticker":"TRI","name":"汤森路透","sector":"工业","weight":0.02,"change":-3.6},{"ticker":"PCAR","name":"Paccar","sector":"工业","weight":0.02,"change":-0.14},{"ticker":"AXON","name":"Axon","sector":"工业","weight":0.03,"change":-1.57},{"ticker":"RKLB","name":"Rocket Lab","sector":"工业","weight":0.02,"change":0.59},{"ticker":"EXC","name":"Exelon","sector":"公用事业","weight":0.1,"change":0.04},{"ticker":"XEL","name":"Xcel","sector":"公用事业","weight":0.09,"change":-0.01},{"ticker":"AEP","name":"AEP","sector":"公用事业","weight":0.09,"change":-0.32},{"ticker":"CEG","name":"Constellation","sector":"公用事业","weight":0.03,"change":1.81},{"ticker":"FANG","name":"Diamondback","sector":"能源","weight":0.03,"change":2.51},{"ticker":"BKR","name":"Baker Hughes","sector":"能源","weight":0.02,"change":1.75},{"ticker":"CSGP","name":"CoStar","sector":"房地产","weight":0.04,"change":-3.36}],"pie_stocks":[{"ticker":"AAPL","name":"苹果","sector":"科技","weight":11.04,"change":-0.12},{"ticker":"NVDA","name":"英伟达","sector":"科技","weight":8.7,"change":0.4},{"ticker":"MSFT","name":"微软","sector":"科技","weight":7.3,"change":0.45},{"ticker":"AMZN","name":"亚马逊","sector":"可选消费","weight":6.7,"change":-0.35},{"ticker":"TSLA","name":"特斯拉","sector":"可选消费","weight":3.6,"change":0.9},{"ticker":"META","name":"Meta","sector":"通信服务","weight":3.3,"change":-0.11},{"ticker":"WMT","name":"沃尔玛","sector":"必需消费","weight":3.0,"change":-0.54},{"ticker":"AVGO","name":"博通","sector":"科技","weight":2.7,"change":-4.57},{"ticker":"GOOGL","name":"谷歌A","sector":"通信服务","weight":2.5,"change":0.0},{"ticker":"GOOG","name":"谷歌C","sector":"通信服务","weight":2.5,"change":0.01},{"ticker":"COST","name":"开市客","sector":"必需消费","weight":2.2,"change":-0.15},{"ticker":"NFLX","name":"奈飞","sector":"通信服务","weight":1.8,"change":-0.38},{"ticker":"AMD","name":"AMD","sector":"科技","weight":1.6,"change":5.04},{"ticker":"PEP","name":"百事","sector":"必需消费","weight":1.4,"change":-0.12},{"ticker":"LIN","name":"林德","sector":"工业","weight":1.3,"change":0.3},{"ticker":"其他","name":"其他84只","sector":"","weight":21.84,"change":-0.75}],"sectors":[{"name":"科技","weight":42.49,"change":-0.29,"count":41},{"name":"可选消费","weight":12.95,"change":0.08,"count":12},{"name":"通信服务","weight":12.04,"change":-0.11,"count":8},{"name":"必需消费","weight":7.54,"change":-0.26,"count":8},{"name":"工业","weight":3.11,"change":0.33,"count":14},{"name":"医疗保健","weight":2.95,"change":-1.17,"count":9},{"name":"公用事业","weight":0.31,"change":0.09,"count":4},{"name":"能源","weight":0.05,"change":2.21,"count":2},{"name":"房地产","weight":0.04,"change":-3.36,"count":1}],"bins":{"labels":["<-3%","-3~-2%","-2~-1%","-1~0%","0~1%","1~2%","2~3%",">3%"],"counts":[9,8,13,32,20,10,4,3]},"history":[29329.21,29697.87,29173.02,29252.56,29727.1,29825.11,29264.1,29586.29,29502.6,29025.77,28592.66,28604.23,29155.18,28998.1,28454.81,28128.34,28039.21,27763.13,27192.31,28106.35,28274.2,28776.8,29733.16,29487.79,29373.33,29722.3,29621.8,29525.48,29742.6,30084.5],"date":"2026-08-14","_is_api":{"ai_summary":false,"ai_stocks":false,"ai_sectors":false,"ai_distribution":false,"ai_industry":false,"ai_trend":false},"ai_summary":"纳指100收涨-0.06%，36涨62跌。","ai_stocks":"权重股苹果（AAPL）、英伟达（NVDA）涨跌互现，权重合计约19.7%。","ai_sectors":"能源领涨+2.21%，房地产领跌-3.36%。","ai_distribution":"37涨62跌，-1~0%区间32只。","ai_industry":"4个行业上涨，5个下跌。","ai_trend":"30日+2.58%，区间27,192-30,084。"};
-const IS_API = {"ai_summary": false, "ai_stocks": false, "ai_sectors": false, "ai_distribution": false, "ai_industry": false, "ai_trend": false};
+const DATA = {"index":{"price":30065.88,"prev_close":30084.5,"change":-0.06,"up":35,"down":62,"flat":1,"total":98},"stocks":[{"ticker":"AAPL","name":"苹果","sector":"科技","weight":11.04,"change":0.0},{"ticker":"NVDA","name":"英伟达","sector":"科技","weight":8.7,"change":0.54},{"ticker":"MSFT","name":"微软","sector":"科技","weight":7.3,"change":0.42},{"ticker":"AVGO","name":"博通","sector":"科技","weight":2.7,"change":-4.58},{"ticker":"ADBE","name":"Adobe","sector":"科技","weight":1.2,"change":-3.17},{"ticker":"CSCO","name":"思科","sector":"科技","weight":1.0,"change":-1.92},{"ticker":"INTU","name":"Intuit","sector":"科技","weight":0.9,"change":-3.46},{"ticker":"QCOM","name":"高通","sector":"科技","weight":0.85,"change":0.31},{"ticker":"AMAT","name":"应用材料","sector":"科技","weight":0.8,"change":-4.31},{"ticker":"TXN","name":"德州仪器","sector":"科技","weight":0.75,"change":1.7},{"ticker":"AMD","name":"AMD","sector":"科技","weight":1.6,"change":4.64},{"ticker":"PANW","name":"Palo Alto","sector":"科技","weight":0.55,"change":-2.26},{"ticker":"ADI","name":"ADI","sector":"科技","weight":0.46,"change":1.2},{"ticker":"MU","name":"美光","sector":"科技","weight":0.45,"change":2.1},{"ticker":"LRCX","name":"Lam Research","sector":"科技","weight":0.42,"change":-1.29},{"ticker":"KLAC","name":"KLA","sector":"科技","weight":0.4,"change":-2.18},{"ticker":"SNPS","name":"Synopsys","sector":"科技","weight":0.35,"change":1.09},{"ticker":"CDNS","name":"Cadence","sector":"科技","weight":0.34,"change":0.09},{"ticker":"PYPL","name":"PayPal","sector":"科技","weight":0.33,"change":-1.26},{"ticker":"CRWD","name":"CrowdStrike","sector":"科技","weight":0.32,"change":-2.54},{"ticker":"FTNT","name":"Fortinet","sector":"科技","weight":0.29,"change":-2.7},{"ticker":"MRVL","name":"Marvell","sector":"科技","weight":0.27,"change":-0.71},{"ticker":"DDOG","name":"Datadog","sector":"科技","weight":0.12,"change":0.29},{"ticker":"ADP","name":"ADP","sector":"科技","weight":0.17,"change":-1.56},{"ticker":"PAYX","name":"Paychex","sector":"科技","weight":0.15,"change":-2.49},{"ticker":"INTC","name":"英特尔","sector":"科技","weight":0.19,"change":0.5},{"ticker":"MCHP","name":"Microchip","sector":"科技","weight":0.07,"change":0.51},{"ticker":"MSTR","name":"MicroStrategy","sector":"科技","weight":0.06,"change":-5.03},{"ticker":"APP","name":"AppLovin","sector":"科技","weight":0.06,"change":2.16},{"ticker":"ARM","name":"ARM","sector":"科技","weight":0.06,"change":0.23},{"ticker":"PLTR","name":"Palantir","sector":"科技","weight":0.05,"change":-1.51},{"ticker":"TEAM","name":"Atlassian","sector":"科技","weight":0.05,"change":-1.99},{"ticker":"WDAY","name":"Workday","sector":"科技","weight":0.05,"change":-5.42},{"ticker":"STX","name":"希捷","sector":"科技","weight":0.04,"change":4.84},{"ticker":"WDC","name":"西数","sector":"科技","weight":0.04,"change":2.58},{"ticker":"ASML","name":"ASML","sector":"科技","weight":0.03,"change":-0.51},{"ticker":"MPWR","name":"MPS","sector":"科技","weight":0.03,"change":1.94},{"ticker":"ALAB","name":"Astera","sector":"科技","weight":0.02,"change":-0.66},{"ticker":"CRWV","name":"CoreWeave","sector":"科技","weight":0.02,"change":-0.48},{"ticker":"TER","name":"泰瑞达","sector":"科技","weight":0.02,"change":-1.44},{"ticker":"GOOGL","name":"谷歌A","sector":"通信服务","weight":2.5,"change":-0.03},{"ticker":"GOOG","name":"谷歌C","sector":"通信服务","weight":2.5,"change":-0.04},{"ticker":"META","name":"Meta","sector":"通信服务","weight":3.3,"change":-0.12},{"ticker":"NFLX","name":"奈飞","sector":"通信服务","weight":1.8,"change":-0.2},{"ticker":"TMUS","name":"T-Mobile","sector":"通信服务","weight":1.1,"change":-0.58},{"ticker":"CMCSA","name":"康卡斯特","sector":"通信服务","weight":0.7,"change":0.78},{"ticker":"WBD","name":"华纳兄弟","sector":"通信服务","weight":0.07,"change":-0.1},{"ticker":"TTWO","name":"Take-Two","sector":"通信服务","weight":0.07,"change":1.9},{"ticker":"AMZN","name":"亚马逊","sector":"可选消费","weight":6.7,"change":-0.44},{"ticker":"TSLA","name":"特斯拉","sector":"可选消费","weight":3.6,"change":0.74},{"ticker":"BKNG","name":"Booking","sector":"可选消费","weight":0.52,"change":-0.03},{"ticker":"SBUX","name":"星巴克","sector":"可选消费","weight":0.5,"change":-0.65},{"ticker":"MELI","name":"MercadoLibre","sector":"可选消费","weight":0.37,"change":1.32},{"ticker":"MAR","name":"万豪","sector":"可选消费","weight":0.31,"change":1.06},{"ticker":"DASH","name":"DoorDash","sector":"可选消费","weight":0.28,"change":0.16},{"ticker":"ORLY","name":"O'Reilly","sector":"可选消费","weight":0.26,"change":-1.14},{"ticker":"ABNB","name":"Airbnb","sector":"可选消费","weight":0.2,"change":0.38},{"ticker":"ROST","name":"Ross","sector":"可选消费","weight":0.14,"change":0.52},{"ticker":"SHOP","name":"Shopify","sector":"可选消费","weight":0.05,"change":-3.15},{"ticker":"PDD","name":"拼多多","sector":"可选消费","weight":0.02,"change":-0.01},{"ticker":"WMT","name":"沃尔玛","sector":"必需消费","weight":3.0,"change":-0.63},{"ticker":"COST","name":"开市客","sector":"必需消费","weight":2.2,"change":-0.31},{"ticker":"PEP","name":"百事","sector":"必需消费","weight":1.4,"change":-0.14},{"ticker":"MDLZ","name":"亿滋","sector":"必需消费","weight":0.36,"change":-0.24},{"ticker":"MNST","name":"Monster","sector":"必需消费","weight":0.21,"change":-0.29},{"ticker":"KDP","name":"Keurig","sector":"必需消费","weight":0.18,"change":1.25},{"ticker":"KHC","name":"卡夫亨氏","sector":"必需消费","weight":0.16,"change":-0.26},{"ticker":"CCEP","name":"可口可乐欧洲","sector":"必需消费","weight":0.03,"change":0.18},{"ticker":"AMGN","name":"安进","sector":"医疗保健","weight":0.65,"change":-1.39},{"ticker":"ISRG","name":"直觉外科","sector":"医疗保健","weight":0.58,"change":-0.36},{"ticker":"GILD","name":"吉利德","sector":"医疗保健","weight":0.48,"change":-0.76},{"ticker":"VRTX","name":"Vertex","sector":"医疗保健","weight":0.43,"change":-2.09},{"ticker":"REGN","name":"再生元","sector":"医疗保健","weight":0.38,"change":-0.89},{"ticker":"DXCM","name":"Dexcom","sector":"医疗保健","weight":0.22,"change":-0.47},{"ticker":"IDXX","name":"IDEXX","sector":"医疗保健","weight":0.08,"change":-1.89},{"ticker":"GEHC","name":"GE医疗","sector":"医疗保健","weight":0.08,"change":-0.24},{"ticker":"ALNY","name":"Alnylam","sector":"医疗保健","weight":0.05,"change":-1.73},{"ticker":"LIN","name":"林德","sector":"工业","weight":1.3,"change":0.32},{"ticker":"HON","name":"霍尼韦尔","sector":"工业","weight":0.6,"change":-0.54},{"ticker":"CSX","name":"CSX","sector":"工业","weight":0.3,"change":0.92},{"ticker":"CTAS","name":"Cintas","sector":"工业","weight":0.25,"change":-0.54},{"ticker":"CPRT","name":"Copart","sector":"工业","weight":0.23,"change":6.07},{"ticker":"ODFL","name":"Old Dominion","sector":"工业","weight":0.13,"change":-0.83},{"ticker":"FAST","name":"Fastenal","sector":"工业","weight":0.1,"change":-0.86},{"ticker":"ROP","name":"Roper","sector":"工业","weight":0.05,"change":-1.46},{"ticker":"VRSK","name":"Verisk","sector":"工业","weight":0.04,"change":-2.12},{"ticker":"FER","name":"Ferrovial","sector":"工业","weight":0.02,"change":-0.31},{"ticker":"TRI","name":"汤森路透","sector":"工业","weight":0.02,"change":-3.51},{"ticker":"PCAR","name":"Paccar","sector":"工业","weight":0.02,"change":-0.22},{"ticker":"AXON","name":"Axon","sector":"工业","weight":0.03,"change":-1.45},{"ticker":"RKLB","name":"Rocket Lab","sector":"工业","weight":0.02,"change":0.19},{"ticker":"EXC","name":"Exelon","sector":"公用事业","weight":0.1,"change":0.02},{"ticker":"XEL","name":"Xcel","sector":"公用事业","weight":0.09,"change":-0.1},{"ticker":"AEP","name":"AEP","sector":"公用事业","weight":0.09,"change":-0.35},{"ticker":"CEG","name":"Constellation","sector":"公用事业","weight":0.03,"change":1.75},{"ticker":"FANG","name":"Diamondback","sector":"能源","weight":0.03,"change":2.19},{"ticker":"BKR","name":"Baker Hughes","sector":"能源","weight":0.02,"change":1.56},{"ticker":"CSGP","name":"CoStar","sector":"房地产","weight":0.04,"change":-2.89}],"pie_stocks":[{"ticker":"AAPL","name":"苹果","sector":"科技","weight":11.04,"change":0.0},{"ticker":"NVDA","name":"英伟达","sector":"科技","weight":8.7,"change":0.54},{"ticker":"MSFT","name":"微软","sector":"科技","weight":7.3,"change":0.42},{"ticker":"AMZN","name":"亚马逊","sector":"可选消费","weight":6.7,"change":-0.44},{"ticker":"TSLA","name":"特斯拉","sector":"可选消费","weight":3.6,"change":0.74},{"ticker":"META","name":"Meta","sector":"通信服务","weight":3.3,"change":-0.12},{"ticker":"WMT","name":"沃尔玛","sector":"必需消费","weight":3.0,"change":-0.63},{"ticker":"AVGO","name":"博通","sector":"科技","weight":2.7,"change":-4.58},{"ticker":"GOOGL","name":"谷歌A","sector":"通信服务","weight":2.5,"change":-0.03},{"ticker":"GOOG","name":"谷歌C","sector":"通信服务","weight":2.5,"change":-0.04},{"ticker":"COST","name":"开市客","sector":"必需消费","weight":2.2,"change":-0.31},{"ticker":"NFLX","name":"奈飞","sector":"通信服务","weight":1.8,"change":-0.2},{"ticker":"AMD","name":"AMD","sector":"科技","weight":1.6,"change":4.64},{"ticker":"PEP","name":"百事","sector":"必需消费","weight":1.4,"change":-0.14},{"ticker":"LIN","name":"林德","sector":"工业","weight":1.3,"change":0.32},{"ticker":"其他","name":"其他83只","sector":"","weight":21.6,"change":-0.77}],"sectors":[{"name":"科技","weight":42.25,"change":-0.28,"count":40},{"name":"可选消费","weight":12.95,"change":-0.01,"count":12},{"name":"通信服务","weight":12.04,"change":-0.07,"count":8},{"name":"必需消费","weight":7.54,"change":-0.36,"count":8},{"name":"工业","weight":3.11,"change":0.37,"count":14},{"name":"医疗保健","weight":2.95,"change":-1.04,"count":9},{"name":"公用事业","weight":0.31,"change":0.05,"count":4},{"name":"能源","weight":0.05,"change":1.94,"count":2},{"name":"房地产","weight":0.04,"change":-2.89,"count":1}],"bins":{"labels":["<-3%","-3~-2%","-2~-1%","-1~0%","0~1%","1~2%","2~3%",">3%"],"counts":[8,8,13,33,19,10,4,3]},"history":[29329.21,29697.87,29173.02,29252.56,29727.1,29825.11,29264.1,29586.29,29502.6,29025.77,28592.66,28604.23,29155.18,28998.1,28454.81,28128.34,28039.21,27763.13,27192.31,28106.35,28274.2,28776.8,29733.16,29487.79,29373.33,29722.3,29621.8,29525.48,29742.6,30084.5],"date":"2026-08-14","_is_api":{"ai_summary":true,"ai_stocks":true,"ai_sectors":true,"ai_distribution":true,"ai_industry":false,"ai_trend":true},"ai_summary":"2026年8月14日，纳斯达克100指数小幅下跌0.06%，成分股中35家上涨而62家下跌，显示市场在科技股承压和部分板块反弹之间的震荡格局，投资者对宏观经济数据和企业财报表现保持谨慎观望态度。","ai_stocks":"今日纳斯达克100指数权重股呈现分化格局，科技巨头苹果（AAPL）以11.04%的权重持平，英伟达（NVDA）和微软（MSFT）分别以8.7%、7.3%的权重上涨0.54%和0.42%，显示AI需求持续升温对芯片与云计算板块形成支撑，而亚马逊（AMZN）以6.7%权重下跌0.44%则反映电商与云计算业务面临竞争压力，特斯拉（TSLA）以3.6%权重上涨0.74%凸显新能源汽车市场韧性，整体指数在权重股结构性行情中微涨，市场情绪呈现震荡偏强态势。","ai_sectors":"今日纳斯达克100指数中，能源板块以1.94%的涨幅成为最大赢家，而房地产板块则因市场担忧利率政策调整影响，以-2.89%的跌幅拖累指数表现，科技与消费类股整体呈现震荡态势，部分受宏观经济预期扰动的个股出现回调，但指数仍维持结构性行情特征。","ai_distribution":"今日纳斯达克100指数成分股中，共有36只股票上涨，62只股票下跌，其中跌幅集中在-1%至0%区间，有33只个股处于该范围，反映出市场整体呈现震荡下行态势，但部分科技股仍表现相对强势。","ai_industry":"3个行业上涨，6个下跌。","ai_trend":"近30个交易日纳斯达克100指数上涨2.58%，最新报收于30084.50点，反映出科技股持续走强及市场对创新产业的乐观预期，尽管期间也经历小幅回调，但整体呈现稳步攀升态势。"};
+const IS_API = {"ai_summary": true, "ai_stocks": true, "ai_sectors": true, "ai_distribution": true, "ai_industry": false, "ai_trend": true};
 
 function colorForChange(c){ return c >= 0 ? 'var(--rise)' : 'var(--fall)'; }
 function fmtPct(c){return(c>=0?"▲ +":"▼ ")+c.toFixed(2)+"%"}
 function fmtPctRaw(c){return(c>=0?"+":"")+c.toFixed(2)+"%"}
-function svgEl(tag,attrs){const el=document.createElementNS("http://www.w3.org/2000/svg","svg");for(let k in attrs)el.setAttribute(k,attrs[k]);return el}
+function svgEl(tag,attrs){const el=document.createElementNS("http://www.w3.org/2000/svg",tag);for(let k in attrs)el.setAttribute(k,attrs[k]);return el}
 
 const HISTORY_DATES = ["2026-07-15", "2026-07-16", "2026-07-17", "2026-07-20", "2026-07-21", "2026-07-22", "2026-07-23", "2026-07-24", "2026-07-27", "2026-07-28", "2026-07-29", "2026-07-30", "2026-07-31", "2026-08-03", "2026-08-04", "2026-08-05", "2026-08-06", "2026-08-07", "2026-08-10", "2026-08-11", "2026-08-12", "2026-08-13", "2026-08-14"];
 const IS_HISTORY = false;
@@ -724,7 +719,7 @@ function renderSummary(containerId, textId, footerId, text, isApi) {
   
   if (footerEl) {
     if (isApi) {
-      footerEl.textContent = 'BRIEF POWERED BY QWEN';
+      footerEl.textContent = 'Brief powered by QWEN';
     } else {
       footerEl.textContent = '';
     }
@@ -1112,61 +1107,50 @@ function toggleTheme(){
   }
 }
 
-// ===== Glitch 引擎（可复用） =====
-window.glitchElements = [];
-let glitchIntervals = {};
-
-function updateGlitchColors() {
-  const computed = getComputedStyle(document.documentElement);
-  const riseColor = computed.getPropertyValue('--rise').trim();
-  const fallColor = computed.getPropertyValue('--fall').trim();
-  const change = DATA.index.change || 0;
-  const isUp = change >= 0;
-  window.glitchElements.forEach(el => {
-    el.style.setProperty('--glitch-color1', isUp ? (fallColor + 'cc') : (riseColor + 'cc'));
-    el.style.setProperty('--glitch-color2', isUp ? (fallColor + '99') : (riseColor + '99'));
-  });
-}
-
-function startGlitch(el) {
-  if (!el) return null;
-  // 若已存在则先停止
-  if (el._glitchInterval) {
-    clearInterval(el._glitchInterval);
-    delete el._glitchInterval;
-  }
-  // 加入全局列表（去重）
-  if (!window.glitchElements.includes(el)) {
-    window.glitchElements.push(el);
-  }
-
+// ===== Glitch 标题切换（颜色与数字相反） =====
+(function() {
+  const el = document.getElementById('glitchTitle');
+  if (!el) return;
+  
   const words = ['纳斯达克100', 'NDX'];
   let currentIndex = 0;
   let isSwitching = false;
+  
   const change = DATA.index.change || 0;
   const isUp = change >= 0;
-  const ndxColor = isUp ? 'var(--rise)' : 'var(--fall)';
-
-  function setInitialContent() {
-    const first = words[0];
-    if (first === 'NDX') {
-      el.innerHTML = 'ND<span style="color:' + ndxColor + '">X</span>';
-    } else if (first === '纳斯达克100') {
-      el.innerHTML = '纳斯达克<span style="color:' + ndxColor + '">100</span>';
+  
+  // 设置伪元素的颜色（与数字相反）
+  function setGlitchColors() {
+    const computed = getComputedStyle(document.documentElement);
+    const riseColor = computed.getPropertyValue('--rise').trim();
+    const fallColor = computed.getPropertyValue('--fall').trim();
+    if (isUp) {
+      // 涨 -> Glitch 闪紫色
+      el.style.setProperty('--glitch-color1', fallColor + 'cc');
+      el.style.setProperty('--glitch-color2', fallColor + '99');
     } else {
-      el.textContent = first;
+      // 跌 -> Glitch 闪绿色
+      el.style.setProperty('--glitch-color1', riseColor + 'cc');
+      el.style.setProperty('--glitch-color2', riseColor + '99');
     }
-    el.setAttribute('data-text', first);
-    el.style.color = '';
   }
-
+  setGlitchColors();
+  
+  // 暴露给全局，供主题切换调用
+  window.updateGlitchColors = setGlitchColors;
+  
+  const ndxColor = isUp ? 'var(--rise)' : 'var(--fall)';
+  
   function switchWord() {
     if (isSwitching) return;
     isSwitching = true;
+    
     el.classList.add('switching');
+    
     setTimeout(() => {
       currentIndex = (currentIndex + 1) % words.length;
       const newText = words[currentIndex];
+      
       if (newText === 'NDX') {
         el.innerHTML = 'ND<span style="color:' + ndxColor + '">X</span>';
       } else if (newText === '纳斯达克100') {
@@ -1174,83 +1158,28 @@ function startGlitch(el) {
       } else {
         el.textContent = newText;
       }
+      
       el.setAttribute('data-text', newText);
       el.style.color = '';
     }, 300);
+    
     setTimeout(() => {
       el.classList.remove('switching');
       isSwitching = false;
     }, 700);
   }
+  
+  setInterval(switchWord, 3000);
+})();
 
-  setInitialContent();
-  updateGlitchColors();
-  const intervalId = setInterval(switchWord, 3000);
-  el._glitchInterval = intervalId;
-  return intervalId;
-}
 
-function stopGlitch(el) {
-  if (el && el._glitchInterval) {
-    clearInterval(el._glitchInterval);
-    delete el._glitchInterval;
-    const idx = window.glitchElements.indexOf(el);
-    if (idx > -1) window.glitchElements.splice(idx, 1);
-  }
-}
-
-// 启动主标题 glitch
-const mainTitleEl = document.getElementById('glitchTitle');
-if (mainTitleEl) startGlitch(mainTitleEl);
-
-window.updateGlitchColors = updateGlitchColors;
-
-// ===== 点击标题切换沉浸模式（手动触发，修复标题被隐藏问题） =====
-const heroTitle = document.getElementById('heroTitle');
-const header = document.querySelector('.header');
-const container = document.querySelector('.container');
-let isImmersive = false;
-
-if (heroTitle) {
-  heroTitle.addEventListener('click', function(e) {
-    e.stopPropagation();
-    isImmersive = !isImmersive;
-    
-    if (isImmersive) {
-      // 隐藏 header
-      if (header) header.style.visibility = 'hidden';
-      // 添加 immersive 类，隐藏 container 中除 .hero 外的其他内容
-      if (container) container.classList.add('immersive');
-      
-      // 标题放大至 160px，并轻微缩放
-      heroTitle.style.fontSize = '160px';
-      heroTitle.style.transform = 'scale(1.05)';
-      heroTitle.classList.add('giant-mode');
-      
-      // 确保 glitch 特效运行（若已停止则重启）
-      if (mainTitleEl && !mainTitleEl._glitchInterval) {
-        startGlitch(mainTitleEl);
-      }
-    } else {
-      // 恢复
-      if (header) header.style.visibility = 'visible';
-      if (container) container.classList.remove('immersive');
-      
-      heroTitle.style.fontSize = '';
-      heroTitle.style.transform = '';
-      heroTitle.classList.remove('giant-mode');
-      
-      // 若希望恢复后 glitch 持续，则无需停止；若希望停止，取消注释下行
-      // if (mainTitleEl) stopGlitch(mainTitleEl);
-    }
-  });
-}
-
-// 原有的 rollNumber 函数
+// Odometer 数字滚动：从 fromValue 逐位翻滚到 toValue
 function rollNumber(el, fromValue, toValue, duration){
+  // 将数字转为字符串，统一用 0 补齐位数（修复 UP 滚动问题）
   const toStr = toValue.toLocaleString("en-US", {minimumFractionDigits: 1, maximumFractionDigits: 1});
   const fromStr = fromValue.toLocaleString("en-US", {minimumFractionDigits: 1, maximumFractionDigits: 1});
   const maxLen = Math.max(toStr.length, fromStr.length);
+  // 关键修改：用 '0' 填充，保证所有位都是数字，都会滚动
   const toPadded = toStr.padStart(maxLen, '0');
   const fromPadded = fromStr.padStart(maxLen, '0');
 
@@ -1265,6 +1194,7 @@ function rollNumber(el, fromValue, toValue, duration){
     const toCh = toPadded[i];
 
     if (fromCh === "," || fromCh === ".") {
+      // 逗号和点保持不变
       const span = document.createElement("span");
       span.textContent = toCh;
       span.style.display = "inline-block";
@@ -1284,6 +1214,7 @@ function rollNumber(el, fromValue, toValue, duration){
       strip.style.display = "flex";
       strip.style.flexDirection = "column";
 
+      // 构建滚动序列：从 fromNum 到 toNum（包括所有中间值）
       let seq = [];
       let n = fromNum;
       while (true) {
