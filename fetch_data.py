@@ -27,7 +27,7 @@ def ensure_dir():
 SILICONFLOW_API_KEY = os.environ.get("SILICONFLOW_API_KEY", "your-api-key-here")
 SILICONFLOW_BASE_URL = os.environ.get("SILICONFLOW_BASE_URL", "https://api.siliconflow.cn/v1/chat/completions")
 SILICONFLOW_MODEL = os.environ.get("SILICONFLOW_MODEL", "Qwen/Qwen3-8B")
-SILICONFLOW_TIMEOUT = 10
+SILICONFLOW_TIMEOUT = 5
 
 
 def fetch_stock_data(tickers, max_batch=25):
@@ -412,10 +412,21 @@ section{padding:60px 0}
 .kpi-change.down{color:var(--fall)}
 .kpi-sub{font-size:13px;color:var(--text3);margin-top:8px;font-family:'JetBrains Mono',monospace}
 
-/* AI Summary */
-.ai-summary .summary-text{margin:0;font-size:28px;font-weight:700;line-height:1.4;color:var(--text);max-width:900px;letter-spacing:-0.5px;min-height:2.8em}
-.ai-summary .summary-text .up{color:var(--rise)}
-.ai-summary .summary-text .down{color:var(--fall)}
+/* ===== AI 总结高亮（全局生效） ===== */
+.up { color: var(--rise); }
+.down { color: var(--fall); }
+
+/* AI Summary 主样式 */
+.ai-summary .summary-text {
+  margin:0;
+  font-size:28px;
+  font-weight:700;
+  line-height:1.4;
+  color:var(--text);
+  max-width:900px;
+  letter-spacing:-0.5px;
+  min-height:2.8em;
+}
 
 /* 全局 footer 样式（主总结和小卡片统一） */
 .summary-footer {
