@@ -1,32 +1,32 @@
 # Nasdaq-100 Constituents (Auto-Updated)
-# Updated: 2026-08-16 11:37:40
+# Updated: 2026-08-16 21:10:48
 # Source: Nasdaq API + Schwab Official Top 20 + Estimates
 #
 STOCKS = [
-    ("NVDA", "NVIDIA Corporation Common Stock", "科技", 8.37),
-    ("AAPL", "Apple Inc. Common Stock", "科技", 7.11),
-    ("MSFT", "Microsoft Corporation Common Stock", "科技", 5.94),
-    ("AMZN", "Amazon.com, Inc. Common Stock", "可选消费", 4.65),
-    ("MU", "Micron Technology, Inc. Common Stock", "科技", 4.29),
-    ("AMD", "Advanced Micro Devices, Inc. Common Stock", "科技", 3.39),
-    ("GOOGL", "Alphabet Inc. Class A Common Stock", "通信服务", 3.18),
-    ("AVGO", "Broadcom Inc. Common Stock", "科技", 3.13),
-    ("GOOG", "Alphabet Inc. Class C Capital Stock", "通信服务", 2.97),
-    ("META", "Meta Platforms, Inc. Class A Common Stock", "通信服务", 2.82),
-    ("TSLA", "Tesla, Inc. Common Stock", "可选消费", 2.64),
-    ("WMT", "Walmart Inc. Common Stock", "必需消费", 2.42),
-    ("INTC", "Intel Corporation Common Stock", "科技", 2.15),
-    ("CSCO", "Cisco Systems, Inc. Common Stock (DE)", "科技", 2.08),
-    ("COST", "Costco Wholesale Corporation Common Stock", "必需消费", 1.84),
-    ("AMAT", "Applied Materials, Inc. Common Stock", "科技", 1.83),
-    ("PLTR", "Palantir Technologies Inc. Class A Common Stock", "科技", 1.76),
-    ("LRCX", "Lam Research Corporation Common Stock", "科技", 1.71),
-    ("NFLX", "Netflix, Inc. Common Stock", "通信服务", 1.38),
+    ("NVDA", "NVIDIA Corporation Common Stock", "科技", 8.57),
+    ("AAPL", "Apple Inc. Common Stock", "科技", 7.00),
+    ("MSFT", "Microsoft Corporation Common Stock", "科技", 5.77),
+    ("AMZN", "Amazon.com, Inc. Common Stock", "可选消费", 4.53),
+    ("MU", "Micron Technology, Inc. Common Stock", "科技", 4.47),
+    ("AMD", "Advanced Micro Devices, Inc. Common Stock", "科技", 3.43),
+    ("GOOGL", "Alphabet Inc. Class A Common Stock", "通信服务", 3.15),
+    ("AVGO", "Broadcom Inc. Common Stock", "科技", 3.11),
+    ("GOOG", "Alphabet Inc. Class C Capital Stock", "通信服务", 2.94),
+    ("META", "Meta Platforms, Inc. Class A Common Stock", "通信服务", 2.70),
+    ("TSLA", "Tesla, Inc. Common Stock", "可选消费", 2.58),
+    ("WMT", "Walmart Inc. Common Stock", "必需消费", 2.46),
+    ("INTC", "Intel Corporation Common Stock", "科技", 2.21),
+    ("CSCO", "Cisco Systems, Inc. Common Stock (DE)", "科技", 2.12),
+    ("AMAT", "Applied Materials, Inc. Common Stock", "科技", 1.89),
+    ("COST", "Costco Wholesale Corporation Common Stock", "必需消费", 1.83),
+    ("LRCX", "Lam Research Corporation Common Stock", "科技", 1.77),
+    ("PLTR", "Palantir Technologies Inc. Class A Common Stock", "科技", 1.71),
     ("PANW", "Palo Alto Networks, Inc. Common Stock", "科技", 1.37),
+    ("NFLX", "Netflix, Inc. Common Stock", "通信服务", 1.36),
     ("SHOP", "Shopify Inc. Class A Subordinate Voting Shares", "可选消费", 1.13),
     ("QCOM", "QUALCOMM Incorporated Common Stock", "科技", 1.03),
-    ("TXN", "Texas Instruments Incorporated Common Stock", "科技", 0.93),
-    ("ASML", "ASML Holding N.V. New York Registry Shares", "科技", 0.90),
+    ("TXN", "Texas Instruments Incorporated Common Stock", "科技", 0.94),
+    ("ASML", "ASML Holding N.V. New York Registry Shares", "科技", 0.91),
     ("ADBE", "Adobe Inc. Common Stock", "科技", 0.89),
     ("KLAC", "KLA Corporation Common Stock", "科技", 0.87),
     ("INTU", "Intuit Inc. Common Stock", "科技", 0.84),
@@ -74,11 +74,11 @@ STOCKS = [
     ("AEP", "American Electric Power Company, Inc. Common Stock", "公用事业", 0.35),
     ("FTNT", "Fortinet, Inc. Common Stock", "科技", 0.35),
     ("TER", "Teradyne, Inc. Common Stock", "科技", 0.34),
-    ("BKR", "Baker Hughes Company Class A Common Stock", "能源", 0.33),
-    ("NXPI", "NXP Semiconductors N.V. Common Stock", "科技", 0.32),
-    ("FAST", "Fastenal Company Common Stock", "工业", 0.31),
+    ("BKR", "Baker Hughes Company Class A Common Stock", "能源", 0.34),
+    ("NXPI", "NXP Semiconductors N.V. Common Stock", "科技", 0.33),
+    ("FAST", "Fastenal Company Common Stock", "工业", 0.32),
+    ("CRWV", "CoreWeave, Inc. Class A Common Stock", "科技", 0.31),
     ("FANG", "Diamondback Energy, Inc. Common Stock", "能源", 0.30),
-    ("CRWV", "CoreWeave, Inc. Class A Common Stock", "科技", 0.30),
     ("ALAB", "Astera Labs, Inc. Common Stock", "科技", 0.29),
     ("ADSK", "Autodesk, Inc. Common Stock", "Technology", 0.28),
     ("PYPL", "PayPal Holdings, Inc. Common Stock", "科技", 0.27),
@@ -109,5 +109,5 @@ STOCKS = [
 
 SECTORS = sorted(set(s[2] for s in STOCKS))
 
-LAST_UPDATE = "2026-08-16 11:37:40"
+LAST_UPDATE = "2026-08-16 21:10:48"
 DATA_SOURCE = "Nasdaq + Schwab"
