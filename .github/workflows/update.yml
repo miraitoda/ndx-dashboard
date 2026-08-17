@@ -2,7 +2,7 @@ name: Update NDX Dashboard
 
 on:
   schedule:
-    - cron: "0 22 * * *"
+    - cron: "0 22 * * 1-5"   # 修改点：只在北京时间周二至周六 06:00 运行（避开周日、周一）
   workflow_dispatch:
 
 permissions:
