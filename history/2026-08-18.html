@@ -634,7 +634,7 @@ function fmtPctRaw(c){return(c>=0?"+":"")+c.toFixed(2)+"%"}
 function svgEl(tag,attrs){const el=document.createElementNS("http://www.w3.org/2000/svg",tag);for(let k in attrs)el.setAttribute(k,attrs[k]);return el}
 
 const HISTORY_DATES = ["2026-07-15", "2026-07-16", "2026-07-17", "2026-07-20", "2026-07-21", "2026-07-22", "2026-07-23", "2026-07-24", "2026-07-27", "2026-07-28", "2026-07-29", "2026-07-30", "2026-07-31", "2026-08-03", "2026-08-04", "2026-08-05", "2026-08-06", "2026-08-07", "2026-08-10", "2026-08-11", "2026-08-12", "2026-08-13", "2026-08-14", "2026-08-15", "2026-08-16", "2026-08-17", "2026-08-18"];
-const IS_HISTORY = false;
+const IS_HISTORY = true;
 
 // 市场状态
 function getMarketStatus(){
