@@ -164,6 +164,31 @@ NAME_MAP = {
 
 
 # ============================================================
+# NEW: Company name cleaner (post-processing)
+# ============================================================
+
+def clean_company_name(name):
+    """
+    Remove common suffixes like 'Common Stock', 'Inc.', 'Corp.', 'Class A', etc.
+    """
+    if not name:
+        return ""
+    # Pattern matches suffixes at the end of the string
+    suffixes = [
+        r"Common Stock", r"Common", r"Capital Stock",
+        r"Inc\.?", r"Corp\.?", r"Corporation", r"Company", r"Co\.?",
+        r"Class [A-C]", r"Class A", r"Class B", r"Class C",
+        r"Holdings", r"plc", r"NV", r"Ltd\.?", r"Limited",
+        r"Technologies", r"International", r"Group", r"Enterprises?",
+    ]
+    # Build regex: optional leading space, case-insensitive, at end
+    pattern = r"\s*(?:" + "|".join(suffixes) + r")\s*$"
+    cleaned = re.sub(pattern, "", name, flags=re.I).strip()
+    # If result is empty, return original (fallback)
+    return cleaned if cleaned else name
+
+
+# ============================================================
 # Logging
 # ============================================================
 
@@ -391,14 +416,20 @@ def build_final_data(constituents, weights, old_data):
     new_tickers = set(constituents.keys())
     added = sorted(new_tickers - old_tickers)
     removed = sorted(old_tickers - new_tickers)
+
     for ticker, info in constituents.items():
-        name = info["name"] or old_data.get(ticker, {}).get("name") or NAME_MAP.get(ticker, ticker)
+        # Determine raw name from API, old data, or NAME_MAP
+        raw_name = info["name"] or old_data.get(ticker, {}).get("name") or NAME_MAP.get(ticker, ticker)
+        # Apply post-processing to clean suffixes
+        clean_name_final = clean_company_name(raw_name)
+
         sector = old_data.get(ticker, {}).get("sector") or SECTOR_MAP.get(ticker, "Unknown")
         final[ticker] = {
-            "name": name,
+            "name": clean_name_final,
             "sector": sector,
             "weight": weights.get(ticker, 0.01),
         }
+
     logging.info("Added: %d", len(added))
     logging.info("Removed: %d", len(removed))
     if added:
