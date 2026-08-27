@@ -1,28 +1,28 @@
 # Nasdaq-100 Constituents (Auto-Updated)
-# Updated: 2026-08-25 21:17:57
+# Updated: 2026-08-27 00:20:19
 # Source: Nasdaq API + Schwab Official Top 20 + Estimates
 #
 STOCKS = [
-    ("NVDA", "NVIDIA Corporation", "Technology", 8.34),
-    ("AAPL", "Apple Inc.", "Technology", 7.33),
+    ("NVDA", "NVIDIA Corporation", "Technology", 8.23),
+    ("AAPL", "Apple Inc.", "Technology", 7.26),
     ("MSFT", "Microsoft Corporation", "Technology", 5.73),
-    ("MU", "Micron Technology, Inc.", "Technology", 4.86),
-    ("AMZN", "Amazon.com, Inc.", "Consumer Discretionary", 4.48),
-    ("AMD", "Advanced Micro Devices, Inc.", "Technology", 3.39),
-    ("GOOGL", "Alphabet Inc. Class A", "Communication Services", 3.18),
-    ("GOOG", "Alphabet Inc. Class C", "Communication Services", 2.96),
-    ("AVGO", "Broadcom Inc.", "Technology", 2.77),
-    ("TSLA", "Tesla, Inc.", "Consumer Discretionary", 2.77),
-    ("META", "Meta Platforms, Inc. Class A", "Communication Services", 2.59),
-    ("WMT", "Walmart Inc.", "Consumer Staples", 2.24),
-    ("INTC", "Intel Corporation", "Technology", 2.05),
-    ("CSCO", "Cisco Systems, Inc. Common Stock (DE)", "Technology", 1.91),
-    ("COST", "Costco Wholesale Corporation", "Consumer Staples", 1.84),
-    ("PLTR", "Palantir Technologies Inc. Class A", "Technology", 1.77),
-    ("AMAT", "Applied Materials, Inc.", "Technology", 1.75),
-    ("LRCX", "Lam Research Corporation", "Technology", 1.72),
-    ("NFLX", "Netflix, Inc.", "Communication Services", 1.50),
-    ("PANW", "Palo Alto Networks, Inc.", "Technology", 1.26),
+    ("MU", "Micron Technology, Inc.", "Technology", 4.81),
+    ("AMZN", "Amazon.com, Inc.", "Consumer Discretionary", 4.44),
+    ("AMD", "Advanced Micro Devices, Inc.", "Technology", 3.41),
+    ("GOOGL", "Alphabet Inc. Class A", "Communication Services", 3.21),
+    ("GOOG", "Alphabet Inc. Class C", "Communication Services", 2.98),
+    ("TSLA", "Tesla, Inc.", "Consumer Discretionary", 2.90),
+    ("AVGO", "Broadcom Inc.", "Technology", 2.79),
+    ("META", "Meta Platforms, Inc. Class A", "Communication Services", 2.61),
+    ("WMT", "Walmart Inc.", "Consumer Staples", 2.23),
+    ("INTC", "Intel Corporation", "Technology", 2.00),
+    ("CSCO", "Cisco Systems, Inc. Common Stock (DE)", "Technology", 1.93),
+    ("COST", "Costco Wholesale Corporation", "Consumer Staples", 1.86),
+    ("PLTR", "Palantir Technologies Inc. Class A", "Technology", 1.82),
+    ("AMAT", "Applied Materials, Inc.", "Technology", 1.73),
+    ("LRCX", "Lam Research Corporation", "Technology", 1.73),
+    ("NFLX", "Netflix, Inc.", "Communication Services", 1.48),
+    ("PANW", "Palo Alto Networks, Inc.", "Technology", 1.29),
     ("SHOP", "Shopify Inc. Class A Subordinate Voting Shares", "Consumer Discretionary", 1.15),
     ("QCOM", "QUALCOMM Incorporated", "Technology", 1.05),
     ("TXN", "Texas Instruments Incorporated", "Technology", 0.95),
@@ -109,5 +109,5 @@ STOCKS = [
 
 SECTORS = sorted(set(s[2] for s in STOCKS))
 
-LAST_UPDATE = "2026-08-25 21:17:57"
+LAST_UPDATE = "2026-08-27 00:20:19"
 DATA_SOURCE = "Nasdaq + Schwab"
