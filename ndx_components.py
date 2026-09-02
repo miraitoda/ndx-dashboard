@@ -1,30 +1,30 @@
 # Nasdaq-100 Constituents (Auto-Updated)
-# Updated: 2026-09-01 22:53:41
+# Updated: 2026-09-02 22:54:20
 # Source: Nasdaq API + Schwab Official Top 20 + Estimates
 #
 STOCKS = [
-    ("NVDA", "NVIDIA Corporation", "Technology", 8.39),
-    ("AAPL", "Apple Inc.", "Technology", 7.48),
-    ("MSFT", "Microsoft Corporation", "Technology", 6.08),
-    ("MU", "Micron Technology, Inc.", "Technology", 4.63),
-    ("AMZN", "Amazon.com, Inc.", "Consumer Discretionary", 4.57),
-    ("AMD", "Advanced Micro Devices, Inc.", "Technology", 3.34),
-    ("GOOGL", "Alphabet Inc. Class A", "Communication Services", 3.22),
-    ("GOOG", "Alphabet Inc. Class C", "Communication Services", 2.98),
-    ("AVGO", "Broadcom Inc.", "Technology", 2.79),
-    ("TSLA", "Tesla, Inc.", "Consumer Discretionary", 2.78),
-    ("META", "Meta Platforms, Inc. Class A", "Communication Services", 2.73),
-    ("WMT", "Walmart Inc.", "Consumer Staples", 2.21),
+    ("NVDA", "NVIDIA Corporation", "Technology", 8.52),
+    ("AAPL", "Apple Inc.", "Technology", 7.41),
+    ("MSFT", "Microsoft Corporation", "Technology", 6.00),
+    ("MU", "Micron Technology, Inc.", "Technology", 4.75),
+    ("AMZN", "Amazon.com, Inc.", "Consumer Discretionary", 4.45),
+    ("AMD", "Advanced Micro Devices, Inc.", "Technology", 3.37),
+    ("GOOGL", "Alphabet Inc. Class A", "Communication Services", 3.15),
+    ("TSLA", "Tesla, Inc.", "Consumer Discretionary", 2.93),
+    ("GOOG", "Alphabet Inc. Class C", "Communication Services", 2.91),
+    ("AVGO", "Broadcom Inc.", "Technology", 2.80),
+    ("META", "Meta Platforms, Inc. Class A", "Communication Services", 2.70),
+    ("WMT", "Walmart Inc.", "Consumer Staples", 2.25),
     ("INTC", "Intel Corporation", "Technology", 1.98),
     ("CSCO", "Cisco Systems, Inc. Common Stock (DE)", "Technology", 1.91),
     ("PLTR", "Palantir Technologies Inc. Class A", "Technology", 1.88),
-    ("COST", "Costco Wholesale Corporation", "Consumer Staples", 1.85),
+    ("COST", "Costco Wholesale Corporation", "Consumer Staples", 1.84),
     ("LRCX", "Lam Research Corporation", "Technology", 1.66),
-    ("AMAT", "Applied Materials, Inc.", "Technology", 1.61),
-    ("NFLX", "Netflix, Inc.", "Communication Services", 1.51),
-    ("PANW", "Palo Alto Networks, Inc.", "Technology", 1.33),
+    ("AMAT", "Applied Materials, Inc.", "Technology", 1.60),
+    ("NFLX", "Netflix, Inc.", "Communication Services", 1.50),
+    ("PANW", "Palo Alto Networks, Inc.", "Technology", 1.37),
     ("SHOP", "Shopify Inc. Class A Subordinate Voting Shares", "Consumer Discretionary", 1.13),
-    ("QCOM", "QUALCOMM Incorporated", "Technology", 1.04),
+    ("QCOM", "QUALCOMM Incorporated", "Technology", 1.03),
     ("TXN", "Texas Instruments Incorporated", "Technology", 0.94),
     ("ASML", "ASML Holding N.V. New York Registry Shares", "Technology", 0.91),
     ("ADBE", "Adobe Inc.", "Technology", 0.89),
@@ -71,11 +71,11 @@ STOCKS = [
     ("VRTX", "Vertex Pharmaceuticals Incorporated", "Health Care", 0.37),
     ("MPWR", "Monolithic Power Systems, Inc.", "Technology", 0.37),
     ("PCAR", "PACCAR Inc.", "Industrials", 0.36),
-    ("AEP", "American Electric Power Company, Inc.", "Utilities", 0.36),
-    ("FTNT", "Fortinet, Inc.", "Technology", 0.36),
-    ("TER", "Teradyne, Inc.", "Technology", 0.35),
-    ("BKR", "Baker Hughes Company Class A", "Energy", 0.34),
+    ("AEP", "American Electric Power Company, Inc.", "Utilities", 0.35),
+    ("FTNT", "Fortinet, Inc.", "Technology", 0.35),
+    ("TER", "Teradyne, Inc.", "Technology", 0.34),
     ("NXPI", "NXP Semiconductors N.V.", "Technology", 0.33),
+    ("BKR", "Baker Hughes Company Class A", "Energy", 0.33),
     ("FAST", "Fastenal Company", "Industrials", 0.32),
     ("CRWV", "CoreWeave, Inc. Class A", "Technology", 0.31),
     ("FANG", "Diamondback Energy, Inc.", "Energy", 0.30),
@@ -109,5 +109,5 @@ STOCKS = [
 
 SECTORS = sorted(set(s[2] for s in STOCKS))
 
-LAST_UPDATE = "2026-09-01 22:53:41"
+LAST_UPDATE = "2026-09-02 22:54:20"
 DATA_SOURCE = "Nasdaq + Schwab"
