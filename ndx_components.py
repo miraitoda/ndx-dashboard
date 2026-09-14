@@ -1,9 +1,9 @@
 # Nasdaq-100 Constituents (Auto-Updated)
-# Updated: 2026-09-13 22:43:01
+# Updated: 2026-09-14 23:34:47
 # Source: Nasdaq API + Schwab Official Top 20 + Estimates
 #
 STOCKS = [
-    ("NVDA", "NVIDIA Corporation", "Technology", 8.60),
+    ("NVDA", "NVIDIA Corporation", "Technology", 8.63),
     ("AAPL", "Apple Inc.", "Technology", 7.38),
     ("MSFT", "Microsoft Corporation", "Technology", 5.82),
     ("MU", "Micron Technology, Inc.", "Technology", 5.10),
@@ -33,7 +33,7 @@ STOCKS = [
     ("APP", "Applovin Corporation Class A", "Technology", 0.79),
     ("ARM", "Arm Holdings plc American Depositary Shares", "Technology", 0.75),
     ("SBUX", "Starbucks Corporation", "Consumer Discretionary", 0.72),
-    ("PDD", "PDD Holdings Inc. American Depositary Shares", "Consumer Discretionary", 0.69),
+    ("PDD", "PDD Holdings Inc. American Depositary Shares", "Consumer Discretionary", 0.70),
     ("ABNB", "Airbnb, Inc. Class A", "Consumer Discretionary", 0.68),
     ("ADP", "Automatic Data Processing, Inc.", "Technology", 0.66),
     ("CEG", "Constellation Energy Corporation", "Utilities", 0.63),
@@ -58,10 +58,10 @@ STOCKS = [
     ("WDC", "Western Digital Corporation", "Technology", 0.46),
     ("LITE", "Lumentum Holdings Inc.", "Technology", 0.45),
     ("MDLZ", "Mondelez International, Inc. Class A", "Consumer Staples", 0.44),
+    ("CTAS", "Cintas Corporation", "Industrials", 0.43),
     ("GILD", "Gilead Sciences, Inc.", "Health Care", 0.43),
     ("SNPS", "Synopsys, Inc.", "Technology", 0.43),
-    ("CTAS", "Cintas Corporation", "Industrials", 0.42),
-    ("ROST", "Ross Stores, Inc.", "Consumer Discretionary", 0.41),
+    ("ROST", "Ross Stores, Inc.", "Consumer Discretionary", 0.42),
     ("BKNG", "Booking Holdings Inc.", "Consumer Discretionary", 0.41),
     ("NBIS", "Nebius Group N.V. Class A Ordinary Shares", "Communication Services", 0.41),
     ("HON", "Honeywell International Inc.", "Industrials", 0.40),
@@ -102,12 +102,11 @@ STOCKS = [
     ("DXCM", "DexCom, Inc.", "Health Care", 0.09),
     ("GEHC", "GE HealthCare Technologies Inc.", "Health Care", 0.08),
     ("ALNY", "Alnylam Pharmaceuticals, Inc.", "Health Care", 0.07),
-    ("KHC", "The Kraft Heinz Company", "Consumer Staples", 0.06),
     ("CPRT", "Copart, Inc. (DE)", "Industrials", 0.05),
     ("PANW", "Palo Alto Networks, Inc.", "Technology", 0.01),
 ]
 
 SECTORS = sorted(set(s[2] for s in STOCKS))
 
-LAST_UPDATE = "2026-09-13 22:43:01"
+LAST_UPDATE = "2026-09-14 23:34:47"
 DATA_SOURCE = "Nasdaq + Schwab"
