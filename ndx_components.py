@@ -1,35 +1,35 @@
 # Nasdaq-100 Constituents (Auto-Updated)
-# Updated: 2026-11-05 01:09:07
+# Updated: 2026-11-06 01:16:29
 # Source: Nasdaq API + Schwab Official Top 20 + Estimates
 #
 STOCKS = [
-    ("AAPL", "Apple Inc.", "Technology", 8.16),
-    ("NVDA", "NVIDIA Corporation", "Technology", 8.00),
-    ("MSFT", "Microsoft Corporation", "Technology", 6.29),
-    ("MU", "Micron Technology, Inc.", "Technology", 4.47),
-    ("AMZN", "Amazon.com, Inc.", "Consumer Discretionary", 4.21),
-    ("AMD", "Advanced Micro Devices, Inc.", "Technology", 3.69),
-    ("TSLA", "Tesla, Inc.", "Consumer Discretionary", 3.41),
-    ("META", "Meta Platforms, Inc. Class A", "Communication Services", 2.97),
-    ("WMT", "Walmart Inc.", "Consumer Staples", 2.69),
-    ("GOOGL", "Alphabet Inc. Class A", "Communication Services", 2.66),
-    ("SPCX", "Space Exploration Technologies Corp. Class A", "Industrials", 2.59),
-    ("AVGO", "Broadcom Inc.", "Technology", 2.52),
-    ("GOOG", "Alphabet Inc. Class C", "Communication Services", 2.49),
-    ("COST", "Costco Wholesale Corporation", "Consumer Staples", 2.01),
-    ("PLTR", "Palantir Technologies Inc. Class A", "Technology", 1.90),
-    ("CSCO", "Cisco Systems, Inc. Common Stock (DE)", "Technology", 1.84),
-    ("INTC", "Intel Corporation", "Technology", 1.55),
-    ("AMAT", "Applied Materials, Inc.", "Technology", 1.39),
-    ("LRCX", "Lam Research Corporation", "Technology", 1.34),
-    ("PANW", "Palo Alto Networks, Inc.", "Technology", 1.34),
+    ("NVDA", "NVIDIA Corporation", "Technology", 8.15),
+    ("AAPL", "Apple Inc.", "Technology", 7.91),
+    ("MSFT", "Microsoft Corporation", "Technology", 6.32),
+    ("AMZN", "Amazon.com, Inc.", "Consumer Discretionary", 4.42),
+    ("MU", "Micron Technology, Inc.", "Technology", 4.36),
+    ("AMD", "Advanced Micro Devices, Inc.", "Technology", 3.56),
+    ("TSLA", "Tesla, Inc.", "Consumer Discretionary", 3.42),
+    ("META", "Meta Platforms, Inc. Class A", "Communication Services", 3.02),
+    ("WMT", "Walmart Inc.", "Consumer Staples", 2.74),
+    ("SPCX", "Space Exploration Technologies Corp. Class A", "Industrials", 2.73),
+    ("GOOGL", "Alphabet Inc. Class A", "Communication Services", 2.68),
+    ("AVGO", "Broadcom Inc.", "Technology", 2.58),
+    ("GOOG", "Alphabet Inc. Class C", "Communication Services", 2.51),
+    ("COST", "Costco Wholesale Corporation", "Consumer Staples", 2.04),
+    ("CSCO", "Cisco Systems, Inc. Common Stock (DE)", "Technology", 1.83),
+    ("PLTR", "Palantir Technologies Inc. Class A", "Technology", 1.82),
+    ("INTC", "Intel Corporation", "Technology", 1.44),
+    ("AMAT", "Applied Materials, Inc.", "Technology", 1.37),
+    ("LRCX", "Lam Research Corporation", "Technology", 1.30),
+    ("PANW", "Palo Alto Networks, Inc.", "Technology", 1.29),
     ("SHOP", "Shopify Inc. Class A Subordinate Voting Shares", "Consumer Discretionary", 1.13),
     ("QCOM", "QUALCOMM Incorporated", "Technology", 1.03),
     ("TXN", "Texas Instruments Incorporated", "Technology", 0.93),
     ("ASML", "ASML Holding N.V. New York Registry Shares", "Technology", 0.90),
     ("ADBE", "Adobe Inc.", "Technology", 0.88),
     ("KLAC", "KLA Corporation", "Technology", 0.86),
-    ("INTU", "Intuit Inc.", "Technology", 0.83),
+    ("INTU", "Intuit Inc.", "Technology", 0.84),
     ("APP", "Applovin Corporation Class A", "Technology", 0.81),
     ("ARM", "Arm Holdings plc American Depositary Shares", "Technology", 0.77),
     ("SBUX", "Starbucks Corporation", "Consumer Discretionary", 0.74),
@@ -78,8 +78,8 @@ STOCKS = [
     ("FAST", "Fastenal Company", "Industrials", 0.31),
     ("CRWV", "CoreWeave, Inc. Class A", "Technology", 0.30),
     ("FANG", "Diamondback Energy, Inc.", "Energy", 0.29),
-    ("ALAB", "Astera Labs, Inc.", "Technology", 0.28),
-    ("ADSK", "Autodesk, Inc.", "Technology", 0.27),
+    ("ALAB", "Astera Labs, Inc.", "Technology", 0.29),
+    ("ADSK", "Autodesk, Inc.", "Technology", 0.28),
     ("PYPL", "PayPal Holdings, Inc.", "Technology", 0.27),
     ("HONA", "Honeywell Aerospace Inc.", "Industrials", 0.26),
     ("RKLB", "Rocket Lab Corporation", "Industrials", 0.25),
@@ -108,5 +108,5 @@ STOCKS = [
 
 SECTORS = sorted(set(s[2] for s in STOCKS))
 
-LAST_UPDATE = "2026-11-05 01:09:07"
+LAST_UPDATE = "2026-11-06 01:16:29"
 DATA_SOURCE = "Nasdaq + Schwab"
