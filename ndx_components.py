@@ -1,33 +1,34 @@
 # Nasdaq-100 Constituents (Auto-Updated)
-# Updated: 2026-11-26 03:16:53
+# Updated: 2026-11-27 03:22:33
 # Source: Nasdaq API + Schwab Official Top 20 + Estimates
 #
 STOCKS = [
-    ("AAPL", "Apple Inc.", "Technology", 8.86),
-    ("NVDA", "NVIDIA Corporation", "Technology", 6.86),
-    ("MSFT", "Microsoft Corporation", "Technology", 6.31),
-    ("AMZN", "Amazon.com, Inc.", "Consumer Discretionary", 4.75),
-    ("MU", "Micron Technology, Inc.", "Technology", 3.81),
-    ("AMD", "Advanced Micro Devices, Inc.", "Technology", 3.53),
-    ("TSLA", "Tesla, Inc.", "Consumer Discretionary", 3.50),
-    ("META", "Meta Platforms, Inc. Class A", "Communication Services", 3.06),
-    ("WMT", "Walmart Inc.", "Consumer Staples", 3.00),
-    ("GOOGL", "Alphabet Inc. Class A", "Communication Services", 2.85),
-    ("SPCX", "Space Exploration Technologies Corp. Class A", "Industrials", 2.72),
-    ("GOOG", "Alphabet Inc. Class C", "Communication Services", 2.66),
-    ("AVGO", "Broadcom Inc.", "Technology", 2.57),
-    ("COST", "Costco Wholesale Corporation", "Consumer Staples", 2.31),
-    ("CSCO", "Cisco Systems, Inc. Common Stock (DE)", "Technology", 1.81),
-    ("PLTR", "Palantir Technologies Inc. Class A", "Technology", 1.74),
-    ("INTC", "Intel Corporation", "Technology", 1.49),
-    ("PANW", "Palo Alto Networks, Inc.", "Technology", 1.37),
-    ("AMAT", "Applied Materials, Inc.", "Technology", 1.31),
-    ("TXN", "Texas Instruments Incorporated", "Technology", 1.26),
-    ("SHOP", "Shopify Inc. Class A Subordinate Voting Shares", "Consumer Discretionary", 1.16),
-    ("QCOM", "QUALCOMM Incorporated", "Technology", 1.06),
-    ("ASML", "ASML Holding N.V. New York Registry Shares", "Technology", 0.93),
-    ("ADBE", "Adobe Inc.", "Technology", 0.91),
-    ("KLAC", "KLA Corporation", "Technology", 0.89),
+    ("AAPL", "Apple Inc.", "Technology", 9.15),
+    ("NVDA", "NVIDIA Corporation", "Technology", 6.59),
+    ("MSFT", "Microsoft Corporation", "Technology", 6.49),
+    ("AMZN", "Amazon.com, Inc.", "Consumer Discretionary", 4.79),
+    ("TSLA", "Tesla, Inc.", "Consumer Discretionary", 3.55),
+    ("MU", "Micron Technology, Inc.", "Technology", 3.45),
+    ("AMD", "Advanced Micro Devices, Inc.", "Technology", 3.28),
+    ("WMT", "Walmart Inc.", "Consumer Staples", 3.12),
+    ("META", "Meta Platforms, Inc. Class A", "Communication Services", 3.08),
+    ("GOOGL", "Alphabet Inc. Class A", "Communication Services", 2.88),
+    ("GOOG", "Alphabet Inc. Class C", "Communication Services", 2.69),
+    ("SPCX", "Space Exploration Technologies Corp. Class A", "Industrials", 2.62),
+    ("AVGO", "Broadcom Inc.", "Technology", 2.52),
+    ("COST", "Costco Wholesale Corporation", "Consumer Staples", 2.35),
+    ("CSCO", "Cisco Systems, Inc. Common Stock (DE)", "Technology", 1.80),
+    ("PLTR", "Palantir Technologies Inc. Class A", "Technology", 1.80),
+    ("INTC", "Intel Corporation", "Technology", 1.40),
+    ("PANW", "Palo Alto Networks, Inc.", "Technology", 1.40),
+    ("AMAT", "Applied Materials, Inc.", "Technology", 1.25),
+    ("AMGN", "Amgen Inc.", "Health Care", 1.24),
+    ("SHOP", "Shopify Inc. Class A Subordinate Voting Shares", "Consumer Discretionary", 1.15),
+    ("QCOM", "QUALCOMM Incorporated", "Technology", 1.05),
+    ("TXN", "Texas Instruments Incorporated", "Technology", 0.95),
+    ("ASML", "ASML Holding N.V. New York Registry Shares", "Technology", 0.92),
+    ("ADBE", "Adobe Inc.", "Technology", 0.90),
+    ("KLAC", "KLA Corporation", "Technology", 0.88),
     ("INTU", "Intuit Inc.", "Technology", 0.85),
     ("APP", "Applovin Corporation Class A", "Technology", 0.82),
     ("ARM", "Arm Holdings plc American Depositary Shares", "Technology", 0.78),
@@ -41,7 +42,6 @@ STOCKS = [
     ("LIN", "Linde plc Ordinary Shares", "Industrials", 0.62),
     ("MELI", "MercadoLibre, Inc.", "Consumer Discretionary", 0.60),
     ("CRWD", "CrowdStrike Holdings, Inc. Class A", "Technology", 0.60),
-    ("AMGN", "Amgen Inc.", "Health Care", 0.58),
     ("MAR", "Marriott International Class A", "Consumer Discretionary", 0.58),
     ("STX", "Seagate Technology Holdings PLC Ordinary Shares (Ireland)", "Technology", 0.58),
     ("CSX", "CSX Corporation", "Industrials", 0.56),
@@ -108,5 +108,5 @@ STOCKS = [
 
 SECTORS = sorted(set(s[2] for s in STOCKS))
 
-LAST_UPDATE = "2026-11-26 03:16:53"
+LAST_UPDATE = "2026-11-27 03:22:33"
 DATA_SOURCE = "Nasdaq + Schwab"
